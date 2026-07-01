@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#111214" />
+<link rel="manifest" href="manifest.webmanifest" />
+<title>MealQuest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    /* Greyscale handheld LCD palette */
+    --c0:#111214;  /* ink / near-black */
+    --c1:#3b3f45;  /* dark grey */
+    --c2:#71767e;  /* mid grey */
+    --c3:#a9aeb6;  /* light grey */
+    --c4:#d5d8dd;  /* panel light */
+    --lcd:#e6e8eb; /* screen bg */
+    --line:#111214;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; }
+  body{
+    font-family:'VT323', monospace;
+    background:var(--c0); color:var(--c0);
+    font-size:22px; line-height:1.15;
+    -webkit-font-smoothing:none; image-rendering:pixelated; overscroll-behavior:none;
+  }
+  #screen{
+    max-width:520px; margin:0 auto; min-height:100dvh; background:var(--lcd);
+    display:flex; flex-direction:column;
+    padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom); position:relative;
+  }
+  .chrome{ font-family:'Press Start 2P', monospace; }
+
+  /* App bar */
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 14px 11px; border-bottom:3px solid var(--c0); background:var(--lcd);
+    position:sticky; top:0; z-index:20;
+  }
+  .brand{ display:flex; align-items:center; gap:9px; }
+  .brand .mark{ width:22px; height:22px; }
+  .brand h1{ font-family:'Press Start 2P', monospace; font-size:12px; color:var(--c0); letter-spacing:0.5px; }
+  .brand h1 span{ color:var(--c2); }
+  .toprow{ display:flex; gap:6px; align-items:center; }
+  .datenav{ display:flex; align-items:center; gap:8px; }
+  .datenav button{ font-family:'Press Start 2P', monospace; font-size:10px; background:none;
+    border:2px solid var(--c0); color:var(--c0); width:26px; height:26px; cursor:pointer; }
+  .datenav button:active{ background:var(--c0); color:var(--lcd); }
+  #dateLabel{ font-size:20px; min-width:104px; text-align:center; }
+  #dateLabel small{ display:block; font-size:13px; color:var(--c2); line-height:1; }
+  .gear{ font-family:'Press Start 2P',monospace; font-size:11px; background:none; border:2px solid var(--c0);
+    color:var(--c0); width:26px; height:26px; cursor:pointer; }
+  .gear:active{ background:var(--c0); color:var(--lcd); }
+
+  main{ flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:14px; }
+
+  /* ---- Hero: gym scene ---- */
+  .stage{ border:3px solid var(--c0); box-shadow:5px 5px 0 var(--c0); background:var(--c4); line-height:0; }
+  .stage svg{ display:block; width:100%; height:auto; }
+  #scene.bob{ animation:bob 3s ease-in-out infinite; transform-origin:center bottom; }
+  @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-1.2px);} }
+
+  /* Speech bubble under the scene, tail points up into the gym */
+  .bubble{
+    position:relative; background:var(--lcd); border:3px solid var(--c0);
+    padding:12px 13px 11px; box-shadow:5px 5px 0 var(--c0); margin-top:11px;
+  }
+  .bubble .who{ font-family:'Press Start 2P',monospace; font-size:8px; color:var(--c2);
+    position:absolute; top:-9px; left:10px; background:var(--lcd); padding:0 5px; letter-spacing:1px; }
+  .bubble p{ font-size:22px; color:var(--c0); }
+  .bubble::before{ content:""; position:absolute; top:-12px; left:38px; width:14px; height:12px;
+    background:var(--lcd); border-left:3px solid var(--c0); border-top:3px solid var(--c0); transform:skewX(-18deg); }
+
+  /* Panels */
+  .panel{ background:var(--c4); border:3px solid var(--c0); box-shadow:5px 5px 0 var(--c0); padding:13px 13px 14px; }
+  .panel h2{ font-family:'Press Start 2P', monospace; font-size:9px; color:var(--c2); margin-bottom:11px; letter-spacing:1px; }
+
+  .kcalrow{ display:flex; justify-content:space-between; align-items:baseline; }
+  .kcalrow .big{ font-size:44px; color:var(--c0); line-height:0.85; }
+  .kcalrow .tgt{ font-size:20px; color:var(--c2); }
+  .bar{ height:16px; border:3px solid var(--c0); background:var(--lcd); margin:10px 0 12px; overflow:hidden; }
+  .bar i{ display:block; height:100%; background:var(--c2); width:0; transition:width .35s steps(12);
+    background-image:linear-gradient(90deg,var(--c1) 0 3px, transparent 3px 6px); background-size:6px 100%; }
+  .bar.over i{ background:var(--c0); }
+  .macros{ display:flex; gap:8px; }
+  .macro{ flex:1; text-align:center; border:2px solid var(--c0); padding:6px 2px; background:var(--lcd); }
+  .macro b{ font-size:27px; display:block; color:var(--c0); line-height:1; }
+  .macro span{ font-family:'Press Start 2P',monospace; font-size:7px; color:var(--c2); }
+  .weightline{ margin-top:12px; display:flex; justify-content:space-between; align-items:baseline; }
+  .weightline .w{ font-size:26px; }
+  .weightline .trend{ font-size:18px; color:var(--c2); }
+
+  .meals ul{ list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .meal{ display:flex; align-items:center; gap:10px; border:2px solid var(--c0); background:var(--lcd); padding:8px 9px; }
+  .meal .t{ flex:1; } .meal .t b{ font-size:22px; display:block; } .meal .t small{ font-size:16px; color:var(--c2); }
+  .meal .kc{ font-family:'Press Start 2P',monospace; font-size:9px; white-space:nowrap; }
+  .meal .del{ background:none; border:2px solid var(--c0); color:var(--c0); width:26px; height:26px;
+    font-family:'Press Start 2P',monospace; font-size:9px; cursor:pointer; }
+  .meal .del:active{ background:var(--c0); color:var(--lcd); }
+  .empty{ font-size:19px; color:var(--c2); text-align:center; padding:8px 4px; }
+
+  .actions{ display:flex; flex-direction:column; gap:10px; }
+  .btnrow{ display:flex; gap:10px; }
+  button.pix{ font-family:'Press Start 2P', monospace; font-size:10px; background:var(--lcd); color:var(--c0);
+    border:3px solid var(--c0); box-shadow:4px 4px 0 var(--c0); padding:13px 10px; cursor:pointer; flex:1; letter-spacing:0.5px; }
+  button.pix:active{ transform:translate(2px,2px); box-shadow:2px 2px 0 var(--c0); }
+  button.pix.solid{ background:var(--c1); color:var(--lcd); }
+  button.pix.ghost{ background:transparent; box-shadow:none; border-width:2px; padding:9px; font-size:9px; }
+
+  /* Overlays */
+  .overlay{ position:fixed; inset:0; background:var(--c0); z-index:50; display:none; }
+  .overlay.show{ display:flex; }
+  .sheet{ max-width:520px; margin:0 auto; width:100%; background:var(--lcd); min-height:100dvh;
+    display:flex; flex-direction:column; padding-top:env(safe-area-inset-top); }
+  .sheet header{ position:sticky; top:0; }
+  .sheet header h2{ font-family:'Press Start 2P',monospace; font-size:12px; }
+  .sheet .body{ flex:1; overflow-y:auto; padding:16px 14px; display:flex; flex-direction:column; gap:14px; }
+  label{ font-family:'Press Start 2P',monospace; font-size:8px; color:var(--c2); display:block; margin-bottom:6px; letter-spacing:0.5px; }
+  input, textarea{ width:100%; font-family:'VT323',monospace; font-size:23px; color:var(--c0);
+    background:var(--lcd); border:3px solid var(--c0); padding:9px 10px; outline:none; }
+  input:focus, textarea:focus{ background:#f2f4f6; }
+  textarea{ resize:vertical; min-height:78px; }
+  .grid3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .closebtn{ font-family:'Press Start 2P',monospace; font-size:11px; background:none; border:2px solid var(--c0);
+    color:var(--c0); width:30px; height:30px; cursor:pointer; }
+  .closebtn:active{ background:var(--c0); color:var(--lcd); }
+
+  .preview{ border:3px solid var(--c0); background:var(--c4); padding:12px; box-shadow:4px 4px 0 var(--c0); display:none; }
+  .preview.show{ display:block; }
+  .preview .ttl{ font-size:24px; margin-bottom:6px; }
+  .preview .range{ font-size:18px; color:var(--c2); margin-bottom:8px; }
+  .preview .note{ font-size:19px; border-top:2px dashed var(--c2); padding-top:8px; margin-top:8px; }
+  .assum{ font-size:16px; color:var(--c2); margin-top:6px; }
+  .spinner{ font-family:'Press Start 2P',monospace; font-size:10px; color:var(--c2); text-align:center; padding:14px; display:none; }
+  .spinner.show{ display:block; }
+  .errline{ font-size:18px; color:var(--lcd); background:var(--c1); border:3px solid var(--c0); padding:8px 10px; display:none; }
+  .errline.show{ display:block; }
+  .hint{ font-size:16px; color:var(--c2); }
+
+  @media (prefers-reduced-motion: reduce){ #scene.bob{ animation:none; } }
+</style>
+</head>
+<body>
+<div id="screen">
+  <header class="chrome">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true">
+        <rect x="3" y="0" width="2" height="2" fill="#111214"/>
+        <rect x="2" y="2" width="4" height="2" fill="#111214"/>
+        <rect x="1" y="4" width="6" height="1" fill="#71767e"/>
+        <rect x="2" y="5" width="4" height="1" fill="#71767e"/>
+        <rect x="3" y="6" width="2" height="1" fill="#111214"/>
+      </svg>
+      <h1>MEAL<span>QUEST</span></h1>
+    </div>
+    <div class="toprow">
+      <div class="datenav">
+        <button id="prevDay" aria-label="Előző nap">&lt;</button>
+        <div id="dateLabel">—</div>
+        <button id="nextDay" aria-label="Következő nap">&gt;</button>
+      </div>
+      <button class="gear" id="openSettings" aria-label="Beállítások">*</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===== GYM SCENE (greyscale 2.5D) ===== -->
+    <div class="stage">
+      <svg id="scene" class="bob" viewBox="0 0 160 112" shape-rendering="crispEdges" aria-label="Coach a teremben">
+        <!-- back wall -->
+        <rect x="0" y="0" width="160" height="60" fill="#d5d8dd"/>
+        <rect x="0" y="0" width="160" height="60" fill="#e6e8eb" opacity="0.35"/>
+        <!-- windows -->
+        <g>
+          <rect x="16" y="10" width="34" height="24" fill="#3b3f45"/>
+          <rect x="18" y="12" width="30" height="20" fill="#a9aeb6"/>
+          <rect x="18" y="12" width="30" height="9" fill="#d5d8dd"/>
+          <rect x="32" y="12" width="2" height="20" fill="#3b3f45"/>
+          <rect x="18" y="21" width="30" height="2" fill="#3b3f45"/>
+          <rect x="110" y="10" width="34" height="24" fill="#3b3f45"/>
+          <rect x="112" y="12" width="30" height="20" fill="#a9aeb6"/>
+          <rect x="112" y="12" width="30" height="9" fill="#d5d8dd"/>
+          <rect x="126" y="12" width="2" height="20" fill="#3b3f45"/>
+          <rect x="112" y="21" width="30" height="2" fill="#3b3f45"/>
+        </g>
+        <!-- wall clock -->
+        <rect x="76" y="8" width="8" height="8" fill="#3b3f45"/>
+        <rect x="78" y="10" width="4" height="4" fill="#e6e8eb"/>
+        <rect x="79" y="11" width="1" height="2" fill="#111214"/>
+        <rect x="80" y="11" width="2" height="1" fill="#111214"/>
+        <!-- wall poster (dumbbell) -->
+        <rect x="92" y="12" width="14" height="18" fill="#3b3f45"/>
+        <rect x="94" y="14" width="10" height="14" fill="#d5d8dd"/>
+        <rect x="96" y="20" width="6" height="2" fill="#3b3f45"/>
+        <rect x="95" y="18" width="2" height="6" fill="#3b3f45"/>
+        <rect x="101" y="18" width="2" height="6" fill="#3b3f45"/>
+        <!-- wall base stripe -->
+        <rect x="0" y="54" width="160" height="6" fill="#71767e"/>
+
+        <!-- floor (perspective) -->
+        <polygon points="0,112 160,112 132,60 28,60" fill="#a9aeb6"/>
+        <!-- floor grid: verticals converging -->
+        <g stroke="#71767e" stroke-width="1">
+          <line x1="28" y1="60" x2="0" y2="112"/>
+          <line x1="54" y1="60" x2="40" y2="112"/>
+          <line x1="80" y1="60" x2="80" y2="112"/>
+          <line x1="106" y1="60" x2="120" y2="112"/>
+          <line x1="132" y1="60" x2="160" y2="112"/>
+          <line x1="24" y1="76" x2="136" y2="76"/>
+          <line x1="16" y1="92" x2="144" y2="92"/>
+        </g>
+        <rect x="0" y="60" width="160" height="2" fill="#71767e"/>
+
+        <!-- LEFT: dumbbell rack -->
+        <g>
+          <rect x="6" y="44" width="30" height="22" fill="#3b3f45"/>
+          <rect x="6" y="44" width="30" height="2" fill="#71767e"/>
+          <rect x="6" y="54" width="30" height="2" fill="#71767e"/>
+          <!-- dumbbell pairs -->
+          <g fill="#a9aeb6">
+            <rect x="9" y="47" width="7" height="4"/><rect x="18" y="47" width="7" height="4"/><rect x="27" y="47" width="6" height="4"/>
+            <rect x="9" y="57" width="8" height="5"/><rect x="20" y="57" width="9" height="5"/>
+          </g>
+          <g fill="#111214">
+            <rect x="9" y="48" width="1" height="2"/><rect x="15" y="48" width="1" height="2"/>
+            <rect x="9" y="58" width="1" height="3"/><rect x="16" y="58" width="1" height="3"/>
+          </g>
+        </g>
+
+        <!-- RIGHT: weight bench + kettlebell -->
+        <g>
+          <rect x="118" y="76" width="34" height="6" fill="#71767e"/>       <!-- seat pad -->
+          <rect x="118" y="76" width="34" height="2" fill="#a9aeb6"/>
+          <rect x="146" y="66" width="8" height="12" fill="#71767e"/>        <!-- raised back pad -->
+          <rect x="146" y="66" width="8" height="2" fill="#a9aeb6"/>
+          <rect x="121" y="82" width="4" height="9" fill="#3b3f45"/>         <!-- legs -->
+          <rect x="145" y="82" width="4" height="9" fill="#3b3f45"/>
+          <!-- kettlebell on floor -->
+          <rect x="126" y="86" width="8" height="7" fill="#3b3f45"/>
+          <rect x="127" y="87" width="6" height="5" fill="#71767e"/>
+          <rect x="128" y="83" width="4" height="4" fill="#111214"/>
+          <rect x="129" y="84" width="2" height="2" fill="#a9aeb6"/>
+        </g>
+
+        <!-- floor mat + shadow under trainer -->
+        <polygon points="56,99 104,99 98,89 62,89" fill="#71767e"/>
+        <polygon points="60,97 100,97 96,91 64,91" fill="#8f949c"/>
+        <ellipse cx="80" cy="98" rx="20" ry="4" fill="#5f646b"/>
+
+        <!-- ===== TRAINER (original character) ===== -->
+        <g>
+          <!-- legs / shorts -->
+          <rect x="70" y="76" width="20" height="10" fill="#3b3f45"/>       <!-- shorts -->
+          <rect x="70" y="76" width="20" height="2" fill="#71767e"/>
+          <rect x="79" y="78" width="2" height="8" fill="#111214"/>          <!-- gap -->
+          <rect x="71" y="86" width="7" height="9" fill="#a9aeb6"/>          <!-- left leg -->
+          <rect x="82" y="86" width="7" height="9" fill="#a9aeb6"/>          <!-- right leg -->
+          <rect x="71" y="86" width="7" height="1" fill="#71767e"/>
+          <rect x="82" y="86" width="7" height="1" fill="#71767e"/>
+          <rect x="69" y="95" width="10" height="3" fill="#111214"/>         <!-- shoes -->
+          <rect x="82" y="95" width="10" height="3" fill="#111214"/>
+          <rect x="69" y="95" width="10" height="1" fill="#e6e8eb"/>
+          <rect x="82" y="95" width="10" height="1" fill="#e6e8eb"/>
+
+          <!-- torso outline (bevel) -->
+          <rect x="65" y="55" width="30" height="22" fill="#111214"/>
+          <!-- tank top -->
+          <rect x="67" y="56" width="26" height="20" fill="#d5d8dd"/>
+          <rect x="85" y="56" width="8" height="20" fill="#a9aeb6"/>         <!-- side shade -->
+          <rect x="67" y="56" width="4" height="20" fill="#e6e8eb"/>         <!-- highlight -->
+          <rect x="72" y="56" width="3" height="6" fill="#71767e"/>
+          <rect x="85" y="56" width="3" height="6" fill="#71767e"/>
+          <rect x="75" y="56" width="10" height="3" fill="#71767e"/>
+
+          <!-- left arm (down at side) -->
+          <rect x="61" y="57" width="6" height="17" fill="#111214"/>
+          <rect x="62" y="58" width="4" height="12" fill="#a9aeb6"/>
+          <rect x="61" y="70" width="6" height="4" fill="#a9aeb6"/>          <!-- hand -->
+          <rect x="62" y="58" width="1" height="12" fill="#c3c7cd"/>
+          <!-- right arm (bent up, holding dumbbell) -->
+          <rect x="94" y="57" width="6" height="9" fill="#111214"/>
+          <rect x="95" y="58" width="4" height="8" fill="#a9aeb6"/>
+          <rect x="95" y="52" width="4" height="7" fill="#a9aeb6"/>          <!-- forearm up -->
+          <rect x="94" y="52" width="6" height="1" fill="#111214"/>
+          <!-- dumbbell in right hand -->
+          <rect x="92" y="48" width="10" height="3" fill="#111214"/>
+          <rect x="90" y="47" width="3" height="5" fill="#71767e"/>
+          <rect x="101" y="47" width="3" height="5" fill="#71767e"/>
+
+          <!-- neck -->
+          <rect x="76" y="51" width="8" height="5" fill="#a9aeb6"/>
+          <rect x="76" y="51" width="8" height="1" fill="#71767e"/>
+
+          <!-- head outline -->
+          <rect x="71" y="38" width="18" height="15" fill="#111214"/>
+          <rect x="72" y="39" width="16" height="13" fill="#a9aeb6"/>        <!-- face -->
+          <rect x="84" y="39" width="4" height="13" fill="#8f949c"/>         <!-- face shade -->
+          <!-- hair -->
+          <rect x="71" y="38" width="18" height="5" fill="#3b3f45"/>
+          <rect x="71" y="41" width="3" height="7" fill="#3b3f45"/>
+          <rect x="86" y="41" width="3" height="7" fill="#3b3f45"/>
+          <!-- headband -->
+          <rect x="71" y="43" width="18" height="2" fill="#111214"/>
+          <rect x="71" y="43" width="18" height="1" fill="#71767e"/>
+          <!-- eyes + mouth -->
+          <rect x="75" y="46" width="2" height="2" fill="#111214"/>
+          <rect x="82" y="46" width="2" height="2" fill="#111214"/>
+          <rect x="77" y="50" width="5" height="1" fill="#3b3f45"/>
+        </g>
+      </svg>
+    </div>
+
+    <!-- speech bubble -->
+    <div class="bubble">
+      <span class="who">COACH BYTE</span>
+      <p id="bubbleText">…</p>
+    </div>
+
+    <!-- Stats -->
+    <section class="panel">
+      <h2>MAI NAP</h2>
+      <div class="kcalrow">
+        <div><span class="big" id="kcalNow">0</span></div>
+        <div class="tgt">/ <span id="kcalTgt">2200</span> kcal</div>
+      </div>
+      <div class="bar" id="kcalBar"><i></i></div>
+      <div class="macros">
+        <div class="macro"><b id="mP">0</b><span>FEHÉRJE g</span></div>
+        <div class="macro"><b id="mC">0</b><span>SZÉNH. g</span></div>
+        <div class="macro"><b id="mF">0</b><span>ZSÍR g</span></div>
+      </div>
+      <div class="weightline">
+        <div class="w">Súly: <span id="wToday">—</span></div>
+        <div class="trend" id="wTrend"></div>
+      </div>
+    </section>
+
+    <!-- Meals -->
+    <section class="panel meals">
+      <h2>ÉTKEZÉSEK</h2>
+      <ul id="mealList"></ul>
+      <div class="empty" id="mealEmpty">Ma még üres a napló. Coach Byte vár egy adatra.</div>
+    </section>
+
+    <!-- Actions -->
+    <div class="actions">
+      <div class="btnrow">
+        <button class="pix solid" id="addMealBtn">+ ÉTEL</button>
+        <button class="pix" id="addWeightBtn">+ SÚLY</button>
+      </div>
+      <button class="pix ghost" id="reportBtn">NAPI JELENTÉS</button>
+    </div>
+  </main>
+</div>
+
+<!-- ADD MEAL -->
+<div class="overlay" id="mealOverlay">
+  <div class="sheet">
+    <header class="chrome"><h2>+ ÉTEL</h2><button class="closebtn" data-close="mealOverlay">X</button></header>
+    <div class="body">
+      <div><label>Mit ettél? (szabad szöveg)</label>
+        <textarea id="mealText" placeholder="2 csirkecomb, kb 200g főtt rizs, paradicsom, 1 ayran"></textarea></div>
+      <div><label>Idő (opcionális)</label><input id="mealTime" type="time" /></div>
+      <button class="pix solid" id="analyzeBtn">ELEMZÉS (AI)</button>
+      <div class="hint" id="aiHint">AI kikapcsolva — add meg a backend URL-t a beállításokban, vagy vidd fel kézzel lentebb.</div>
+      <div class="spinner chrome" id="mealSpinner">COACH BYTE SZÁMOL…</div>
+      <div class="errline" id="mealErr"></div>
+      <div class="preview" id="mealPreview">
+        <div class="ttl" id="pvTitle"></div>
+        <div class="range" id="pvRange"></div>
+        <div class="grid3">
+          <div class="macro"><b id="pvP">0</b><span>FEH g</span></div>
+          <div class="macro"><b id="pvC">0</b><span>SZH g</span></div>
+          <div class="macro"><b id="pvF">0</b><span>ZS g</span></div>
+        </div>
+        <div class="note" id="pvNote"></div>
+        <div class="assum" id="pvAssum"></div>
+      </div>
+      <div><label>Megnevezés</label><input id="mTitle" placeholder="pl. Ebéd — csirke rizzsel" /></div>
+      <div class="grid3">
+        <div><label>Kcal</label><input id="mKcal" type="number" inputmode="numeric" placeholder="0" /></div>
+        <div><label>Feh. g</label><input id="mProt" type="number" inputmode="numeric" placeholder="0" /></div>
+        <div><label>Zsír g</label><input id="mFat" type="number" inputmode="numeric" placeholder="0" /></div>
+      </div>
+      <div><label>Szénhidrát g</label><input id="mCarb" type="number" inputmode="numeric" placeholder="0" /></div>
+      <button class="pix solid" id="saveMealBtn">MENTÉS A NAPLÓBA</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD WEIGHT -->
+<div class="overlay" id="weightOverlay">
+  <div class="sheet">
+    <header class="chrome"><h2>+ SÚLY</h2><button class="closebtn" data-close="weightOverlay">X</button></header>
+    <div class="body">
+      <div><label>Testsúly (kg)</label><input id="wKg" type="number" inputmode="decimal" step="0.1" placeholder="84.2" /></div>
+      <div><label>Megjegyzés (opcionális)</label><input id="wNote" placeholder="reggel, éhgyomorra" /></div>
+      <div class="hint">A napi ingadozás normális. Coach Byte a trendet nézi, nem egy számot.</div>
+      <button class="pix solid" id="saveWeightBtn">SÚLY RÖGZÍTÉSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="overlay" id="settingsOverlay">
+  <div class="sheet">
+    <header class="chrome"><h2>BEÁLLÍTÁS</h2><button class="closebtn" data-close="settingsOverlay">X</button></header>
+    <div class="body">
+      <div><label>Napi kcal cél</label><input id="setTarget" type="number" inputmode="numeric" placeholder="2200" /></div>
+      <div><label>Backend URL (AI-hoz)</label><input id="setBackend" placeholder="https://mealquest.<neved>.workers.dev" />
+        <div class="hint">Cloudflare Worker URL. Üresen = kézi mód. Az OpenAI kulcs csak a Workerben él, sosem itt.</div></div>
+      <div><label>App titok (x-app-secret)</label><input id="setSecret" placeholder="a Worker APP_API_SECRET titka" /></div>
+      <button class="pix solid" id="saveSettingsBtn">MENTÉS</button>
+      <button class="pix ghost" id="wipeBtn">MAI NAP TÖRLÉSE</button>
+      <div class="hint">MealQuest v0.2 · adatok a te eszközödön (IndexedDB) · offline PWA</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DB_NAME='mealquest', DB_VER=1;
+let db, state={ date:isoToday(), settings:{ kcalTarget:2200, backendUrl:'', appSecret:'' }, pendingAI:null };
+
+function isoToday(){ return isoOf(new Date()); }
+function isoOf(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function shiftDate(iso,delta){ const [y,m,dd]=iso.split('-').map(Number); const d=new Date(y,m-1,dd); d.setDate(d.getDate()+delta); return isoOf(d); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function n(v){ v=parseInt(v,10); return isNaN(v)?0:v; }
+function $(id){ return document.getElementById(id); }
+function esc(s){ return (s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])); }
+
+function openDB(){ return new Promise((res,rej)=>{ const r=indexedDB.open(DB_NAME,DB_VER);
+  r.onupgradeneeded=e=>{ const d=e.target.result;
+    if(!d.objectStoreNames.contains('meals')){ const s=d.createObjectStore('meals',{keyPath:'id'}); s.createIndex('date','date'); }
+    if(!d.objectStoreNames.contains('weights')){ const s=d.createObjectStore('weights',{keyPath:'id'}); s.createIndex('date','date'); }
+    if(!d.objectStoreNames.contains('settings')){ d.createObjectStore('settings',{keyPath:'key'}); } };
+  r.onsuccess=e=>{ db=e.target.result; res(db); }; r.onerror=e=>rej(e.target.error); }); }
+function tx(store,mode){ return db.transaction(store,mode).objectStore(store); }
+function put(store,val){ return new Promise((res,rej)=>{ const r=tx(store,'readwrite').put(val); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error); }); }
+function del(store,key){ return new Promise((res,rej)=>{ const r=tx(store,'readwrite').delete(key); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error); }); }
+function getAllByDate(store,date){ return new Promise((res,rej)=>{ const out=[]; const idx=tx(store,'readonly').index('date');
+  const r=idx.openCursor(IDBKeyRange.only(date)); r.onsuccess=e=>{ const c=e.target.result; if(c){ out.push(c.value); c.continue(); } else res(out); }; r.onerror=()=>rej(r.error); }); }
+function getAll(store){ return new Promise((res,rej)=>{ const r=tx(store,'readonly').getAll(); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+function getSetting(key){ return new Promise((res)=>{ const r=tx('settings','readonly').get(key); r.onsuccess=()=>res(r.result?r.result.value:undefined); r.onerror=()=>res(undefined); }); }
+function setSetting(key,value){ return put('settings',{key,value}); }
+
+async function render(){
+  const [y,m,d]=state.date.split('-');
+  const dow=['Vas','Hét','Kedd','Sze','Csüt','Pén','Szo'][new Date(+y,+m-1,+d).getDay()];
+  $('dateLabel').innerHTML = `${m}.${d}<small>${dow}${state.date===isoToday()?' · ma':''}</small>`;
+  $('kcalTgt').textContent = state.settings.kcalTarget;
+
+  const meals=await getAllByDate('meals',state.date);
+  meals.sort((a,b)=> (a.time||'99')<(b.time||'99')?-1:(a.time||'99')>(b.time||'99')?1:a.createdAt-b.createdAt);
+  let kcal=0,P=0,C=0,F=0;
+  meals.forEach(mm=>{ kcal+=n(mm.kcal); P+=n(mm.protein); C+=n(mm.carbs); F+=n(mm.fat); });
+  $('kcalNow').textContent=kcal; $('mP').textContent=P; $('mC').textContent=C; $('mF').textContent=F;
+  const pct=Math.min(100,Math.round(kcal/state.settings.kcalTarget*100));
+  $('kcalBar').querySelector('i').style.width=pct+'%';
+  $('kcalBar').classList.toggle('over', kcal>state.settings.kcalTarget);
+
+  const ul=$('mealList'); ul.innerHTML='';
+  $('mealEmpty').style.display = meals.length?'none':'block';
+  meals.forEach(mm=>{ const li=document.createElement('li'); li.className='meal';
+    li.innerHTML=`<div class="t"><b>${esc(mm.title||mm.rawText||'Étkezés')}</b>${mm.time?`<small>${mm.time}</small>`:''}</div>
+      <div class="kc">${n(mm.kcal)}</div><button class="del" aria-label="Törlés">X</button>`;
+    li.querySelector('.del').onclick=async()=>{ await del('meals',mm.id); render(); }; ul.appendChild(li); });
+
+  const weights=await getAll('weights');
+  const todayW=weights.find(w=>w.date===state.date);
+  $('wToday').textContent = todayW? todayW.weightKg.toFixed(1)+' kg' : '—';
+  const past=weights.filter(w=>w.date<=state.date).sort((a,b)=>a.date<b.date?1:-1);
+  if(past.length>=2){ const cutoff=shiftDate(past[0].date,-7); const ref=past.find(w=>w.date<=cutoff)||past[past.length-1];
+    const diff=past[0].weightKg-ref.weightKg; const sign=diff>0?'▲':(diff<0?'▼':'=');
+    $('wTrend').textContent = `7n ${sign} ${Math.abs(diff).toFixed(1)}`;
+  } else $('wTrend').textContent='';
+
+  updateBubble(kcal, meals.length, !!todayW);
+}
+
+function updateBubble(kcal, mealCount, hasWeight){
+  const t=state.settings.kcalTarget; let line;
+  if(mealCount===0 && !hasWeight){ line='Új nap, tiszta terem. Rögzítsd az elsőt, aztán meglátjuk a terepet.'; }
+  else if(mealCount===0 && hasWeight){ line='Súly megvan. Jöhet az első étkezés a naplóba.'; }
+  else if(kcal < t*0.55){ line='Jó ütem eddig. Nem koplalunk — csak pontosan naplózunk.'; }
+  else if(kcal <= t){ line=`Még ~${t-kcal} kcal fér a mai keretbe. Nyugodt tempó.`; }
+  else if(kcal <= t*1.15){ line='Kicsit a keret fölött. Nem dráma — holnap könnyebb köret.'; }
+  else { line='Nehéz nap kalóriában. Bejegyezve, nem büntetve. Megyünk tovább.'; }
+  $('bubbleText').textContent=line;
+}
+
+function refreshAIState(){ const on=!!state.settings.backendUrl;
+  $('analyzeBtn').style.display=on?'block':'none'; $('aiHint').style.display=on?'none':'block'; }
+
+function show(id){ $(id).classList.add('show'); }
+function hide(id){ $(id).classList.remove('show'); }
+document.querySelectorAll('[data-close]').forEach(b=> b.onclick=()=>hide(b.dataset.close));
+
+$('addMealBtn').onclick=()=>{ ['mealText','mealTime','mTitle','mKcal','mProt','mFat','mCarb'].forEach(i=>$(i).value='');
+  $('mealPreview').classList.remove('show'); $('mealErr').classList.remove('show'); state.pendingAI=null; refreshAIState(); show('mealOverlay'); };
+
+$('analyzeBtn').onclick=async()=>{
+  const raw=$('mealText').value.trim(); if(raw.length<2) return;
+  $('mealErr').classList.remove('show'); $('mealPreview').classList.remove('show'); $('mealSpinner').classList.add('show');
+  try{
+    const body={ date:state.date, time:$('mealTime').value||undefined, rawText:raw,
+      userContext:{ language:'hu', goal:'weight_loss', dailyKcalTarget:state.settings.kcalTarget, simpleDietStyle:true } };
+    const res=await fetch(state.settings.backendUrl.replace(/\/$/,'')+'/api/analyze-meal',{
+      method:'POST', headers:{ 'Content-Type':'application/json', 'x-app-secret':state.settings.appSecret }, body:JSON.stringify(body) });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const a=await res.json(); state.pendingAI=a;
+    $('pvTitle').textContent=a.title||'';
+    $('pvRange').textContent=`${a.estimatedKcal} kcal  (${a.kcalMin}–${a.kcalMax})  ·  ${a.confidence||''}`;
+    $('pvP').textContent=a.proteinG; $('pvC').textContent=a.carbsG; $('pvF').textContent=a.fatG;
+    $('pvNote').textContent=[a.trainerNote,a.practicalAdjustment].filter(Boolean).join('  ');
+    $('pvAssum').textContent=(a.assumptions||[]).join(' · ');
+    $('mealPreview').classList.add('show');
+    $('mTitle').value=a.title||''; $('mKcal').value=a.estimatedKcal; $('mProt').value=a.proteinG; $('mCarb').value=a.carbsG; $('mFat').value=a.fatG;
+  }catch(err){ $('mealErr').textContent='Az AI elemzés nem sikerült ('+err.message+'). Vidd fel kézzel, vagy ellenőrizd a backend URL-t.'; $('mealErr').classList.add('show'); }
+  finally{ $('mealSpinner').classList.remove('show'); }
+};
+
+$('saveMealBtn').onclick=async()=>{
+  const title=$('mTitle').value.trim(); const raw=$('mealText').value.trim();
+  if(!title && !raw && !$('mKcal').value) return;
+  const a=state.pendingAI;
+  const meal={ id:uid(), date:state.date, time:$('mealTime').value||null, rawText:raw,
+    title:title||raw||'Étkezés', kcal:n($('mKcal').value), kcalMin:a?a.kcalMin:null, kcalMax:a?a.kcalMax:null,
+    protein:n($('mProt').value), carbs:n($('mCarb').value), fat:n($('mFat').value),
+    confidence:a?a.confidence:null, trainerNote:a?a.trainerNote:null, source:a?'ai':'manual', createdAt:Date.now(), updatedAt:Date.now() };
+  await put('meals',meal); hide('mealOverlay'); render();
+};
+
+$('addWeightBtn').onclick=()=>{ $('wKg').value=''; $('wNote').value=''; show('weightOverlay'); };
+$('saveWeightBtn').onclick=async()=>{ const kg=parseFloat($('wKg').value); if(isNaN(kg)) return;
+  const existing=(await getAll('weights')).find(w=>w.date===state.date);
+  const w={ id:existing?existing.id:uid(), date:state.date, weightKg:kg, note:$('wNote').value.trim()||null,
+    createdAt:existing?existing.createdAt:Date.now(), updatedAt:Date.now() };
+  await put('weights',w); hide('weightOverlay'); render(); };
+
+$('reportBtn').onclick=async()=>{
+  const meals=await getAllByDate('meals',state.date); let kcal=0,P=0; meals.forEach(m=>{ kcal+=n(m.kcal); P+=n(m.protein); });
+  const t=state.settings.kcalTarget; let head;
+  if(meals.length===0){ head='Nincs rögzített étkezés ma. A jelentéshez előbb naplózz.'; }
+  else if(kcal<=t && P>=t*0.03){ head=`Kontroll rendben: ${kcal} kcal a ${t}-es keretben, fehérje ${P} g. A rögzítés a lényeg — ma megvan.`; }
+  else if(kcal<=t){ head=`${kcal} kcal, keret alatt. Rendben, de a fehérje (${P} g) lehetne feljebb holnap.`; }
+  else { head=`${kcal} kcal, ${kcal-t} a keret fölött. Bejegyezve. Holnap egy könnyebb köret kiegyenlíti.`; }
+  $('bubbleText').textContent=head;
+  const s=$('scene'); s.classList.remove('bob'); void s.offsetWidth; s.classList.add('bob');
+};
+
+$('openSettings').onclick=()=>{ $('setTarget').value=state.settings.kcalTarget; $('setBackend').value=state.settings.backendUrl; $('setSecret').value=state.settings.appSecret; show('settingsOverlay'); };
+$('saveSettingsBtn').onclick=async()=>{
+  state.settings.kcalTarget=n($('setTarget').value)||2200; state.settings.backendUrl=$('setBackend').value.trim(); state.settings.appSecret=$('setSecret').value.trim();
+  await setSetting('kcalTarget',state.settings.kcalTarget); await setSetting('backendUrl',state.settings.backendUrl); await setSetting('appSecret',state.settings.appSecret);
+  hide('settingsOverlay'); refreshAIState(); render(); };
+$('wipeBtn').onclick=async()=>{ const meals=await getAllByDate('meals',state.date); for(const m of meals) await del('meals',m.id); hide('settingsOverlay'); render(); };
+
+$('prevDay').onclick=()=>{ state.date=shiftDate(state.date,-1); render(); };
+$('nextDay').onclick=()=>{ state.date=shiftDate(state.date, 1); render(); };
+
+(async function(){
+  await openDB();
+  const kt=await getSetting('kcalTarget'); if(kt!==undefined) state.settings.kcalTarget=kt;
+  const bu=await getSetting('backendUrl'); if(bu!==undefined) state.settings.backendUrl=bu;
+  const sc=await getSetting('appSecret'); if(sc!==undefined) state.settings.appSecret=sc;
+  refreshAIState(); await render();
+  if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+})();
+</script>
+</body>
+</html>
