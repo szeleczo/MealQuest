@@ -75,16 +75,21 @@
   .bubble{
     position:relative; background:var(--lcd); border:3px solid var(--c0);
     padding:12px 13px 11px; box-shadow:5px 5px 0 var(--c0); margin-top:11px;
+    cursor:pointer; user-select:none;
   }
   .bubble .who{ font-family:'Press Start 2P',monospace; font-size:8px; color:var(--c2);
     position:absolute; top:-9px; left:10px; background:var(--lcd); padding:0 5px; letter-spacing:1px; }
   .bubble p{ font-size:22px; color:var(--c0); }
   .bubble::before{ content:""; position:absolute; top:-12px; left:38px; width:14px; height:12px;
     background:var(--lcd); border-left:3px solid var(--c0); border-top:3px solid var(--c0); transform:skewX(-18deg); }
+  .bubble:active{ transform:translate(2px,2px); box-shadow:3px 3px 0 var(--c0); }
 
   /* Panels */
   .panel{ background:var(--c4); border:3px solid var(--c0); box-shadow:5px 5px 0 var(--c0); padding:13px 13px 14px; }
-  .panel h2{ font-family:'Press Start 2P', monospace; font-size:9px; color:var(--c2); margin-bottom:11px; letter-spacing:1px; }
+  .panel h2{ font-family:'Press Start 2P', monospace; font-size:9px; color:var(--c2); margin-bottom:11px; letter-spacing:1px; display:flex; justify-content:space-between; gap:8px; align-items:center; }
+  .tapHint{ font-size:7px; color:var(--c1); border:2px solid var(--c2); padding:3px 5px; letter-spacing:0; }
+  .todayPanel{ cursor:pointer; }
+  .todayPanel:active{ transform:translate(2px,2px); box-shadow:3px 3px 0 var(--c0); }
 
   .kcalrow{ display:flex; justify-content:space-between; align-items:baseline; }
   .kcalrow .big{ font-size:44px; color:var(--c0); line-height:0.85; }
@@ -134,6 +139,20 @@
   .nutriRow.high .stat{ color:var(--c0); }
   .nutriRow.ok .stat{ color:var(--c2); }
   .noteBox{ border:2px dashed var(--c2); padding:9px; font-size:18px; color:var(--c1); background:rgba(255,255,255,.16); }
+  .macroBars{ border:3px solid var(--c0); background:var(--lcd); padding:10px; display:flex; flex-direction:column; gap:8px; }
+  .mbar{ display:grid; grid-template-columns:70px 1fr 58px; gap:8px; align-items:center; }
+  .mbar .lab{ font-family:'Press Start 2P',monospace; font-size:7px; color:var(--c2); }
+  .mbar .track{ height:13px; border:2px solid var(--c0); background:var(--c4); overflow:hidden; }
+  .mbar .fill{ height:100%; width:0; background:var(--c2); background-image:linear-gradient(90deg,var(--c1) 0 3px, transparent 3px 6px); background-size:6px 100%; }
+  .mbar .num{ font-size:17px; text-align:right; }
+  .nutriChart{ border:3px solid var(--c0); background:var(--c4); padding:10px; box-shadow:3px 3px 0 var(--c0); }
+  .nutriChartTitle{ font-family:'Press Start 2P',monospace; font-size:8px; color:var(--c2); margin-bottom:8px; }
+  .nutriCols{ height:118px; display:flex; gap:5px; align-items:flex-end; border-left:2px solid var(--c0); border-bottom:2px solid var(--c0); padding:0 4px 0 7px; background:rgba(255,255,255,.12); }
+  .nutriColWrap{ flex:1; min-width:0; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; }
+  .nutriCol{ width:100%; max-width:22px; min-height:4px; border:2px solid var(--c0); background:var(--c2); }
+  .nutriCol.low{ background:var(--c3); }
+  .nutriCol.high{ background:var(--c0); }
+  .nutriColLabel{ font-size:12px; color:var(--c1); height:28px; line-height:.9; overflow:hidden; text-align:center; margin-top:4px; }
   .pillList{ display:flex; flex-wrap:wrap; gap:6px; }
   .pill{ border:2px solid var(--c0); background:var(--lcd); padding:5px 7px; font-size:17px; }
 
@@ -209,6 +228,7 @@
     .bubble::before{ top:-9px; height:9px; border-width:2px; }
     .panel{ padding:8px 9px 9px; border-width:2px; box-shadow:3px 3px 0 var(--c0); }
     .panel h2{ font-size:7px; margin-bottom:6px; }
+    .tapHint{ font-size:5px; padding:2px 4px; }
     .kcalrow .big{ font-size:34px; }
     .kcalrow .tgt{ font-size:17px; }
     .bar{ height:11px; border-width:2px; margin:6px 0 7px; }
@@ -232,6 +252,10 @@
     .nutriRow .name{ font-size:17px; }
     .nutriRow .val{ font-size:16px; }
     .nutriRow .stat{ font-size:6px; }
+    .mbar{ grid-template-columns:55px 1fr 48px; gap:6px; }
+    .mbar .num{ font-size:15px; }
+    .nutriCols{ height:96px; gap:4px; }
+    .nutriColLabel{ font-size:10px; height:24px; }
     .actions{ gap:7px; }
     .btnrow{ gap:7px; }
     button.pix{ font-size:8px; border-width:2px; box-shadow:3px 3px 0 var(--c0); padding:9px 7px; }
@@ -281,14 +305,14 @@
     </div>
 
     <!-- speech bubble -->
-    <div class="bubble">
+    <div class="bubble" id="coachBubble" role="button" tabindex="0" aria-label="Napi jelentés megjelenítése">
       <span class="who">COACH BYTE</span>
       <p id="bubbleText">…</p>
     </div>
 
     <!-- Stats -->
-    <section class="panel">
-      <h2>MAI NAP</h2>
+    <section class="panel todayPanel" id="todayPanel" role="button" tabindex="0" aria-label="Részletes napi tápanyagok">
+      <h2>MAI NAP <span class="tapHint">TÁPANYAG</span></h2>
       <div class="kcalrow">
         <div><span class="big" id="kcalNow">0</span></div>
         <div class="tgt">/ <span id="kcalTgt">2200</span> kcal</div>
@@ -318,10 +342,6 @@
       <div class="btnrow">
         <button class="pix solid" id="addMealBtn">+ ÉTEL</button>
         <button class="pix" id="addWeightBtn">+ SÚLY</button>
-      </div>
-      <div class="btnrow">
-        <button class="pix ghost" id="reportBtn">NAPI JELENTÉS</button>
-        <button class="pix ghost" id="nutrientBtn">EXTRA TÁP.</button>
       </div>
     </div>
   </main>
@@ -396,9 +416,9 @@
 <!-- EXTRA NUTRIENTS -->
 <div class="overlay" id="nutrientOverlay">
   <div class="sheet">
-    <header class="chrome"><h2>EXTRA TÁP.</h2><button class="closebtn" data-close="nutrientOverlay">X</button></header>
+    <header class="chrome"><h2>NAPI TÁPANYAGOK</h2><button class="closebtn" data-close="nutrientOverlay">X</button></header>
     <div class="body">
-      <div class="hint">Becslés vitaminokra, ásványi anyagokra, rostra, sóra. Nem laboreredmény, hanem napi tájékozódás.</div>
+      <div class="hint">A MAI NAP panelről nyílik. Makrók, vitaminok, ásványi anyagok, rost, só és koleszterin becslése. Nem laboreredmény, hanem napi tájékozódás.</div>
       <div class="spinner chrome" id="nutriSpinner">COACH BYTE MÉLYEBBEN SZÁMOL…</div>
       <div class="errline" id="nutriErr"></div>
       <div id="nutriContent"></div>
@@ -417,8 +437,12 @@
       <div><label>App titok (x-app-secret)</label><input id="setSecret" placeholder="a Worker APP_API_SECRET titka" /></div>
       <button class="pix solid" id="saveSettingsBtn">MENTÉS</button>
       <button class="pix ghost" id="settingsInstallBtn">TELEPÍTÉS ANDROIDRA</button>
+      <button class="pix ghost" id="exportBtn">EXPORT JSON</button>
+      <button class="pix ghost" id="importBtn">IMPORT JSON</button>
+      <input id="importFile" type="file" accept="application/json,.json" hidden />
       <button class="pix ghost" id="wipeBtn">MAI NAP TÖRLÉSE</button>
-      <div class="hint">MealQuest v0.2 · adatok a te eszközödön (IndexedDB) · offline PWA</div>
+      <div class="hint" id="backupHint">Export/import: a naplózott étkezések és súlyadatok mentése JSON fájlba. Az App titok biztonság miatt nem kerül exportba.</div>
+      <div class="hint">MealQuest v0.2.8 · adatok a te eszközödön (IndexedDB) · offline PWA</div>
     </div>
   </div>
 </div>
@@ -449,6 +473,59 @@ function getAllByDate(store,date){ return new Promise((res,rej)=>{ const out=[];
 function getAll(store){ return new Promise((res,rej)=>{ const r=tx(store,'readonly').getAll(); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
 function getSetting(key){ return new Promise((res)=>{ const r=tx('settings','readonly').get(key); r.onsuccess=()=>res(r.result?r.result.value:undefined); r.onerror=()=>res(undefined); }); }
 function setSetting(key,value){ return put('settings',{key,value}); }
+
+function setBackupHint(txt){ const el=$('backupHint'); if(el) el.textContent=txt; }
+function downloadTextFile(filename, text, type='application/json'){
+  const blob=new Blob([text],{type}); const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1200);
+}
+async function exportBackup(){
+  const [meals,weights]=await Promise.all([getAll('meals'),getAll('weights')]);
+  const backup={
+    app:'MealQuest', version:'0.2.8', schemaVersion:1, exportedAt:new Date().toISOString(),
+    data:{
+      meals:meals.sort((a,b)=>(a.date||'').localeCompare(b.date||'') || (a.time||'99').localeCompare(b.time||'99') || n(a.createdAt)-n(b.createdAt)),
+      weights:weights.sort((a,b)=>(a.date||'').localeCompare(b.date||'')),
+      settings:{ kcalTarget:state.settings.kcalTarget, backendUrl:state.settings.backendUrl }
+    },
+    note:'Az appSecret / hozzáférési kód biztonság miatt nincs benne a mentésben.'
+  };
+  const stamp=new Date().toISOString().slice(0,19).replace(/[-:T]/g,'');
+  downloadTextFile(`mealquest_backup_${stamp}.json`, JSON.stringify(backup,null,2));
+  setBackupHint(`Export kész: ${meals.length} étkezés, ${weights.length} súlybejegyzés. Az App titok nem került bele.`);
+  $('bubbleText').textContent='Backup elkészült. Tartsd meg a JSON fájlt, ez a naplód mentése.';
+}
+function normaliseMeal(m){
+  return { id:String(m.id||uid()), date:String(m.date||isoToday()), time:m.time||null, rawText:String(m.rawText||''),
+    title:String(m.title||m.rawText||'Étkezés'), kcal:n(m.kcal), kcalMin:m.kcalMin==null?null:n(m.kcalMin), kcalMax:m.kcalMax==null?null:n(m.kcalMax),
+    protein:n(m.protein), carbs:n(m.carbs), fat:n(m.fat), confidence:m.confidence||null, trainerNote:m.trainerNote||null,
+    source:m.source||'import', createdAt:n(m.createdAt)||Date.now(), updatedAt:Date.now() };
+}
+function normaliseWeight(w){
+  const kg=parseFloat(w.weightKg);
+  return { id:String(w.id||uid()), date:String(w.date||isoToday()), weightKg:isNaN(kg)?0:kg, note:w.note||null,
+    createdAt:n(w.createdAt)||Date.now(), updatedAt:Date.now() };
+}
+async function importBackupFromFile(file){
+  try{
+    const text=await file.text(); const parsed=JSON.parse(text); const data=parsed.data||parsed;
+    const meals=Array.isArray(data.meals)?data.meals:[]; const weights=Array.isArray(data.weights)?data.weights:[];
+    if(!meals.length && !weights.length) throw new Error('nincs meals/weights adat');
+    const ok=confirm(`Importáljam a mentést?\n\n${meals.length} étkezés és ${weights.length} súlybejegyzés érkezik.\nA meglévő adatokat nem törli, azonos ID esetén frissít.`);
+    if(!ok) return;
+    for(const m of meals) await put('meals',normaliseMeal(m));
+    for(const w of weights) await put('weights',normaliseWeight(w));
+    if(data.settings && data.settings.kcalTarget){ state.settings.kcalTarget=n(data.settings.kcalTarget)||state.settings.kcalTarget; await setSetting('kcalTarget',state.settings.kcalTarget); }
+    if(data.settings && data.settings.backendUrl){ state.settings.backendUrl=String(data.settings.backendUrl); await setSetting('backendUrl',state.settings.backendUrl); }
+    refreshAIState(); await render();
+    setBackupHint(`Import kész: ${meals.length} étkezés, ${weights.length} súlybejegyzés.`);
+    $('bubbleText').textContent='Import kész. A napló visszatöltve, Coach Byte jelenti: adat mentve.';
+  }catch(err){
+    setBackupHint('Import hiba: '+err.message);
+    $('bubbleText').textContent='Az import nem sikerült. Valószínűleg nem MealQuest JSON fájl.';
+  }
+}
 
 function totalKcalForMeals(meals){ return meals.reduce((sum,m)=>sum+n(m.kcal),0); }
 
@@ -558,7 +635,34 @@ function mealTotals(meals){
   return meals.reduce((a,m)=>{ a.kcal+=n(m.kcal); a.protein+=n(m.protein); a.carbs+=n(m.carbs); a.fat+=n(m.fat); return a; },{kcal:0,protein:0,carbs:0,fat:0});
 }
 function nutrientStatusLabel(st){ return {low:'kevés',ok:'ok',high:'magas',unknown:'?'}[st] || '?'; }
-function renderNutrientReport(r){
+function shortNutriName(name){
+  const map={'Koleszterin':'Kol.','Kalcium':'Ca','Vas':'Fe','Kálium':'K','Magnézium':'Mg','Rost':'Rost','Nátrium':'Na','Só':'Só','C-vitamin':'C','D-vitamin':'D','B12-vitamin':'B12','Omega-3':'Ω3','Cukor':'Cuk.'};
+  return map[name] || String(name||'').replace('vitamin','vit.').slice(0,6);
+}
+function barPct(value,max){ return Math.max(0, Math.min(100, Math.round((Number(value)||0)/(max||1)*100))); }
+function macroBarsHtml(totals){
+  const kcalPct=barPct(totals.kcal,state.settings.kcalTarget);
+  const proteinTarget=Math.max(75, Math.round(state.settings.kcalTarget*0.04));
+  const carbSoft=Math.max(160, Math.round(state.settings.kcalTarget*0.10));
+  const fatSoft=Math.max(70, Math.round(state.settings.kcalTarget*0.04));
+  const items=[
+    ['KCAL', totals.kcal, 'kcal', kcalPct],
+    ['FEH.', totals.protein, 'g', barPct(totals.protein,proteinTarget)],
+    ['SZH.', totals.carbs, 'g', barPct(totals.carbs,carbSoft)],
+    ['ZSÍR', totals.fat, 'g', barPct(totals.fat,fatSoft)]
+  ];
+  return `<div class="macroBars">${items.map(i=>`<div class="mbar"><div class="lab">${i[0]}</div><div class="track"><div class="fill" style="width:${i[3]}%"></div></div><div class="num">${i[1]} ${i[2]}</div></div>`).join('')}</div>`;
+}
+function nutrientColumnsHtml(nutrients){
+  const items=(nutrients||[]).filter(x=>x.dailyValuePercent!==undefined && x.status!=='unknown').slice(0,10);
+  if(!items.length) return '';
+  return `<div class="nutriChart"><div class="nutriChartTitle">NAPI ÉRTÉK % · GYORS NÉZET</div><div class="nutriCols">${items.map(x=>{
+    const pct=Math.max(4,Math.min(100,n(x.dailyValuePercent)));
+    const cls=esc(x.status||'ok');
+    return `<div class="nutriColWrap"><div class="nutriCol ${cls}" title="${esc(x.name)} ${pct}%" style="height:${pct}%"></div><div class="nutriColLabel">${esc(shortNutriName(x.name))}</div></div>`;
+  }).join('')}</div></div>`;
+}
+function renderNutrientReport(r, totals){
   const box=$('nutriContent');
   const rows=(r.nutrients||[]).map(x=>`<div class="nutriRow ${esc(x.status)}">
     <div class="name">${esc(x.name)}</div>
@@ -568,7 +672,9 @@ function renderNutrientReport(r){
   </div>`).join('');
   const strengths=(r.likelyStrengths||[]).map(x=>`<span class="pill">${esc(x)}</span>`).join('');
   const gaps=(r.likelyGaps||[]).map(x=>`<span class="pill">${esc(x)}</span>`).join('');
-  box.innerHTML=`<div class="nutriHead"><div class="h">${esc(r.headline||'Extra tápanyagbecslés')}</div><div class="s">${esc(r.summary||'')}</div></div>
+  box.innerHTML=`<div class="nutriHead"><div class="h">${esc(r.headline||'Napi tápanyagbecslés')}</div><div class="s">${esc(r.summary||'')}</div></div>
+    ${macroBarsHtml(totals||{kcal:0,protein:0,carbs:0,fat:0})}
+    ${nutrientColumnsHtml(r.nutrients||[])}
     <div class="nutriTable">${rows}</div>
     <div><label>ERŐSSÉGEK</label><div class="pillList">${strengths||'<span class="pill">nincs elég adat</span>'}</div></div>
     <div><label>FIGYELENDŐ</label><div class="pillList">${gaps||'<span class="pill">nincs elég adat</span>'}</div></div>
@@ -589,7 +695,7 @@ async function openNutrientReport(){
     const res=await fetch(state.settings.backendUrl.replace(/\/$/,'')+'/api/analyze-nutrients',{
       method:'POST', headers:{ 'Content-Type':'application/json', 'x-app-secret':state.settings.appSecret }, body:JSON.stringify(body) });
     if(!res.ok) throw new Error('HTTP '+res.status);
-    renderNutrientReport(await res.json());
+    renderNutrientReport(await res.json(), totals);
   }catch(err){ $('nutriErr').textContent='Az extra tápanyagbecslés nem sikerült ('+err.message+'). Ellenőrizd, hogy a Cloudflare Worker is frissítve lett-e.'; $('nutriErr').classList.add('show'); }
   finally{ $('nutriSpinner').classList.remove('show'); }
 }
@@ -643,7 +749,7 @@ $('saveWeightBtn').onclick=async()=>{ const kg=parseFloat($('wKg').value); if(is
     createdAt:existing?existing.createdAt:Date.now(), updatedAt:Date.now() };
   await put('weights',w); hide('weightOverlay'); render(); };
 
-$('reportBtn').onclick=async()=>{
+async function showDailyReport(){
   const meals=await getAllByDate('meals',state.date); let kcal=0,P=0; meals.forEach(m=>{ kcal+=n(m.kcal); P+=n(m.protein); });
   const t=state.settings.kcalTarget; let head;
   if(meals.length===0){ head='Nincs rögzített étkezés ma. A jelentéshez előbb naplózz.'; }
@@ -651,11 +757,14 @@ $('reportBtn').onclick=async()=>{
   else if(kcal<=t){ head=`${kcal} kcal, keret alatt. Rendben, de a fehérje (${P} g) lehetne feljebb holnap.`; }
   else { head=`${kcal} kcal, ${kcal-t} a keret fölött. Bejegyezve. Holnap egy könnyebb köret kiegyenlíti.`; }
   $('bubbleText').textContent=head;
-  const s=$('scene'); s.classList.remove('bob'); void s.offsetWidth; s.classList.add('bob');
-};
+  const sc=$('scene'); sc.classList.remove('bob'); void sc.offsetWidth; sc.classList.add('bob');
+}
 
 $('openDayBtn').onclick=openDayDetail;
-$('nutrientBtn').onclick=openNutrientReport;
+$('todayPanel').onclick=openNutrientReport;
+$('todayPanel').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openNutrientReport(); } };
+$('coachBubble').onclick=showDailyReport;
+$('coachBubble').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); showDailyReport(); } };
 
 $('openSettings').onclick=()=>{ $('setTarget').value=state.settings.kcalTarget; $('setBackend').value=state.settings.backendUrl; $('setSecret').value=state.settings.appSecret; show('settingsOverlay'); };
 $('saveSettingsBtn').onclick=async()=>{
@@ -663,6 +772,9 @@ $('saveSettingsBtn').onclick=async()=>{
   await setSetting('kcalTarget',state.settings.kcalTarget); await setSetting('backendUrl',state.settings.backendUrl); await setSetting('appSecret',state.settings.appSecret);
   hide('settingsOverlay'); refreshAIState(); render(); };
 $('wipeBtn').onclick=async()=>{ const meals=await getAllByDate('meals',state.date); for(const m of meals) await del('meals',m.id); hide('settingsOverlay'); render(); };
+$('exportBtn').onclick=exportBackup;
+$('importBtn').onclick=()=>{ $('importFile').value=''; $('importFile').click(); };
+$('importFile').onchange=async()=>{ const f=$('importFile').files && $('importFile').files[0]; if(f) await importBackupFromFile(f); };
 
 $('prevDay').onclick=()=>{ state.date=shiftDate(state.date,-1); render(); };
 $('nextDay').onclick=()=>{ state.date=shiftDate(state.date, 1); render(); };
