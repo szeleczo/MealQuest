@@ -447,8 +447,8 @@
   </main>
 </div>
 
-<div class="installNudge" id="installNudge" role="region" aria-label="Telepítés Androidra">
-  <div class="txt" id="installText">Telepíthető Androidra önálló appként.</div>
+<div class="installNudge" id="installNudge" role="region" aria-label="Telepítés">
+  <div class="txt" id="installText">Telepíthető önálló appként.</div>
   <button id="installBtn">TELEPÍTÉS</button>
   <button class="dismiss" id="installDismiss" aria-label="Telepítés elrejtése">X</button>
 </div>
@@ -556,13 +556,15 @@
         <div class="hint">Cloudflare Worker URL. Üresen = kézi mód. Az API-kulcs csak a Workerben él, sosem itt.</div></div>
       <div><label>App titok (x-app-secret)</label><input id="setSecret" placeholder="a Worker APP_API_SECRET titka" /></div>
       <button class="pix solid" id="saveSettingsBtn">MENTÉS</button>
-      <button class="pix ghost" id="settingsInstallBtn">TELEPÍTÉS ANDROIDRA</button>
+      <button class="pix ghost" id="settingsInstallBtn">TELEPÍTÉS</button>
+      <button class="pix ghost" id="refreshAppBtn">APP FRISSÍTÉSE</button>
       <button class="pix ghost" id="exportBtn">EXPORT JSON</button>
       <button class="pix ghost" id="importBtn">IMPORT JSON</button>
       <input id="importFile" type="file" accept="application/json,.json" hidden />
       <button class="pix ghost" id="wipeBtn">MAI NAP TÖRLÉSE</button>
       <div class="hint" id="backupHint">Export/import: a naplózott étkezések és súlyadatok mentése JSON fájlba. Az App titok biztonság miatt nem kerül exportba.</div>
-      <div class="hint">MealQuest v0.3.4 · adatok a te eszközödön (IndexedDB) · offline PWA</div>
+      <div class="hint">APP FRISSÍTÉSE: csak az offline app-cache-t és service workert cseréli. A napló, a Backend URL és az App titok megmarad.</div>
+      <div class="hint">MealQuest v0.3.5 · adatok a te eszközödön (IndexedDB) · offline PWA</div>
     </div>
   </div>
 </div>
@@ -1063,6 +1065,25 @@ async function ensureServiceWorkerReady(){
     return {ok:false, reason:'A service worker nem indult el. Frissítsd a GitHub Pages buildet, majd próbáld újra.'};
   }
 }
+async function refreshAppShell(){
+  setCoachMessage('Frissítem az appot. A napló és az App titok megmarad.', {source:'system'});
+  try{
+    if('serviceWorker' in navigator){
+      const regs=await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r=>r.unregister()));
+    }
+    if('caches' in window){
+      const keys=await caches.keys();
+      await Promise.all(keys.filter(k=>String(k).startsWith('mealquest-')).map(k=>caches.delete(k)));
+    }
+    localStorage.removeItem('mqInstallWanted');
+    const base=location.href.split('#')[0].split('?')[0];
+    setTimeout(()=>{ location.replace(base+'?refresh='+Date.now()); }, 350);
+  }catch(err){
+    setCoachMessage('Frissítés nem sikerült. A napló nem sérült; próbálj böngészőből frissíteni.', {source:'system'});
+  }
+}
+
 async function runInstallPrompt(){
   localStorage.removeItem('mqInstallDismissed');
   if(isInstalledPWA()){
@@ -1076,32 +1097,33 @@ async function runInstallPrompt(){
     deferredInstallPrompt=null; hideInstallNudge(); return;
   }
   showInstallNudge('Előkészítem a rendes app-telepítést…');
-  setCoachMessage('Telepítési előkészítés fut. Ha most még shortcutot ajánlott a Chrome, azt hagyd figyelmen kívül.', {source:'install'});
+  setCoachMessage('Telepítési előkészítés fut. Ha most még böngészős shortcutot ajánl, azt hagyd figyelmen kívül.', {source:'install'});
   const ready=await ensureServiceWorkerReady();
   if(!ready.ok){ setCoachMessage(ready.reason, {source:'install'}); hideInstallNudge(); return; }
   if(!ready.controlled){
     localStorage.setItem('mqInstallWanted','1');
-    setCoachMessage('A service worker kész. Frissítek egyet, hogy a Chrome már appként lássa az oldalt.', {source:'install'});
+    setCoachMessage('A service worker kész. Frissítek egyet, hogy a böngésző már appként lássa az oldalt.', {source:'install'});
     showInstallNudge('Előkészítés kész. Frissítés…');
     setTimeout(()=>{ location.replace('./?install=1&t='+Date.now()); }, 700);
     return;
   }
   localStorage.setItem('mqInstallWanted','1');
-  setCoachMessage('A PWA alapok készen vannak. Várj pár másodpercet, majd nyomd meg újra a TELEPÍTÉS gombot. Ha akkor sem jön fel app-telepítő ablak, a Chrome ezen a címen még nem adta oda a promptot.', {source:'install'});
+  setCoachMessage('A PWA alapok készen vannak. Várj pár másodpercet, majd nyomd meg újra a TELEPÍTÉS gombot. Ha akkor sem jön fel app-telepítő ablak, a böngésző ezen a címen még nem adta oda a promptot.', {source:'install'});
   showInstallNudge('Készül az app-telepítő. Nyomd meg újra pár másodperc múlva.');
 }
 window.addEventListener('beforeinstallprompt', e=>{
   e.preventDefault(); deferredInstallPrompt=e;
   if(localStorage.getItem('mqInstallWanted')){
     setTimeout(()=>showInstallNudge('Kész: most már önálló appként telepíthető.'), 500);
-    setCoachMessage('Telepítés kész. Nyomd meg a TELEPÍTÉS gombot, és ne a Chrome menüs shortcutot használd.', {source:'install'});
+    setCoachMessage('Telepítés kész. Nyomd meg a TELEPÍTÉS gombot, és ne a böngésző menüs shortcutját használd.', {source:'install'});
   }else if(!localStorage.getItem('mqInstallDismissed')){
-    setTimeout(()=>showInstallNudge('Telepíthető Androidra önálló appként.'), 900);
+    setTimeout(()=>showInstallNudge('Telepíthető önálló appként.'), 900);
   }
 });
 window.addEventListener('appinstalled', ()=>{ deferredInstallPrompt=null; localStorage.removeItem('mqInstallWanted'); hideInstallNudge(); });
 $('installBtn').onclick=runInstallPrompt;
 $('settingsInstallBtn').onclick=runInstallPrompt;
+$('refreshAppBtn').onclick=refreshAppShell;
 $('installDismiss').onclick=()=>{ hideInstallNudge(); localStorage.setItem('mqInstallDismissed','1'); };
 
 
