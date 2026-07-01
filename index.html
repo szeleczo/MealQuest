@@ -79,7 +79,7 @@
     cursor:pointer; user-select:none;
   }
   .bubble .who{ font-family:'Press Start 2P',monospace; font-size:8px; color:var(--c2);
-    position:absolute; top:-9px; left:10px; background:var(--lcd); padding:0 5px; letter-spacing:1px; }
+    position:absolute; top:-9px; right:10px; left:auto; background:var(--lcd); padding:0 5px; letter-spacing:1px; z-index:2; }
   .bubble p{ font-size:22px; color:var(--c0); }
   .bubble::before{ content:""; position:absolute; top:-12px; left:38px; width:14px; height:12px;
     background:var(--lcd); border-left:3px solid var(--c0); border-top:3px solid var(--c0); transform:skewX(-18deg); }
@@ -290,7 +290,7 @@
     .stage{ border-width:2px; box-shadow:3px 3px 0 var(--c0); }
     .stage img{ height:min(31dvh, 248px); aspect-ratio:auto; object-fit:cover; object-position:center center; }
     .bubble{ padding:8px 9px 7px; box-shadow:3px 3px 0 var(--c0); border-width:2px; margin-top:3px; }
-    .bubble .who{ font-size:6px; top:-7px; }
+    .bubble .who{ font-size:6px; top:-7px; right:8px; left:auto; }
     .bubble p{ font-size:18px; line-height:1.05; max-height:38px; overflow:hidden; }
     .bubble::before{ top:-9px; height:9px; border-width:2px; }
     .panel{ padding:8px 9px 9px; border-width:2px; box-shadow:3px 3px 0 var(--c0); }
@@ -401,12 +401,12 @@
         <span id="routineLevel">RUTIN 0/7</span>
       </div>
       <div class="stage">
-        <img id="scene" class="bob" src="assets/scene-fat.png" alt="Coach a teremben" loading="eager" />
+        <img id="scene" class="bob" src="assets/scene-fat.png" alt="Edző a teremben" loading="eager" />
       </div>
 
       <!-- speech bubble -->
-      <div class="bubble" id="coachBubble" role="button" tabindex="0" aria-label="Coach Byte üzenetek váltása">
-        <span class="who">COACH BYTE</span>
+      <div class="bubble" id="coachBubble" role="button" tabindex="0" aria-label="Edző üzenetek váltása">
+        <span class="who">EDZŐ</span>
         <p id="bubbleText">…</p>
       </div>
     </section>
@@ -432,7 +432,7 @@
       <div class="questLog" id="mealsPanel" role="button" tabindex="0" aria-label="Teljes napi étkezéslista">
         <div class="questHead chrome"><span>MEAL LOG</span><span>RÉSZLET</span></div>
         <ul id="mealList"></ul>
-        <div class="empty" id="mealEmpty">Ma még üres a napló. Coach Byte vár egy adatra.</div>
+        <div class="empty" id="mealEmpty">Ma még üres a napló. Az edző vár egy adatra.</div>
       </div>
     </section>
 
@@ -460,9 +460,9 @@
       <div><label>Mit ettél? (szabad szöveg)</label>
         <textarea id="mealText" placeholder="2 csirkecomb, kb 200g főtt rizs, paradicsom, 1 ayran"></textarea></div>
       <div><label>Idő (opcionális)</label><input id="mealTime" type="time" /></div>
-      <button class="pix solid" id="analyzeBtn">ELEMZÉS (AI)</button>
-      <div class="hint" id="aiHint">AI kikapcsolva — add meg a backend URL-t a beállításokban, vagy vidd fel kézzel lentebb.</div>
-      <div class="spinner chrome" id="mealSpinner">COACH BYTE SZÁMOL…</div>
+      <button class="pix solid" id="analyzeBtn">BECSLÉS</button>
+      <div class="hint" id="aiHint">Automatikus becslés kikapcsolva — add meg a backend URL-t a beállításokban, vagy vidd fel kézzel lentebb.</div>
+      <div class="spinner chrome" id="mealSpinner">ELEMZÉS…</div>
       <div class="errline" id="mealErr"></div>
       <div class="preview" id="mealPreview">
         <div class="ttl" id="pvTitle"></div>
@@ -494,7 +494,7 @@
     <div class="body">
       <div><label>Testsúly (kg)</label><input id="wKg" type="number" inputmode="decimal" step="0.1" placeholder="84.2" /></div>
       <div><label>Megjegyzés (opcionális)</label><input id="wNote" placeholder="reggel, éhgyomorra" /></div>
-      <div class="hint">A napi ingadozás normális. Coach Byte a trendet nézi, nem egy számot.</div>
+      <div class="hint">A napi ingadozás normális. A trend számít, nem egyetlen szám.</div>
       <button class="pix solid" id="saveWeightBtn">SÚLY RÖGZÍTÉSE</button>
     </div>
   </div>
@@ -538,7 +538,7 @@
     <header class="chrome"><h2>NAPI TÁPANYAGOK</h2><button class="closebtn" data-close="nutrientOverlay">X</button></header>
     <div class="body">
       <div class="hint">A MAI NAP panelről nyílik. Makrók, vitaminok, ásványi anyagok, rost, só és koleszterin becslése. Nem laboreredmény, hanem napi tájékozódás.</div>
-      <div class="spinner chrome" id="nutriSpinner">COACH BYTE MÉLYEBBEN SZÁMOL…</div>
+      <div class="spinner chrome" id="nutriSpinner">RÉSZLETES ELEMZÉS…</div>
       <div class="errline" id="nutriErr"></div>
       <div id="nutriContent"></div>
     </div>
@@ -551,8 +551,8 @@
     <header class="chrome"><h2>BEÁLLÍTÁS</h2><button class="closebtn" data-close="settingsOverlay">X</button></header>
     <div class="body">
       <div><label>Napi kcal cél</label><input id="setTarget" type="number" inputmode="numeric" placeholder="2200" /></div>
-      <div><label>Backend URL (AI-hoz)</label><input id="setBackend" placeholder="https://mealquest.<neved>.workers.dev" />
-        <div class="hint">Cloudflare Worker URL. Üresen = kézi mód. Az OpenAI kulcs csak a Workerben él, sosem itt.</div></div>
+      <div><label>Backend URL (becsléshez)</label><input id="setBackend" placeholder="https://mealquest.<neved>.workers.dev" />
+        <div class="hint">Cloudflare Worker URL. Üresen = kézi mód. Az API-kulcs csak a Workerben él, sosem itt.</div></div>
       <div><label>App titok (x-app-secret)</label><input id="setSecret" placeholder="a Worker APP_API_SECRET titka" /></div>
       <button class="pix solid" id="saveSettingsBtn">MENTÉS</button>
       <button class="pix ghost" id="settingsInstallBtn">TELEPÍTÉS ANDROIDRA</button>
@@ -617,7 +617,7 @@ function downloadTextFile(filename, text, type='application/json'){
 const COACH_HISTORY_LIMIT = 10;
 function coachWhoLabel(txt){
   const el=document.querySelector('#coachBubble .who');
-  if(el) el.textContent = txt || 'COACH BYTE';
+  if(el) el.textContent = txt || 'EDZŐ';
 }
 function addCoachHistory(text, source){
   text=String(text||'').trim();
@@ -633,14 +633,14 @@ function setCoachMessage(text, opts){
   if(!text) return;
   $('bubbleText').textContent=text;
   if(opts.remember!==false) addCoachHistory(text, opts.source||'coach');
-  if(opts.resetCycle!==false){ state.coachIndex=-1; state.coachCycleMode=false; coachWhoLabel('COACH BYTE'); }
+  if(opts.resetCycle!==false){ state.coachIndex=-1; state.coachCycleMode=false; coachWhoLabel('EDZŐ'); }
 }
 function displayCoachHistory(index){
   const h=state.coachHistory;
   if(!h.length) return false;
   state.coachIndex=((index%h.length)+h.length)%h.length;
   $('bubbleText').textContent=h[state.coachIndex].text;
-  coachWhoLabel('COACH BYTE '+(state.coachIndex+1)+'/'+h.length);
+  coachWhoLabel('EDZŐ '+(state.coachIndex+1)+'/'+h.length);
   return true;
 }
 async function handleCoachBubbleTap(){
@@ -692,7 +692,7 @@ async function importBackupFromFile(file){
     if(data.settings && data.settings.backendUrl){ state.settings.backendUrl=String(data.settings.backendUrl); await setSetting('backendUrl',state.settings.backendUrl); }
     refreshAIState(); await render();
     setBackupHint(`Import kész: ${meals.length} étkezés, ${weights.length} súlybejegyzés.`);
-    setCoachMessage('Import kész. A napló visszatöltve, Coach Byte jelenti: adat mentve.', {source:'import'});
+    setCoachMessage('Import kész. A napló visszatöltve. Adat mentve.', {source:'import'});
   }catch(err){
     setBackupHint('Import hiba: '+err.message);
     setCoachMessage('Az import nem sikerült. Valószínűleg nem MealQuest JSON fájl.', {source:'import'});
@@ -877,7 +877,7 @@ function renderNutrientReport(r, totals){
     <div><label>ERŐSSÉGEK</label><div class="pillList">${strengths||'<span class="pill">nincs elég adat</span>'}</div></div>
     <div><label>FIGYELENDŐ</label><div class="pillList">${gaps||'<span class="pill">nincs elég adat</span>'}</div></div>
     <div class="noteBox">${esc(r.practicalSuggestion||'')}</div>
-    <div class="hint">${esc(r.caveat||'AI becslés · adagpontosságtól függ · nem orvosi tanács.')}</div>`;
+    <div class="hint">${esc(r.caveat||'Becslés · adagpontosságtól függ · nem orvosi tanács.')}</div>`;
 }
 async function openNutrientReport(){
   $('nutriErr').classList.remove('show'); $('nutriContent').innerHTML=''; show('nutrientOverlay');
@@ -968,10 +968,10 @@ $('analyzeBtn').onclick=async()=>{
     $('pvNote').textContent=[a.trainerNote,a.practicalAdjustment].filter(Boolean).join('  ');
     $('pvAssum').textContent=(a.assumptions||[]).join(' · ');
     const aiCoachMsg=[a.trainerNote,a.practicalAdjustment].filter(Boolean).join(' ');
-    if(aiCoachMsg) rememberCoachMessage(aiCoachMsg, 'meal-ai');
+    if(aiCoachMsg) rememberCoachMessage(aiCoachMsg, 'meal-estimate');
     $('mealPreview').classList.add('show');
     $('mTitle').value=a.title||''; $('mKcal').value=a.estimatedKcal; $('mProt').value=a.proteinG; $('mCarb').value=a.carbsG; $('mFat').value=a.fatG;
-  }catch(err){ $('mealErr').textContent='Az AI elemzés nem sikerült ('+err.message+'). Vidd fel kézzel, vagy ellenőrizd a backend URL-t.'; $('mealErr').classList.add('show'); }
+  }catch(err){ $('mealErr').textContent='Az automatikus becslés nem sikerült ('+err.message+'). Vidd fel kézzel, vagy ellenőrizd a backend URL-t.'; $('mealErr').classList.add('show'); }
   finally{ $('mealSpinner').classList.remove('show'); }
 };
 
@@ -1065,7 +1065,7 @@ async function ensureServiceWorkerReady(){
 async function runInstallPrompt(){
   localStorage.removeItem('mqInstallDismissed');
   if(isInstalledPWA()){
-    setCoachMessage('Már appként fut. Coach Byte nem telepít kétszer.', {source:'install'});
+    setCoachMessage('Már appként fut. Nem kell újratelepíteni.', {source:'install'});
     hideInstallNudge();
     return;
   }
