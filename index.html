@@ -15,17 +15,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
 <style>
   :root{
-    /* Warm retro RPG / handheld LCD palette */
-    --c0:#1c1711;  /* ink / near-black */
-    --c1:#3d3324;  /* dark umber */
-    --c2:#75684f;  /* muted brass */
-    --c3:#b9ad8a;  /* faded LCD highlight */
-    --c4:#dfd0a7;  /* parchment panel */
-    --lcd:#f1e7c9; /* screen bg */
+    /* Greyscale retro RPG / handheld LCD palette */
+    --c0:#111214;  /* ink / near-black */
+    --c1:#2a2d31;  /* charcoal */
+    --c2:#6f747c;  /* muted UI grey */
+    --c3:#b9c0c8;  /* faded LCD highlight */
+    --c4:#d9dee4;  /* light panel */
+    --lcd:#eef1f4; /* screen bg */
     --line:#1c1711;
   }
   *{ box-sizing:border-box; margin:0; padding:0; }
-  html,body{ height:100%; }
+  html,body{ height:var(--app-height, 100dvh); overflow:hidden; }
   body{
     font-family:'VT323', monospace;
     background:var(--c0); color:var(--c0);
@@ -36,8 +36,8 @@
   *{ scrollbar-width:none; -ms-overflow-style:none; }
   *::-webkit-scrollbar{ width:0; height:0; display:none; }
   #screen{
-    max-width:520px; margin:0 auto; min-height:100dvh; background:var(--lcd);
-    display:flex; flex-direction:column;
+    max-width:520px; margin:0 auto; height:var(--app-height, 100dvh); min-height:var(--app-height, 100dvh); background:var(--lcd);
+    display:flex; flex-direction:column; overflow:hidden;
     padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom); position:relative;
   }
   .chrome{ font-family:'Press Start 2P', monospace; }
@@ -64,11 +64,11 @@
     color:var(--c0); width:26px; height:26px; cursor:pointer; }
   .gear:active{ background:var(--c0); color:var(--lcd); }
 
-  main{ flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:14px; }
+  main{ flex:1; min-height:0; overflow:hidden; padding:14px; display:flex; flex-direction:column; gap:14px; }
 
   /* ---- Hero: gym scene ---- */
   .stage{ border:3px solid var(--c0); box-shadow:5px 5px 0 var(--c0); background:var(--c4); line-height:0; overflow:hidden; }
-  .stage img{ display:block; width:100%; height:auto; aspect-ratio:3/2; object-fit:cover; }
+  .stage img{ display:block; width:100%; height:auto; aspect-ratio:3/2; object-fit:cover; filter:grayscale(1) contrast(1.04); }
   #scene.bob{ animation:bob 3s ease-in-out infinite; transform-origin:center bottom; }
   @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-1.2px);} }
 
@@ -228,7 +228,7 @@
 
 
 
-  /* v0.3.0 status-screen pass: fewer cards, stronger retro RPG screen logic */
+  /* v0.3.1 greyscale + fixed-screen pass: fewer cards, stronger retro RPG screen logic */
   .heroPanel{
     position:relative; background:var(--c4); border:3px solid var(--c0); box-shadow:5px 5px 0 var(--c0);
     padding:8px; display:flex; flex-direction:column; gap:8px;
@@ -337,7 +337,7 @@
     .heroPanel{ padding:5px; border-width:2px; box-shadow:3px 3px 0 var(--c0); gap:5px; }
     .heroStatus{ font-size:6px; gap:5px; }
     .heroStatus span{ padding:4px 5px; border-width:2px; }
-    .heroPanel .stage img{ height:min(30dvh, 224px); }
+    .heroPanel .stage img{ height:min(28dvh, 210px); }
     .questLog{ margin-top:7px; padding:5px; }
     .questHead{ font-size:6px; margin-bottom:4px; }
     .questLog ul{ gap:2px; max-height:64px; overflow:hidden; }
@@ -405,7 +405,7 @@
       </div>
 
       <!-- speech bubble -->
-      <div class="bubble" id="coachBubble" role="button" tabindex="0" aria-label="Napi jelentés megjelenítése">
+      <div class="bubble" id="coachBubble" role="button" tabindex="0" aria-label="Coach Byte üzenetek váltása">
         <span class="who">COACH BYTE</span>
         <p id="bubbleText">…</p>
       </div>
@@ -568,7 +568,21 @@
 
 <script>
 const DB_NAME='mealquest', DB_VER=1;
-let db, deferredInstallPrompt=null, state={ date:isoToday(), settings:{ kcalTarget:2200, backendUrl:'', appSecret:'' }, pendingAI:null };
+let db, deferredInstallPrompt=null, state={
+  date:isoToday(),
+  settings:{ kcalTarget:2200, backendUrl:'', appSecret:'' },
+  pendingAI:null,
+  coachHistory:[],
+  coachIndex:-1,
+  coachCycleMode:false
+};
+
+function syncAppHeight(){
+  document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
+}
+syncAppHeight();
+window.addEventListener('resize', syncAppHeight);
+window.addEventListener('orientationchange', ()=>setTimeout(syncAppHeight, 250));
 
 function isoToday(){ return isoOf(new Date()); }
 function isoOf(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -599,10 +613,49 @@ function downloadTextFile(filename, text, type='application/json'){
   const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click();
   setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1200);
 }
+
+const COACH_HISTORY_LIMIT = 10;
+function coachWhoLabel(txt){
+  const el=document.querySelector('#coachBubble .who');
+  if(el) el.textContent = txt || 'COACH BYTE';
+}
+function addCoachHistory(text, source){
+  text=String(text||'').trim();
+  if(!text) return;
+  const h=state.coachHistory;
+  if(h.length && h[0].text===text) return;
+  state.coachHistory = [{text, source:source||'coach', at:Date.now()}].concat(h).slice(0, COACH_HISTORY_LIMIT);
+}
+function rememberCoachMessage(text, source){ addCoachHistory(text, source); }
+function setCoachMessage(text, opts){
+  opts=opts||{};
+  text=String(text||'').trim();
+  if(!text) return;
+  $('bubbleText').textContent=text;
+  if(opts.remember!==false) addCoachHistory(text, opts.source||'coach');
+  if(opts.resetCycle!==false){ state.coachIndex=-1; state.coachCycleMode=false; coachWhoLabel('COACH BYTE'); }
+}
+function displayCoachHistory(index){
+  const h=state.coachHistory;
+  if(!h.length) return false;
+  state.coachIndex=((index%h.length)+h.length)%h.length;
+  $('bubbleText').textContent=h[state.coachIndex].text;
+  coachWhoLabel('COACH BYTE '+(state.coachIndex+1)+'/'+h.length);
+  return true;
+}
+async function handleCoachBubbleTap(){
+  if(!state.coachCycleMode){
+    await showDailyReport(true);
+    return;
+  }
+  if(!displayCoachHistory(state.coachIndex+1)) await showDailyReport(true);
+  const sc=$('scene'); sc.classList.remove('bob'); void sc.offsetWidth; sc.classList.add('bob');
+}
+
 async function exportBackup(){
   const [meals,weights]=await Promise.all([getAll('meals'),getAll('weights')]);
   const backup={
-    app:'MealQuest', version:'0.3.0', schemaVersion:1, exportedAt:new Date().toISOString(),
+    app:'MealQuest', version:'0.3.2', schemaVersion:1, exportedAt:new Date().toISOString(),
     data:{
       meals:meals.sort((a,b)=>(a.date||'').localeCompare(b.date||'') || (a.time||'99').localeCompare(b.time||'99') || n(a.createdAt)-n(b.createdAt)),
       weights:weights.sort((a,b)=>(a.date||'').localeCompare(b.date||'')),
@@ -613,7 +666,7 @@ async function exportBackup(){
   const stamp=new Date().toISOString().slice(0,19).replace(/[-:T]/g,'');
   downloadTextFile(`mealquest_backup_${stamp}.json`, JSON.stringify(backup,null,2));
   setBackupHint(`Export kész: ${meals.length} étkezés, ${weights.length} súlybejegyzés. Az App titok nem került bele.`);
-  $('bubbleText').textContent='Backup elkészült. Tartsd meg a JSON fájlt, ez a naplód mentése.';
+  setCoachMessage('Backup elkészült. Tartsd meg a JSON fájlt, ez a naplód mentése.', {source:'backup'});
 }
 function normaliseMeal(m){
   return { id:String(m.id||uid()), date:String(m.date||isoToday()), time:m.time||null, rawText:String(m.rawText||''),
@@ -639,10 +692,10 @@ async function importBackupFromFile(file){
     if(data.settings && data.settings.backendUrl){ state.settings.backendUrl=String(data.settings.backendUrl); await setSetting('backendUrl',state.settings.backendUrl); }
     refreshAIState(); await render();
     setBackupHint(`Import kész: ${meals.length} étkezés, ${weights.length} súlybejegyzés.`);
-    $('bubbleText').textContent='Import kész. A napló visszatöltve, Coach Byte jelenti: adat mentve.';
+    setCoachMessage('Import kész. A napló visszatöltve, Coach Byte jelenti: adat mentve.', {source:'import'});
   }catch(err){
     setBackupHint('Import hiba: '+err.message);
-    $('bubbleText').textContent='Az import nem sikerült. Valószínűleg nem MealQuest JSON fájl.';
+    setCoachMessage('Az import nem sikerült. Valószínűleg nem MealQuest JSON fájl.', {source:'import'});
   }
 }
 
@@ -733,7 +786,7 @@ function updateBubble(kcal, mealCount, hasWeight){
   else if(kcal <= t){ line=`Még ~${t-kcal} kcal fér a mai keretbe. Nyugodt tempó.`; }
   else if(kcal <= t*1.15){ line='Kicsit a keret fölött. Nem dráma — holnap könnyebb köret.'; }
   else { line='Nehéz nap kalóriában. Bejegyezve, nem büntetve. Megyünk tovább.'; }
-  $('bubbleText').textContent=line;
+  setCoachMessage(line, {source:'status'});
 }
 
 
@@ -914,6 +967,8 @@ $('analyzeBtn').onclick=async()=>{
     $('pvP').textContent=a.proteinG; $('pvC').textContent=a.carbsG; $('pvF').textContent=a.fatG;
     $('pvNote').textContent=[a.trainerNote,a.practicalAdjustment].filter(Boolean).join('  ');
     $('pvAssum').textContent=(a.assumptions||[]).join(' · ');
+    const aiCoachMsg=[a.trainerNote,a.practicalAdjustment].filter(Boolean).join(' ');
+    if(aiCoachMsg) rememberCoachMessage(aiCoachMsg, 'meal-ai');
     $('mealPreview').classList.add('show');
     $('mTitle').value=a.title||''; $('mKcal').value=a.estimatedKcal; $('mProt').value=a.proteinG; $('mCarb').value=a.carbsG; $('mFat').value=a.fatG;
   }catch(err){ $('mealErr').textContent='Az AI elemzés nem sikerült ('+err.message+'). Vidd fel kézzel, vagy ellenőrizd a backend URL-t.'; $('mealErr').classList.add('show'); }
@@ -938,21 +993,26 @@ $('saveWeightBtn').onclick=async()=>{ const kg=parseFloat($('wKg').value); if(is
     createdAt:existing?existing.createdAt:Date.now(), updatedAt:Date.now() };
   await put('weights',w); hide('weightOverlay'); render(); };
 
-async function showDailyReport(){
+async function showDailyReport(fromBubble){
   const meals=await getAllByDate('meals',state.date); let kcal=0,P=0; meals.forEach(m=>{ kcal+=n(m.kcal); P+=n(m.protein); });
   const t=state.settings.kcalTarget; let head;
   if(meals.length===0){ head='Nincs rögzített étkezés ma. A jelentéshez előbb naplózz.'; }
   else if(kcal<=t && P>=t*0.03){ head=`Kontroll rendben: ${kcal} kcal a ${t}-es keretben, fehérje ${P} g. A rögzítés a lényeg — ma megvan.`; }
   else if(kcal<=t){ head=`${kcal} kcal, keret alatt. Rendben, de a fehérje (${P} g) lehetne feljebb holnap.`; }
   else { head=`${kcal} kcal, ${kcal-t} a keret fölött. Bejegyezve. Holnap egy könnyebb köret kiegyenlíti.`; }
-  $('bubbleText').textContent=head;
+  setCoachMessage(head, {source:'daily', resetCycle:false});
+  if(fromBubble){
+    state.coachCycleMode=true;
+    state.coachIndex=0;
+    displayCoachHistory(0);
+  }
   const sc=$('scene'); sc.classList.remove('bob'); void sc.offsetWidth; sc.classList.add('bob');
 }
 
 $('todayPanel').onclick=openNutrientReport;
 $('todayPanel').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openNutrientReport(); } };
-$('coachBubble').onclick=showDailyReport;
-$('coachBubble').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); showDailyReport(); } };
+$('coachBubble').onclick=handleCoachBubbleTap;
+$('coachBubble').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); handleCoachBubbleTap(); } };
 
 
 $('dateLabel').onclick=openCalendar;
@@ -1005,7 +1065,7 @@ async function ensureServiceWorkerReady(){
 async function runInstallPrompt(){
   localStorage.removeItem('mqInstallDismissed');
   if(isInstalledPWA()){
-    $('bubbleText').textContent='Már appként fut. Coach Byte nem telepít kétszer.';
+    setCoachMessage('Már appként fut. Coach Byte nem telepít kétszer.', {source:'install'});
     hideInstallNudge();
     return;
   }
@@ -1015,25 +1075,25 @@ async function runInstallPrompt(){
     deferredInstallPrompt=null; hideInstallNudge(); return;
   }
   showInstallNudge('Előkészítem a rendes app-telepítést…');
-  $('bubbleText').textContent='Telepítési előkészítés fut. Ha most még shortcutot ajánlott a Chrome, azt hagyd figyelmen kívül.';
+  setCoachMessage('Telepítési előkészítés fut. Ha most még shortcutot ajánlott a Chrome, azt hagyd figyelmen kívül.', {source:'install'});
   const ready=await ensureServiceWorkerReady();
-  if(!ready.ok){ $('bubbleText').textContent=ready.reason; hideInstallNudge(); return; }
+  if(!ready.ok){ setCoachMessage(ready.reason, {source:'install'}); hideInstallNudge(); return; }
   if(!ready.controlled){
     localStorage.setItem('mqInstallWanted','1');
-    $('bubbleText').textContent='A service worker kész. Frissítek egyet, hogy a Chrome már appként lássa az oldalt.';
+    setCoachMessage('A service worker kész. Frissítek egyet, hogy a Chrome már appként lássa az oldalt.', {source:'install'});
     showInstallNudge('Előkészítés kész. Frissítés…');
     setTimeout(()=>{ location.replace('./?install=1&t='+Date.now()); }, 700);
     return;
   }
   localStorage.setItem('mqInstallWanted','1');
-  $('bubbleText').textContent='A PWA alapok készen vannak. Várj pár másodpercet, majd nyomd meg újra a TELEPÍTÉS gombot. Ha akkor sem jön fel app-telepítő ablak, a Chrome ezen a címen még nem adta oda a promptot.';
+  setCoachMessage('A PWA alapok készen vannak. Várj pár másodpercet, majd nyomd meg újra a TELEPÍTÉS gombot. Ha akkor sem jön fel app-telepítő ablak, a Chrome ezen a címen még nem adta oda a promptot.', {source:'install'});
   showInstallNudge('Készül az app-telepítő. Nyomd meg újra pár másodperc múlva.');
 }
 window.addEventListener('beforeinstallprompt', e=>{
   e.preventDefault(); deferredInstallPrompt=e;
   if(localStorage.getItem('mqInstallWanted')){
     setTimeout(()=>showInstallNudge('Kész: most már önálló appként telepíthető.'), 500);
-    $('bubbleText').textContent='Telepítés kész. Nyomd meg a TELEPÍTÉS gombot, és ne a Chrome menüs shortcutot használd.';
+    setCoachMessage('Telepítés kész. Nyomd meg a TELEPÍTÉS gombot, és ne a Chrome menüs shortcutot használd.', {source:'install'});
   }else if(!localStorage.getItem('mqInstallDismissed')){
     setTimeout(()=>showInstallNudge('Telepíthető Androidra önálló appként.'), 900);
   }
