@@ -142,7 +142,10 @@
   .nutriRow.low .stat{ color:var(--c1); }
   .nutriRow.high .stat{ color:var(--c0); }
   .nutriRow.ok .stat{ color:var(--c2); }
-  .noteBox{ border:2px dashed var(--c2); padding:10px; font-size:18px; line-height:1.18; color:var(--c1); background:rgba(255,255,255,.16); }
+  .noteStack{ display:flex; flex-direction:column; gap:12px; margin-top:2px; }
+  .noteBox{ border:2px dashed var(--c2); padding:11px 10px 10px; font-size:18px; line-height:1.22; color:var(--c1); background:rgba(255,255,255,.16); }
+  .noteBox label{ display:block; font-family:'Press Start 2P',monospace; font-size:8px; line-height:1.35; color:var(--c2); margin-bottom:8px; }
+  .noteBox p{ margin:0; }
   .macroBars{ border:3px solid var(--c0); background:var(--lcd); padding:10px; display:flex; flex-direction:column; gap:8px; }
   .mbar{ display:grid; grid-template-columns:70px 1fr 58px; gap:8px; align-items:center; }
   .mbar .lab{ font-family:'Press Start 2P',monospace; font-size:7px; color:var(--c2); }
@@ -848,6 +851,33 @@ function macroBarsHtml(totals){
   ];
   return `<div class="macroBars">${items.map(i=>`<div class="mbar"><div class="lab">${i[0]}</div><div class="track"><div class="fill" style="width:${i[3]}%"></div></div><div class="num">${i[1]} ${i[2]}</div></div>`).join('')}</div>`;
 }
+
+function remainingDayAdvice(totals){
+  const target=n(state.settings.kcalTarget)||2200;
+  const left=target-n(totals.kcal);
+  const proteinTarget=Math.max(90, Math.round(target*0.05));
+  const proteinLeft=proteinTarget-n(totals.protein);
+  const carbHigh=n(totals.carbs)>Math.max(230, Math.round(target*0.13));
+  const fatHigh=n(totals.fat)>Math.max(85, Math.round(target*0.045));
+  const pieces=[];
+  if(left>700){
+    if(proteinLeft>25) pieces.push(`Még kb. ${left} kcal maradt. Érdemes egy rendes, fehérjedús étkezést bevinni: tojás, túró/görög joghurt, tonhal vagy hús + zöldség; köret mérsékelten.`);
+    else pieces.push(`Még kb. ${left} kcal maradt. Fehérje nagyjából rendben, ezért jöhet egy normális, de nem nehéz étkezés: zöldség + kisebb köret + egyszerű fehérje.`);
+  }else if(left>300){
+    if(proteinLeft>20) pieces.push(`Még kb. ${left} kcal fér bele. A nap maradékában inkább fehérjét érdemes pótolni kevés körettel.`);
+    else pieces.push(`Még kb. ${left} kcal fér bele. Könnyű vacsora / kis snack még belefér, de nagy köretet már nem erőltetnék.`);
+  }else if(left>=0){
+    if(proteinLeft>20) pieces.push(`Már közel vagy a napi célhoz. Ha még ennél, inkább kis fehérjés opciót válassz, kevés zsírral és kevés körettel.`);
+    else pieces.push(`A napi cél közelében vagy. Innen már inkább csak könnyű, kontrollált lezárás ajánlott.`);
+  }else{
+    pieces.push(`A napi cél fölött vagy kb. ${Math.abs(left)} kcal-lal. Nem tragédia, de ma már inkább víz, zöldség, könnyű fehérje; új nagy étkezést nem érdemes nyitni.`);
+  }
+  if(proteinLeft>30) pieces.push(`Fehérjéből még kb. ${proteinLeft} g hiányozhat a jó naphoz.`);
+  if(carbHigh) pieces.push('A szénhidrát már magasabb oldalon van, ezért a további köretet érdemes visszafogni.');
+  if(fatHigh) pieces.push('A zsír már magasabb oldalon van, ezért olajos/sajtos/kolbászos zárást nem választanék.');
+  return pieces.join(' ');
+}
+
 function nutrientColumnsHtml(nutrients){
   const items=(nutrients||[]).filter(x=>x.dailyValuePercent!==undefined && x.status!=='unknown').slice(0,10);
   if(!items.length) return '';
@@ -890,7 +920,10 @@ function renderNutrientReport(r, totals){
     ${renderNutrientGroup('VITAMINOK', groups['VITAMINOK'])}
     <div class="softBlock"><label>ERŐSSÉGEK</label><div class="pillList">${strengths||'<span class="pill">nincs elég adat</span>'}</div></div>
     <div class="softBlock"><label>FIGYELENDŐ</label><div class="pillList">${gaps||'<span class="pill">nincs elég adat</span>'}</div></div>
-    <div class="noteBox">${esc(r.practicalSuggestion||'')}</div>
+    <div class="noteStack">
+      <div class="noteBox"><label>NAP MARADÉKA</label><p>${esc(remainingDayAdvice(totals||{kcal:0,protein:0,carbs:0,fat:0}))}</p></div>
+      <div class="noteBox"><label>EDZŐI MEGJEGYZÉS</label><p>${esc(r.practicalSuggestion||'')}</p></div>
+    </div>
     <div class="hint">${esc(r.caveat||'Becslés · adagpontosságtól függ · nem orvosi tanács.')}</div>`;
 }
 function mealSignature(meals){
