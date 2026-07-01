@@ -57,7 +57,8 @@
   .datenav button{ font-family:'Press Start 2P', monospace; font-size:10px; background:none;
     border:2px solid var(--c0); color:var(--c0); width:26px; height:26px; cursor:pointer; }
   .datenav button:active{ background:var(--c0); color:var(--lcd); }
-  #dateLabel{ font-size:20px; min-width:104px; text-align:center; }
+  #dateLabel{ font-size:20px; min-width:104px; text-align:center; cursor:pointer; padding:2px 4px; border:2px solid transparent; }
+  #dateLabel:active, #dateLabel:focus{ border-color:var(--c0); outline:none; background:var(--c4); }
   #dateLabel small{ display:block; font-size:13px; color:var(--c2); line-height:1; }
   .gear{ font-family:'Press Start 2P',monospace; font-size:11px; background:none; border:2px solid var(--c0);
     color:var(--c0); width:26px; height:26px; cursor:pointer; }
@@ -106,6 +107,8 @@
   .weightline .w{ font-size:26px; }
   .weightline .trend{ font-size:18px; color:var(--c2); }
 
+  .meals{ cursor:pointer; }
+  .meals:active{ transform:translate(2px,2px); box-shadow:3px 3px 0 var(--c0); }
   .meals ul{ list-style:none; display:flex; flex-direction:column; gap:8px; }
   .meal{ display:flex; align-items:center; gap:10px; border:2px solid var(--c0); background:var(--lcd); padding:8px 9px; }
   .meal .t{ flex:1; } .meal .t b{ font-size:22px; display:block; } .meal .t small{ font-size:16px; color:var(--c2); }
@@ -155,6 +158,34 @@
   .nutriColLabel{ font-size:12px; color:var(--c1); height:28px; line-height:.9; overflow:hidden; text-align:center; margin-top:4px; }
   .pillList{ display:flex; flex-wrap:wrap; gap:6px; }
   .pill{ border:2px solid var(--c0); background:var(--lcd); padding:5px 7px; font-size:17px; }
+
+
+
+  /* Calendar overlay */
+  .calTop{ display:flex; align-items:center; justify-content:space-between; gap:8px; border:3px solid var(--c0); background:var(--c4); padding:9px; box-shadow:3px 3px 0 var(--c0); }
+  .calTop button{ font-family:'Press Start 2P',monospace; font-size:8px; background:var(--lcd); color:var(--c0); border:2px solid var(--c0); padding:8px 9px; cursor:pointer; }
+  .calTop button:active{ background:var(--c0); color:var(--lcd); }
+  #calMonthLabel{ font-family:'Press Start 2P',monospace; font-size:10px; color:var(--c0); text-align:center; flex:1; }
+  .calWeek{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-top:4px; }
+  .calWeek span{ font-family:'Press Start 2P',monospace; font-size:7px; color:var(--c2); text-align:center; }
+  .calendarGrid{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
+  .calDay{ min-height:44px; border:2px solid var(--c0); background:var(--lcd); color:var(--c0); font-family:'VT323',monospace; font-size:20px; position:relative; cursor:pointer; padding:4px 3px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
+  .calDay:active{ background:var(--c0); color:var(--lcd); }
+  .calDay.out{ opacity:.25; pointer-events:none; }
+  .calDay.selected{ background:var(--c1); color:var(--lcd); }
+  .calDay.today::before{ content:'MA'; position:absolute; top:-5px; right:2px; font-family:'Press Start 2P',monospace; font-size:5px; background:var(--lcd); color:var(--c0); border:1px solid var(--c0); padding:2px 2px; }
+  .calMarks{ display:flex; gap:2px; min-height:6px; align-items:center; justify-content:center; }
+  .markMeal,.markWeight{ display:block; width:6px; height:6px; border:1px solid var(--c0); }
+  .markMeal{ background:var(--c0); }
+  .markWeight{ background:var(--lcd); }
+  .calDay.selected .markMeal,.calDay.selected .markWeight{ border-color:var(--lcd); }
+  .calDay.selected .markMeal{ background:var(--lcd); }
+  .calLegend{ display:flex; gap:8px; flex-wrap:wrap; font-size:17px; color:var(--c1); align-items:center; }
+  .calLegend i{ display:inline-block; width:8px; height:8px; border:1px solid var(--c0); margin-right:3px; vertical-align:middle; }
+  .calLegend .lm{ background:var(--c0); }
+  .calLegend .lw{ background:var(--lcd); }
+  .calActions{ display:flex; gap:8px; }
+  .calActions button{ flex:1; }
 
   .actions{ display:flex; flex-direction:column; gap:10px; }
   .btnrow{ display:flex; gap:10px; }
@@ -217,7 +248,7 @@
     .brand h1{ font-size:9px; }
     .datenav{ gap:5px; }
     .datenav button,.gear{ width:23px; height:23px; border-width:2px; font-size:8px; }
-    #dateLabel{ font-size:17px; min-width:75px; }
+    #dateLabel{ font-size:17px; min-width:75px; padding:1px 3px; }
     #dateLabel small{ font-size:11px; }
     main{ padding:8px; gap:8px; overflow:hidden; }
     .stage{ border-width:2px; box-shadow:3px 3px 0 var(--c0); }
@@ -256,6 +287,12 @@
     .mbar .num{ font-size:15px; }
     .nutriCols{ height:96px; gap:4px; }
     .nutriColLabel{ font-size:10px; height:24px; }
+    .calTop{ padding:7px; border-width:2px; }
+    #calMonthLabel{ font-size:8px; }
+    .calWeek{ gap:4px; }
+    .calendarGrid{ gap:4px; }
+    .calDay{ min-height:38px; font-size:18px; border-width:2px; }
+    .calLegend{ font-size:15px; }
     .actions{ gap:7px; }
     .btnrow{ gap:7px; }
     button.pix{ font-size:8px; border-width:2px; box-shadow:3px 3px 0 var(--c0); padding:9px 7px; }
@@ -291,7 +328,7 @@
     <div class="toprow">
       <div class="datenav">
         <button id="prevDay" aria-label="Előző nap">&lt;</button>
-        <div id="dateLabel">—</div>
+        <div id="dateLabel" role="button" tabindex="0" aria-label="Naptár megnyitása">—</div>
         <button id="nextDay" aria-label="Következő nap">&gt;</button>
       </div>
       <button class="gear" id="openSettings" aria-label="Beállítások">*</button>
@@ -330,11 +367,10 @@
     </section>
 
     <!-- Meals -->
-    <section class="panel meals">
-      <h2>ÉTKEZÉSEK</h2>
+    <section class="panel meals" id="mealsPanel" role="button" tabindex="0" aria-label="Teljes napi étkezéslista">
+      <h2>ÉTKEZÉSEK <span class="tapHint">RÉSZLET</span></h2>
       <ul id="mealList"></ul>
       <div class="empty" id="mealEmpty">Ma még üres a napló. Coach Byte vár egy adatra.</div>
-      <div class="panelFoot"><button class="miniBtn" id="openDayBtn">TELJES NAP</button></div>
     </section>
 
     <!-- Actions -->
@@ -402,6 +438,26 @@
 </div>
 
 
+
+<!-- CALENDAR -->
+<div class="overlay" id="calendarOverlay">
+  <div class="sheet">
+    <header class="chrome"><h2>NAPTÁR</h2><button class="closebtn" data-close="calendarOverlay">X</button></header>
+    <div class="body">
+      <div class="calTop">
+        <button id="calPrevMonth" aria-label="Előző hónap">&lt;</button>
+        <div id="calMonthLabel">—</div>
+        <button id="calNextMonth" aria-label="Következő hónap">&gt;</button>
+      </div>
+      <div class="calWeek chrome"><span>H</span><span>K</span><span>SZE</span><span>CS</span><span>P</span><span>SZO</span><span>V</span></div>
+      <div class="calendarGrid" id="calendarGrid"></div>
+      <div class="calLegend"><span><i class="lm"></i>étkezés</span><span><i class="lw"></i>súly</span><span>MA = mai nap</span></div>
+      <div class="calActions"><button class="pix solid" id="calTodayBtn">MAI NAP</button></div>
+      <div class="hint">A dátumra koppintva nyílik. Balra/jobbra swipe továbbra is napot vált.</div>
+    </div>
+  </div>
+</div>
+
 <!-- DAY DETAIL -->
 <div class="overlay" id="dayOverlay">
   <div class="sheet">
@@ -442,7 +498,7 @@
       <input id="importFile" type="file" accept="application/json,.json" hidden />
       <button class="pix ghost" id="wipeBtn">MAI NAP TÖRLÉSE</button>
       <div class="hint" id="backupHint">Export/import: a naplózott étkezések és súlyadatok mentése JSON fájlba. Az App titok biztonság miatt nem kerül exportba.</div>
-      <div class="hint">MealQuest v0.2.8 · adatok a te eszközödön (IndexedDB) · offline PWA</div>
+      <div class="hint">MealQuest v0.2.9 · adatok a te eszközödön (IndexedDB) · offline PWA</div>
     </div>
   </div>
 </div>
@@ -483,7 +539,7 @@ function downloadTextFile(filename, text, type='application/json'){
 async function exportBackup(){
   const [meals,weights]=await Promise.all([getAll('meals'),getAll('weights')]);
   const backup={
-    app:'MealQuest', version:'0.2.8', schemaVersion:1, exportedAt:new Date().toISOString(),
+    app:'MealQuest', version:'0.2.9', schemaVersion:1, exportedAt:new Date().toISOString(),
     data:{
       meals:meals.sort((a,b)=>(a.date||'').localeCompare(b.date||'') || (a.time||'99').localeCompare(b.time||'99') || n(a.createdAt)-n(b.createdAt)),
       weights:weights.sort((a,b)=>(a.date||'').localeCompare(b.date||'')),
@@ -573,8 +629,6 @@ async function render(){
 
   const ul=$('mealList'); ul.innerHTML='';
   $('mealEmpty').style.display = meals.length?'none':'block';
-  $('openDayBtn').style.display = meals.length?'block':'none';
-  $('openDayBtn').textContent = meals.length>3 ? `TELJES NAP (${meals.length})` : 'TELJES NAP';
   const visibleMeals = meals.slice(0,3);
   visibleMeals.forEach(mm=>{ const li=document.createElement('li'); li.className='meal';
     li.innerHTML=`<div class="t"><b>${esc(mm.title||mm.rawText||'Étkezés')}</b>${mm.time?`<small>${mm.time}</small>`:''}</div>
@@ -703,6 +757,50 @@ async function openNutrientReport(){
 function refreshAIState(){ const on=!!state.settings.backendUrl;
   $('analyzeBtn').style.display=on?'block':'none'; $('aiHint').style.display=on?'none':'block'; }
 
+
+function addMonths(ym, delta){
+  const [y,m]=ym.split('-').map(Number);
+  const d=new Date(y, m-1+delta, 1);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+}
+function monthLabelHu(ym){
+  const [y,m]=ym.split('-').map(Number);
+  const names=['január','február','március','április','május','június','július','augusztus','szeptember','október','november','december'];
+  return `${y} · ${names[m-1].toUpperCase()}`;
+}
+async function openCalendar(){
+  state.calendarMonth=state.date.slice(0,7);
+  await renderCalendar();
+  show('calendarOverlay');
+}
+async function renderCalendar(){
+  const ym=state.calendarMonth || state.date.slice(0,7);
+  const [y,m]=ym.split('-').map(Number);
+  $('calMonthLabel').textContent=monthLabelHu(ym);
+  const [meals,weights]=await Promise.all([getAll('meals'),getAll('weights')]);
+  const mealDates=new Set(meals.map(x=>x.date));
+  const weightDates=new Set(weights.map(x=>x.date));
+  const first=new Date(y,m-1,1);
+  const offset=(first.getDay()+6)%7; // Monday-first
+  const days=new Date(y,m,0).getDate();
+  const cells=Math.max(35, Math.ceil((offset+days)/7)*7);
+  const grid=$('calendarGrid'); grid.innerHTML='';
+  for(let i=0;i<cells;i++){
+    const num=i-offset+1;
+    const btn=document.createElement('button');
+    btn.type='button'; btn.className='calDay';
+    if(num<1 || num>days){ btn.classList.add('out'); btn.innerHTML='<span></span><span class="calMarks"></span>'; grid.appendChild(btn); continue; }
+    const iso=`${y}-${String(m).padStart(2,'0')}-${String(num).padStart(2,'0')}`;
+    const hasMeal=mealDates.has(iso), hasWeight=weightDates.has(iso);
+    if(iso===state.date) btn.classList.add('selected');
+    if(iso===isoToday()) btn.classList.add('today');
+    btn.setAttribute('aria-label', `${iso}${hasMeal?' étkezés':''}${hasWeight?' súly':''}`);
+    btn.innerHTML=`<span>${num}</span><span class="calMarks">${hasMeal?'<i class="markMeal"></i>':''}${hasWeight?'<i class="markWeight"></i>':''}</span>`;
+    btn.onclick=async()=>{ state.date=iso; hide('calendarOverlay'); await render(); };
+    grid.appendChild(btn);
+  }
+}
+
 function show(id){ $(id).classList.add('show'); }
 function hide(id){ $(id).classList.remove('show'); }
 document.querySelectorAll('[data-close]').forEach(b=> b.onclick=()=>hide(b.dataset.close));
@@ -760,11 +858,19 @@ async function showDailyReport(){
   const sc=$('scene'); sc.classList.remove('bob'); void sc.offsetWidth; sc.classList.add('bob');
 }
 
-$('openDayBtn').onclick=openDayDetail;
 $('todayPanel').onclick=openNutrientReport;
 $('todayPanel').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openNutrientReport(); } };
 $('coachBubble').onclick=showDailyReport;
 $('coachBubble').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); showDailyReport(); } };
+
+
+$('dateLabel').onclick=openCalendar;
+$('dateLabel').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openCalendar(); } };
+$('calPrevMonth').onclick=async()=>{ state.calendarMonth=addMonths(state.calendarMonth || state.date.slice(0,7),-1); await renderCalendar(); };
+$('calNextMonth').onclick=async()=>{ state.calendarMonth=addMonths(state.calendarMonth || state.date.slice(0,7), 1); await renderCalendar(); };
+$('calTodayBtn').onclick=async()=>{ state.date=isoToday(); state.calendarMonth=state.date.slice(0,7); hide('calendarOverlay'); await render(); };
+$('mealsPanel').onclick=e=>{ if(e.target.closest('.del')) return; openDayDetail(); };
+$('mealsPanel').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openDayDetail(); } };
 
 $('openSettings').onclick=()=>{ $('setTarget').value=state.settings.kcalTarget; $('setBackend').value=state.settings.backendUrl; $('setSecret').value=state.settings.appSecret; show('settingsOverlay'); };
 $('saveSettingsBtn').onclick=async()=>{
