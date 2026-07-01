@@ -1,5 +1,5 @@
-/* MealQuest service worker v0.2.4 */
-const CACHE = 'mealquest-v0-2-4';
+/* MealQuest service worker v0.2.6 */
+const CACHE = 'mealquest-v0-2-6';
 const ASSETS = ['./?source=pwa','./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-maskable-512.png','./assets/scene-fat.png','./assets/scene-medium.png','./assets/scene-lean.png'];
 
 self.addEventListener('install', e => {
@@ -12,7 +12,7 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  if (url.pathname.includes('/api/')) return; // never cache AI calls
+  if (url.pathname.includes('/api/')) return;
   if (url.origin === location.origin) {
     e.respondWith(
       fetch(req).then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)).catch(()=>{}); return res; })

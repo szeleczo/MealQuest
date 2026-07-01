@@ -32,6 +32,9 @@
     font-size:22px; line-height:1.15;
     -webkit-font-smoothing:none; image-rendering:pixelated; overscroll-behavior:none;
   }
+  /* Scrollbars are hidden visually, but panels/sheets can still scroll by touch. */
+  *{ scrollbar-width:none; -ms-overflow-style:none; }
+  *::-webkit-scrollbar{ width:0; height:0; display:none; }
   #screen{
     max-width:520px; margin:0 auto; min-height:100dvh; background:var(--lcd);
     display:flex; flex-direction:column;
@@ -106,6 +109,33 @@
     font-family:'Press Start 2P',monospace; font-size:9px; cursor:pointer; }
   .meal .del:active{ background:var(--c0); color:var(--lcd); }
   .empty{ font-size:19px; color:var(--c2); text-align:center; padding:8px 4px; }
+  .meal .t b, .meal .t small{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .panelFoot{ margin-top:8px; display:flex; gap:8px; }
+  .miniBtn{ font-family:'Press Start 2P',monospace; font-size:7px; background:transparent; color:var(--c0); border:2px solid var(--c0); padding:7px 8px; cursor:pointer; flex:1; }
+  .miniBtn:active{ background:var(--c0); color:var(--lcd); }
+  .detailList{ display:flex; flex-direction:column; gap:10px; }
+  .detailMeal{ border:3px solid var(--c0); background:var(--c4); padding:10px; box-shadow:3px 3px 0 var(--c0); }
+  .detailMeal .top{ display:flex; justify-content:space-between; gap:10px; align-items:baseline; }
+  .detailMeal .name{ font-size:24px; }
+  .detailMeal .kcal{ font-family:'Press Start 2P',monospace; font-size:8px; white-space:nowrap; }
+  .detailMeal .raw{ margin-top:6px; font-size:18px; color:var(--c1); }
+  .detailMeal .meta{ margin-top:7px; font-size:16px; color:var(--c2); }
+  .nutriHead{ border:3px solid var(--c0); background:var(--c4); padding:10px; box-shadow:3px 3px 0 var(--c0); }
+  .nutriHead .h{ font-size:25px; margin-bottom:5px; }
+  .nutriHead .s{ font-size:18px; color:var(--c1); }
+  .nutriTable{ border:3px solid var(--c0); background:var(--lcd); overflow:hidden; }
+  .nutriRow{ display:grid; grid-template-columns:1.15fr .75fr .5fr; gap:6px; padding:8px 9px; border-bottom:2px solid var(--c2); align-items:center; }
+  .nutriRow:last-child{ border-bottom:none; }
+  .nutriRow .name{ font-size:19px; }
+  .nutriRow .val{ font-size:18px; text-align:right; }
+  .nutriRow .stat{ font-family:'Press Start 2P',monospace; font-size:7px; text-align:right; }
+  .nutriRow .nNote{ grid-column:1/-1; font-size:15px; color:var(--c1); opacity:.82; line-height:1.15; margin-top:-2px; }
+  .nutriRow.low .stat{ color:var(--c1); }
+  .nutriRow.high .stat{ color:var(--c0); }
+  .nutriRow.ok .stat{ color:var(--c2); }
+  .noteBox{ border:2px dashed var(--c2); padding:9px; font-size:18px; color:var(--c1); background:rgba(255,255,255,.16); }
+  .pillList{ display:flex; flex-wrap:wrap; gap:6px; }
+  .pill{ border:2px solid var(--c0); background:var(--lcd); padding:5px 7px; font-size:17px; }
 
   .actions{ display:flex; flex-direction:column; gap:10px; }
   .btnrow{ display:flex; gap:10px; }
@@ -196,6 +226,12 @@
     .meal .kc{ font-size:7px; }
     .meal .del{ width:21px; height:21px; font-size:7px; }
     .empty{ font-size:16px; padding:3px; }
+    .panelFoot{ margin-top:5px; }
+    .miniBtn{ font-size:6px; padding:5px 6px; }
+    .nutriRow{ grid-template-columns:1fr .72fr .46fr; padding:6px 7px; }
+    .nutriRow .name{ font-size:17px; }
+    .nutriRow .val{ font-size:16px; }
+    .nutriRow .stat{ font-size:6px; }
     .actions{ gap:7px; }
     .btnrow{ gap:7px; }
     button.pix{ font-size:8px; border-width:2px; box-shadow:3px 3px 0 var(--c0); padding:9px 7px; }
@@ -209,7 +245,7 @@
     .bubble p{ font-size:16px; max-height:34px; }
     .meals ul{ max-height:48px; }
     .weightline{ display:none; }
-    button.pix.ghost{ display:none; }
+    button.pix.ghost.optional{ display:none; }
   }
 
   @media (prefers-reduced-motion: reduce){ #scene.bob{ animation:none; } }
@@ -274,6 +310,7 @@
       <h2>ÉTKEZÉSEK</h2>
       <ul id="mealList"></ul>
       <div class="empty" id="mealEmpty">Ma még üres a napló. Coach Byte vár egy adatra.</div>
+      <div class="panelFoot"><button class="miniBtn" id="openDayBtn">TELJES NAP</button></div>
     </section>
 
     <!-- Actions -->
@@ -282,7 +319,10 @@
         <button class="pix solid" id="addMealBtn">+ ÉTEL</button>
         <button class="pix" id="addWeightBtn">+ SÚLY</button>
       </div>
-      <button class="pix ghost" id="reportBtn">NAPI JELENTÉS</button>
+      <div class="btnrow">
+        <button class="pix ghost" id="reportBtn">NAPI JELENTÉS</button>
+        <button class="pix ghost" id="nutrientBtn">EXTRA TÁP.</button>
+      </div>
     </div>
   </main>
 </div>
@@ -337,6 +377,31 @@
       <div><label>Megjegyzés (opcionális)</label><input id="wNote" placeholder="reggel, éhgyomorra" /></div>
       <div class="hint">A napi ingadozás normális. Coach Byte a trendet nézi, nem egy számot.</div>
       <button class="pix solid" id="saveWeightBtn">SÚLY RÖGZÍTÉSE</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- DAY DETAIL -->
+<div class="overlay" id="dayOverlay">
+  <div class="sheet">
+    <header class="chrome"><h2>TELJES NAP</h2><button class="closebtn" data-close="dayOverlay">X</button></header>
+    <div class="body">
+      <div class="hint">A főképernyő szándékosan tömör. Itt látszik a teljes szöveg, scrollbar nélkül, érintéssel görgetve.</div>
+      <div class="detailList" id="dayMealFullList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- EXTRA NUTRIENTS -->
+<div class="overlay" id="nutrientOverlay">
+  <div class="sheet">
+    <header class="chrome"><h2>EXTRA TÁP.</h2><button class="closebtn" data-close="nutrientOverlay">X</button></header>
+    <div class="body">
+      <div class="hint">Becslés vitaminokra, ásványi anyagokra, rostra, sóra. Nem laboreredmény, hanem napi tájékozódás.</div>
+      <div class="spinner chrome" id="nutriSpinner">COACH BYTE MÉLYEBBEN SZÁMOL…</div>
+      <div class="errline" id="nutriErr"></div>
+      <div id="nutriContent"></div>
     </div>
   </div>
 </div>
@@ -431,10 +496,16 @@ async function render(){
 
   const ul=$('mealList'); ul.innerHTML='';
   $('mealEmpty').style.display = meals.length?'none':'block';
-  meals.forEach(mm=>{ const li=document.createElement('li'); li.className='meal';
+  $('openDayBtn').style.display = meals.length?'block':'none';
+  $('openDayBtn').textContent = meals.length>3 ? `TELJES NAP (${meals.length})` : 'TELJES NAP';
+  const visibleMeals = meals.slice(0,3);
+  visibleMeals.forEach(mm=>{ const li=document.createElement('li'); li.className='meal';
     li.innerHTML=`<div class="t"><b>${esc(mm.title||mm.rawText||'Étkezés')}</b>${mm.time?`<small>${mm.time}</small>`:''}</div>
       <div class="kc">${n(mm.kcal)}</div><button class="del" aria-label="Törlés">X</button>`;
-    li.querySelector('.del').onclick=async()=>{ await del('meals',mm.id); render(); }; ul.appendChild(li); });
+    li.querySelector('.del').onclick=async()=>{ await del('meals',mm.id); render(); };
+    li.onclick=(e)=>{ if(!e.target.classList.contains('del')) openDayDetail(); };
+    ul.appendChild(li);
+  });
 
   const weights=await getAll('weights');
   const todayW=weights.find(w=>w.date===state.date);
@@ -458,6 +529,69 @@ function updateBubble(kcal, mealCount, hasWeight){
   else if(kcal <= t*1.15){ line='Kicsit a keret fölött. Nem dráma — holnap könnyebb köret.'; }
   else { line='Nehéz nap kalóriában. Bejegyezve, nem büntetve. Megyünk tovább.'; }
   $('bubbleText').textContent=line;
+}
+
+
+async function getDayMealsSorted(){
+  const meals=await getAllByDate('meals',state.date);
+  meals.sort((a,b)=> (a.time||'99')<(b.time||'99')?-1:(a.time||'99')>(b.time||'99')?1:a.createdAt-b.createdAt);
+  return meals;
+}
+
+async function openDayDetail(){
+  const meals=await getDayMealsSorted();
+  const box=$('dayMealFullList'); box.innerHTML='';
+  if(!meals.length){ box.innerHTML='<div class="empty">Nincs rögzített étkezés ezen a napon.</div>'; }
+  meals.forEach(mm=>{
+    const el=document.createElement('div'); el.className='detailMeal';
+    const macros=`P ${n(mm.protein)}g · SzH ${n(mm.carbs)}g · Zs ${n(mm.fat)}g`;
+    const range=(mm.kcalMin&&mm.kcalMax)?` · tartomány ${mm.kcalMin}–${mm.kcalMax} kcal`:'';
+    el.innerHTML=`<div class="top"><div class="name">${esc(mm.title||'Étkezés')}</div><div class="kcal">${n(mm.kcal)} kcal</div></div>
+      <div class="raw">${esc(mm.rawText||'')}</div>
+      <div class="meta">${mm.time?esc(mm.time)+' · ':''}${macros}${range}</div>`;
+    box.appendChild(el);
+  });
+  show('dayOverlay');
+}
+
+function mealTotals(meals){
+  return meals.reduce((a,m)=>{ a.kcal+=n(m.kcal); a.protein+=n(m.protein); a.carbs+=n(m.carbs); a.fat+=n(m.fat); return a; },{kcal:0,protein:0,carbs:0,fat:0});
+}
+function nutrientStatusLabel(st){ return {low:'kevés',ok:'ok',high:'magas',unknown:'?'}[st] || '?'; }
+function renderNutrientReport(r){
+  const box=$('nutriContent');
+  const rows=(r.nutrients||[]).map(x=>`<div class="nutriRow ${esc(x.status)}">
+    <div class="name">${esc(x.name)}</div>
+    <div class="val">${Number(x.value||0).toFixed(x.value%1?1:0)} ${esc(x.unit)} · ${n(x.dailyValuePercent)}%</div>
+    <div class="stat">${nutrientStatusLabel(x.status)}</div>
+    <div class="nNote">${esc(x.note||'')}</div>
+  </div>`).join('');
+  const strengths=(r.likelyStrengths||[]).map(x=>`<span class="pill">${esc(x)}</span>`).join('');
+  const gaps=(r.likelyGaps||[]).map(x=>`<span class="pill">${esc(x)}</span>`).join('');
+  box.innerHTML=`<div class="nutriHead"><div class="h">${esc(r.headline||'Extra tápanyagbecslés')}</div><div class="s">${esc(r.summary||'')}</div></div>
+    <div class="nutriTable">${rows}</div>
+    <div><label>ERŐSSÉGEK</label><div class="pillList">${strengths||'<span class="pill">nincs elég adat</span>'}</div></div>
+    <div><label>FIGYELENDŐ</label><div class="pillList">${gaps||'<span class="pill">nincs elég adat</span>'}</div></div>
+    <div class="noteBox">${esc(r.practicalSuggestion||'')}</div>
+    <div class="hint">${esc(r.caveat||'Becslés, nem orvosi tanács.')}</div>`;
+}
+async function openNutrientReport(){
+  $('nutriErr').classList.remove('show'); $('nutriContent').innerHTML=''; show('nutrientOverlay');
+  const meals=await getDayMealsSorted();
+  if(!meals.length){ $('nutriContent').innerHTML='<div class="empty">Előbb rögzíts étkezést, utána van mit elemezni.</div>'; return; }
+  if(!state.settings.backendUrl){ $('nutriContent').innerHTML='<div class="empty">Az extra tápanyagbecsléshez kell a backend URL a beállításokban.</div>'; return; }
+  const totals=mealTotals(meals);
+  $('nutriSpinner').classList.add('show');
+  try{
+    const body={ date:state.date, meals:meals.map(m=>({time:m.time,title:m.title,rawText:m.rawText,kcal:n(m.kcal),protein:n(m.protein),carbs:n(m.carbs),fat:n(m.fat)})),
+      totalKcal:totals.kcal,totalProtein:totals.protein,totalCarbs:totals.carbs,totalFat:totals.fat,
+      userContext:{ language:'hu', goal:'weight_loss', dailyKcalTarget:state.settings.kcalTarget } };
+    const res=await fetch(state.settings.backendUrl.replace(/\/$/,'')+'/api/analyze-nutrients',{
+      method:'POST', headers:{ 'Content-Type':'application/json', 'x-app-secret':state.settings.appSecret }, body:JSON.stringify(body) });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    renderNutrientReport(await res.json());
+  }catch(err){ $('nutriErr').textContent='Az extra tápanyagbecslés nem sikerült ('+err.message+'). Ellenőrizd, hogy a Cloudflare Worker is frissítve lett-e.'; $('nutriErr').classList.add('show'); }
+  finally{ $('nutriSpinner').classList.remove('show'); }
 }
 
 function refreshAIState(){ const on=!!state.settings.backendUrl;
@@ -520,6 +654,9 @@ $('reportBtn').onclick=async()=>{
   const s=$('scene'); s.classList.remove('bob'); void s.offsetWidth; s.classList.add('bob');
 };
 
+$('openDayBtn').onclick=openDayDetail;
+$('nutrientBtn').onclick=openNutrientReport;
+
 $('openSettings').onclick=()=>{ $('setTarget').value=state.settings.kcalTarget; $('setBackend').value=state.settings.backendUrl; $('setSecret').value=state.settings.appSecret; show('settingsOverlay'); };
 $('saveSettingsBtn').onclick=async()=>{
   state.settings.kcalTarget=n($('setTarget').value)||2200; state.settings.backendUrl=$('setBackend').value.trim(); state.settings.appSecret=$('setSecret').value.trim();
@@ -529,6 +666,18 @@ $('wipeBtn').onclick=async()=>{ const meals=await getAllByDate('meals',state.dat
 
 $('prevDay').onclick=()=>{ state.date=shiftDate(state.date,-1); render(); };
 $('nextDay').onclick=()=>{ state.date=shiftDate(state.date, 1); render(); };
+
+let touchStartX=0, touchStartY=0;
+document.querySelector('main').addEventListener('touchstart', e=>{
+  if(e.target.closest('button,input,textarea,.overlay')) return;
+  const t=e.changedTouches[0]; touchStartX=t.clientX; touchStartY=t.clientY;
+},{passive:true});
+document.querySelector('main').addEventListener('touchend', e=>{
+  const t=e.changedTouches[0]; const dx=t.clientX-touchStartX; const dy=t.clientY-touchStartY;
+  if(Math.abs(dx)>70 && Math.abs(dx)>Math.abs(dy)*1.5){
+    state.date=shiftDate(state.date, dx>0?-1:1); render();
+  }
+},{passive:true});
 
 function isInstalledPWA(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true; }
 function setInstallText(txt){ const el=$('installText'); if(el) el.textContent=txt; }
