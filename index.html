@@ -151,6 +151,11 @@
   .mbar .num{ font-size:17px; text-align:right; }
   .nutriChart{ border:3px solid var(--c0); background:var(--c4); padding:10px; box-shadow:3px 3px 0 var(--c0); }
   .nutriChartTitle{ font-family:'Press Start 2P',monospace; font-size:8px; color:var(--c2); margin-bottom:8px; }
+  .nutriActions{ display:grid; gap:8px; margin:8px 0 10px; }
+  .nutriMeta{ border:2px dashed var(--c2); background:rgba(255,255,255,.22); padding:8px; font-size:16px; line-height:1.15; color:var(--c1); }
+  .nutriMeta.fresh{ border-style:solid; }
+  .nutriMeta.stale{ border-color:var(--c0); background:rgba(255,255,255,.34); }
+  .nutriMeta.empty{ opacity:.9; }
   .nutriCols{ height:118px; display:flex; gap:5px; align-items:flex-end; border-left:2px solid var(--c0); border-bottom:2px solid var(--c0); padding:0 4px 0 7px; background:rgba(255,255,255,.12); }
   .nutriColWrap{ flex:1; min-width:0; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; }
   .nutriCol{ width:100%; max-width:22px; min-height:4px; border:2px solid var(--c0); background:var(--c2); }
@@ -539,6 +544,10 @@
     <header class="chrome"><h2>NAPI TÁPANYAGOK</h2><button class="closebtn" data-close="nutrientOverlay">X</button></header>
     <div class="body">
       <div class="hint">A MAI NAP panelről nyílik. Makrók, vitaminok, ásványi anyagok, rost, só és koleszterin becslése. Nem laboreredmény, hanem napi tájékozódás.</div>
+      <div class="nutriActions">
+        <button class="pix solid" id="refreshNutrientsBtn">FRISSÍTÉS / ELEMZÉS</button>
+        <div class="nutriMeta empty" id="nutriMeta">A részletes tápanyagbecslés csak akkor hív API-t, ha itt frissítést kérsz.</div>
+      </div>
       <div class="spinner chrome" id="nutriSpinner">RÉSZLETES ELEMZÉS…</div>
       <div class="errline" id="nutriErr"></div>
       <div id="nutriContent"></div>
@@ -564,7 +573,7 @@
       <button class="pix ghost" id="wipeBtn">MAI NAP TÖRLÉSE</button>
       <div class="hint" id="backupHint">Export/import: a naplózott étkezések és súlyadatok mentése JSON fájlba. Az App titok biztonság miatt nem kerül exportba.</div>
       <div class="hint">APP FRISSÍTÉSE: csak az offline app-cache-t és service workert cseréli. A napló, a Backend URL és az App titok megmarad.</div>
-      <div class="hint">MealQuest v0.3.5 · adatok a te eszközödön (IndexedDB) · offline PWA</div>
+      <div class="hint">MealQuest v0.3.6 · adatok a te eszközödön (IndexedDB) · offline PWA</div>
     </div>
   </div>
 </div>
@@ -652,13 +661,12 @@ async function handleCoachBubbleTap(){
     return;
   }
   if(!displayCoachHistory(state.coachIndex+1)) await showDailyReport(true);
-  const sc=$('scene'); sc.classList.remove('bob'); void sc.offsetWidth; sc.classList.add('bob');
 }
 
 async function exportBackup(){
   const [meals,weights]=await Promise.all([getAll('meals'),getAll('weights')]);
   const backup={
-    app:'MealQuest', version:'0.3.2', schemaVersion:1, exportedAt:new Date().toISOString(),
+    app:'MealQuest', version:'0.3.6', schemaVersion:1, exportedAt:new Date().toISOString(),
     data:{
       meals:meals.sort((a,b)=>(a.date||'').localeCompare(b.date||'') || (a.time||'99').localeCompare(b.time||'99') || n(a.createdAt)-n(b.createdAt)),
       weights:weights.sort((a,b)=>(a.date||'').localeCompare(b.date||'')),
@@ -882,25 +890,106 @@ function renderNutrientReport(r, totals){
     <div class="noteBox">${esc(r.practicalSuggestion||'')}</div>
     <div class="hint">${esc(r.caveat||'Becslés · adagpontosságtól függ · nem orvosi tanács.')}</div>`;
 }
+function mealSignature(meals){
+  const raw=(meals||[]).map(m=>[
+    m.id||'', m.date||'', m.time||'', m.title||'', m.rawText||'',
+    n(m.kcal), n(m.protein), n(m.carbs), n(m.fat), n(m.updatedAt)||n(m.createdAt)
+  ].join('|')).join('||');
+  let h=0;
+  for(let i=0;i<raw.length;i++){ h=((h<<5)-h + raw.charCodeAt(i))|0; }
+  return String(h)+'/'+raw.length;
+}
+function nutrientCacheKey(date){ return 'nutrientReport:'+date; }
+function formatTimeStamp(ms){
+  if(!ms) return 'ismeretlen idő';
+  const d=new Date(ms);
+  return `${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+function setNutriMeta(text, kind){
+  const el=$('nutriMeta');
+  if(!el) return;
+  el.className='nutriMeta '+(kind||'');
+  el.textContent=text||'';
+}
+async function getCachedNutrientReport(date){ return await getSetting(nutrientCacheKey(date)); }
+async function saveCachedNutrientReport(date, payload){ await setSetting(nutrientCacheKey(date), payload); }
 async function openNutrientReport(){
-  $('nutriErr').classList.remove('show'); $('nutriContent').innerHTML=''; show('nutrientOverlay');
+  $('nutriErr').classList.remove('show');
+  $('nutriSpinner').classList.remove('show');
+  $('nutriContent').innerHTML='';
+  show('nutrientOverlay');
   const meals=await getDayMealsSorted();
-  if(!meals.length){ $('nutriContent').innerHTML='<div class="empty">Előbb rögzíts étkezést, utána van mit elemezni.</div>'; return; }
-  if(!state.settings.backendUrl){ $('nutriContent').innerHTML='<div class="empty">Az extra tápanyagbecsléshez kell a backend URL a beállításokban.</div>'; return; }
+  if(!meals.length){
+    setNutriMeta('Nincs még mit elemezni. Előbb rögzíts étkezést ezen a napon.', 'empty');
+    $('nutriContent').innerHTML='<div class="empty">Előbb rögzíts étkezést, utána van mit elemezni.</div>';
+    return;
+  }
   const totals=mealTotals(meals);
+  const sig=mealSignature(meals);
+  const cached=await getCachedNutrientReport(state.date);
+  if(cached && cached.report){
+    renderNutrientReport(cached.report, cached.totals || totals);
+    if(cached.signature===sig){
+      setNutriMeta('Utolsó részletes elemzés: '+formatTimeStamp(cached.updatedAt)+'. Azóta nem változott a napi étkezéslista.', 'fresh');
+    }else{
+      setNutriMeta('Van korábbi elemzés, de azóta változott a napló. Nyomj FRISSÍTÉS / ELEMZÉS-t, ha új becslést kérsz.', 'stale');
+    }
+    return;
+  }
+  setNutriMeta('Ehhez a naphoz még nincs részletes tápanyagbecslés. Nyomj FRISSÍTÉS / ELEMZÉS-t, ha kéred. Ez egy API-hívást használ.', 'empty');
+  $('nutriContent').innerHTML='<div class="empty">Még nincs részletes napi tápanyagbecslés. A gomb csak kérésre indít elemzést, így nem költ feleslegesen API-hívást.</div>';
+}
+async function refreshNutrientReport(){
+  $('nutriErr').classList.remove('show');
+  const meals=await getDayMealsSorted();
+  if(!meals.length){
+    setNutriMeta('Nincs még mit elemezni ezen a napon.', 'empty');
+    $('nutriContent').innerHTML='<div class="empty">Előbb rögzíts étkezést.</div>';
+    return;
+  }
+  if(!state.settings.backendUrl){
+    setNutriMeta('A részletes elemzéshez kell Backend URL a Beállításokban.', 'empty');
+    $('nutriContent').innerHTML='<div class="empty">Az extra tápanyagbecsléshez kell a backend URL a beállításokban.</div>';
+    return;
+  }
+  const totals=mealTotals(meals);
+  const sig=mealSignature(meals);
+  const btn=$('refreshNutrientsBtn');
+  if(btn) btn.disabled=true;
   $('nutriSpinner').classList.add('show');
+  setNutriMeta('Részletes elemzés fut… ez most egy API-hívás.', 'stale');
   try{
     const body={ date:state.date, meals:meals.map(m=>({time:m.time,title:m.title,rawText:m.rawText,kcal:n(m.kcal),protein:n(m.protein),carbs:n(m.carbs),fat:n(m.fat)})),
       totalKcal:totals.kcal,totalProtein:totals.protein,totalCarbs:totals.carbs,totalFat:totals.fat,
       userContext:{ language:'hu', goal:'weight_loss', dailyKcalTarget:state.settings.kcalTarget } };
     const res=await fetch(state.settings.backendUrl.replace(/\/$/,'')+'/api/analyze-nutrients',{
       method:'POST', headers:{ 'Content-Type':'application/json', 'x-app-secret':state.settings.appSecret }, body:JSON.stringify(body) });
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    renderNutrientReport(await res.json(), totals);
-  }catch(err){ $('nutriErr').textContent='Az extra tápanyagbecslés nem sikerült ('+err.message+'). Ellenőrizd, hogy a Cloudflare Worker is frissítve lett-e.'; $('nutriErr').classList.add('show'); }
-  finally{ $('nutriSpinner').classList.remove('show'); }
+    if(!res.ok){
+      let detail='';
+      try{ detail=await res.text(); }catch(_e){}
+      throw new Error('HTTP '+res.status+(detail?' · '+detail.slice(0,160):''));
+    }
+    const report=await res.json();
+    const payload={ date:state.date, signature:sig, report, totals, updatedAt:Date.now(), schemaVersion:1 };
+    await saveCachedNutrientReport(state.date, payload);
+    renderNutrientReport(report, totals);
+    setNutriMeta('Friss részletes elemzés mentve: '+formatTimeStamp(payload.updatedAt)+'.', 'fresh');
+    setCoachMessage('Részletes napi tápanyagbecslés frissítve. Ez már el van mentve ehhez a naphoz.', {source:'nutrients'});
+  }catch(err){
+    $('nutriErr').textContent='A részletes tápanyagbecslés nem sikerült: '+err.message;
+    $('nutriErr').classList.add('show');
+    const cached=await getCachedNutrientReport(state.date);
+    if(cached && cached.report){
+      renderNutrientReport(cached.report, cached.totals || totals);
+      setNutriMeta('Frissítés nem sikerült. A korábbi mentett elemzést mutatom: '+formatTimeStamp(cached.updatedAt)+'.', 'stale');
+    }else{
+      setNutriMeta('Frissítés nem sikerült. Nincs korábbi mentett elemzés ehhez a naphoz.', 'empty');
+    }
+  }finally{
+    $('nutriSpinner').classList.remove('show');
+    if(btn) btn.disabled=false;
+  }
 }
-
 function refreshAIState(){ const on=!!state.settings.backendUrl;
   $('analyzeBtn').style.display=on?'block':'none'; $('aiHint').style.display=on?'none':'block'; }
 
@@ -1009,9 +1098,9 @@ async function showDailyReport(fromBubble){
     state.coachIndex=0;
     displayCoachHistory(0);
   }
-  const sc=$('scene'); sc.classList.remove('bob'); void sc.offsetWidth; sc.classList.add('bob');
 }
 
+$('refreshNutrientsBtn').onclick=refreshNutrientReport;
 $('todayPanel').onclick=openNutrientReport;
 $('todayPanel').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openNutrientReport(); } };
 $('coachBubble').onclick=handleCoachBubbleTap;
