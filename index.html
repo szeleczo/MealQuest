@@ -4,6 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#111214" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="MealQuest" />
+<link rel="apple-touch-icon" href="icon-192.png" />
 <link rel="manifest" href="manifest.webmanifest" />
 <title>MealQuest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -284,7 +288,7 @@
 </div>
 
 <div class="installNudge" id="installNudge" role="region" aria-label="Telepítés Androidra">
-  <div class="txt">Telepíthető Androidra kezdőképernyős appként.</div>
+  <div class="txt">Telepíthető Androidra önálló appként.</div>
   <button id="installBtn">TELEPÍTÉS</button>
   <button class="dismiss" id="installDismiss" aria-label="Telepítés elrejtése">X</button>
 </div>
@@ -535,7 +539,7 @@ async function runInstallPrompt(){
     try{ await deferredInstallPrompt.userChoice; }catch(e){}
     deferredInstallPrompt=null; hideInstallNudge(); return;
   }
-  $('bubbleText').textContent='Android Chrome-ban: menü ⋮ → Telepítés / Hozzáadás a kezdőképernyőhöz.';
+  $('bubbleText').textContent='A Chrome még nem PWA-ként kínálja. Frissítsd az oldalt egyszer, várj pár másodpercet, majd csak az „Install app / Telepítés” opciót használd. A „Hozzáadás a kezdőképernyőhöz” gyakran csak böngészős shortcutot készít.';
   hideInstallNudge();
 }
 window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredInstallPrompt=e; setTimeout(showInstallNudge, 900); });
