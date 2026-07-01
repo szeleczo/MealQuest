@@ -15,20 +15,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
 <style>
   :root{
-    /* Greyscale retro RPG / handheld LCD palette */
-    --c0:#111214;  /* ink / near-black */
-    --c1:#2a2d31;  /* charcoal */
-    --c2:#6f747c;  /* muted UI grey */
-    --c3:#b9c0c8;  /* faded LCD highlight */
-    --c4:#d9dee4;  /* light panel */
-    --lcd:#eef1f4; /* screen bg */
+    /* Brighter greyscale retro RPG / handheld LCD palette */
+    --c0:#0f1113;  /* ink / near-black */
+    --c1:#24282c;  /* charcoal */
+    --c2:#68717a;  /* muted UI grey */
+    --c3:#cfd5db;  /* faded LCD highlight */
+    --c4:#f2f5f7;  /* light panel */
+    --lcd:#fbfcfd; /* screen bg */
     --line:#1c1711;
   }
   *{ box-sizing:border-box; margin:0; padding:0; }
   html,body{ height:var(--app-height, 100dvh); overflow:hidden; }
   body{
     font-family:'VT323', monospace;
-    background:var(--c0); color:var(--c0);
+    background:var(--c1); color:var(--c0);
     font-size:22px; line-height:1.15;
     -webkit-font-smoothing:none; image-rendering:pixelated; overscroll-behavior:none;
   }
@@ -67,21 +67,22 @@
   main{ flex:1; min-height:0; overflow:hidden; padding:14px; display:flex; flex-direction:column; gap:14px; }
 
   /* ---- Hero: gym scene ---- */
-  .stage{ border:3px solid var(--c0); box-shadow:5px 5px 0 var(--c0); background:var(--c4); line-height:0; overflow:hidden; }
-  .stage img{ display:block; width:100%; height:auto; aspect-ratio:3/2; object-fit:cover; filter:grayscale(1) contrast(1.04); }
-  #scene.bob{ animation:bob 3s ease-in-out infinite; transform-origin:center bottom; }
-  @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-1.2px);} }
+  .stage{ border:3px solid var(--c0); box-shadow:5px 5px 0 var(--c0); background:var(--c4); line-height:0; overflow:hidden; position:relative; z-index:0; }
+  .stage img{ display:block; width:100%; height:auto; aspect-ratio:3/2; object-fit:cover; filter:grayscale(1) contrast(1.02) brightness(1.11); opacity:.94; pointer-events:none; }
+  /* The room is now a stable background layer. No bobbing: the UI must stay anchored and readable. */
+  #scene.bob{ animation:none !important; transform:none !important; transform-origin:center bottom; }
+  @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(0);} }
 
   /* Speech bubble under the scene, tail points up into the gym */
   .bubble{
-    position:relative; background:var(--lcd); border:3px solid var(--c0);
+    position:relative; z-index:8; background:rgba(251,252,253,.98); border:3px solid var(--c0);
     padding:12px 13px 11px; box-shadow:5px 5px 0 var(--c0); margin-top:11px;
-    cursor:pointer; user-select:none;
+    cursor:pointer; user-select:none; isolation:isolate;
   }
   .bubble .who{ font-family:'Press Start 2P',monospace; font-size:8px; color:var(--c2);
-    position:absolute; top:-9px; right:10px; left:auto; background:var(--lcd); padding:0 5px; letter-spacing:1px; z-index:2; }
-  .bubble p{ font-size:22px; color:var(--c0); }
-  .bubble::before{ content:""; position:absolute; top:-12px; left:38px; width:14px; height:12px;
+    position:absolute; top:-9px; right:10px; left:auto; background:var(--lcd); padding:0 5px; letter-spacing:1px; z-index:4; }
+  .bubble p{ position:relative; z-index:3; font-size:22px; color:var(--c0); }
+  .bubble::before{ content:""; position:absolute; top:-12px; left:38px; width:14px; height:12px; z-index:2;
     background:var(--lcd); border-left:3px solid var(--c0); border-top:3px solid var(--c0); transform:skewX(-18deg); }
   .bubble:active{ transform:translate(2px,2px); box-shadow:3px 3px 0 var(--c0); }
 
@@ -206,7 +207,7 @@
   label{ font-family:'Press Start 2P',monospace; font-size:8px; color:var(--c2); display:block; margin-bottom:6px; letter-spacing:0.5px; }
   input, textarea{ width:100%; font-family:'VT323',monospace; font-size:23px; color:var(--c0);
     background:var(--lcd); border:3px solid var(--c0); padding:9px 10px; outline:none; }
-  input:focus, textarea:focus{ background:#f2f4f6; }
+  input:focus, textarea:focus{ background:#ffffff; }
   textarea{ resize:vertical; min-height:78px; }
   .grid3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
   .closebtn{ font-family:'Press Start 2P',monospace; font-size:11px; background:none; border:2px solid var(--c0);
@@ -228,15 +229,15 @@
 
 
 
-  /* v0.3.1 greyscale + fixed-screen pass: fewer cards, stronger retro RPG screen logic */
+  /* v0.3.4 brighter greyscale + stable background scene pass */
   .heroPanel{
-    position:relative; background:var(--c4); border:3px solid var(--c0); box-shadow:5px 5px 0 var(--c0);
+    position:relative; overflow:visible; background:var(--c4); border:3px solid var(--c0); box-shadow:5px 5px 0 var(--c0);
     padding:8px; display:flex; flex-direction:column; gap:8px;
   }
   .heroStatus{ display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:8px; color:var(--lcd); }
   .heroStatus span{ background:var(--c1); border:2px solid var(--c0); padding:6px 7px; box-shadow:2px 2px 0 var(--c0); white-space:nowrap; }
-  .heroPanel .stage{ border-width:2px; box-shadow:none; background:var(--lcd); }
-  .heroPanel .bubble{ margin-top:0; box-shadow:3px 3px 0 var(--c0); background:var(--lcd); }
+  .heroPanel .stage{ border-width:2px; box-shadow:none; background:var(--lcd); position:relative; z-index:0; }
+  .heroPanel .bubble{ margin-top:6px; box-shadow:3px 3px 0 var(--c0); background:rgba(251,252,253,.98); position:relative; z-index:9; }
   .heroPanel .bubble p{ line-height:1.05; }
   .todayPanel h2{ margin-bottom:8px; }
   .questLog{ margin-top:10px; border:2px solid var(--c0); background:var(--lcd); padding:7px; cursor:pointer; }
@@ -289,7 +290,7 @@
     main{ padding:8px; gap:8px; overflow:hidden; }
     .stage{ border-width:2px; box-shadow:3px 3px 0 var(--c0); }
     .stage img{ height:min(31dvh, 248px); aspect-ratio:auto; object-fit:cover; object-position:center center; }
-    .bubble{ padding:8px 9px 7px; box-shadow:3px 3px 0 var(--c0); border-width:2px; margin-top:3px; }
+    .bubble{ padding:8px 9px 7px; box-shadow:3px 3px 0 var(--c0); border-width:2px; margin-top:6px; }
     .bubble .who{ font-size:6px; top:-7px; right:8px; left:auto; }
     .bubble p{ font-size:18px; line-height:1.05; max-height:38px; overflow:hidden; }
     .bubble::before{ top:-9px; height:9px; border-width:2px; }
@@ -334,10 +335,10 @@
     button.pix{ font-size:8px; border-width:2px; box-shadow:3px 3px 0 var(--c0); padding:9px 7px; }
     button.pix.ghost{ padding:6px; font-size:7px; }
 
-    .heroPanel{ padding:5px; border-width:2px; box-shadow:3px 3px 0 var(--c0); gap:5px; }
+    .heroPanel{ padding:5px; border-width:2px; box-shadow:3px 3px 0 var(--c0); gap:4px; }
     .heroStatus{ font-size:6px; gap:5px; }
     .heroStatus span{ padding:4px 5px; border-width:2px; }
-    .heroPanel .stage img{ height:min(28dvh, 210px); }
+    .heroPanel .stage img{ height:min(27dvh, 205px); }
     .questLog{ margin-top:7px; padding:5px; }
     .questHead{ font-size:6px; margin-bottom:4px; }
     .questLog ul{ gap:2px; max-height:64px; overflow:hidden; }
@@ -561,7 +562,7 @@
       <input id="importFile" type="file" accept="application/json,.json" hidden />
       <button class="pix ghost" id="wipeBtn">MAI NAP TÖRLÉSE</button>
       <div class="hint" id="backupHint">Export/import: a naplózott étkezések és súlyadatok mentése JSON fájlba. Az App titok biztonság miatt nem kerül exportba.</div>
-      <div class="hint">MealQuest v0.3.0 · adatok a te eszközödön (IndexedDB) · offline PWA</div>
+      <div class="hint">MealQuest v0.3.4 · adatok a te eszközödön (IndexedDB) · offline PWA</div>
     </div>
   </div>
 </div>
