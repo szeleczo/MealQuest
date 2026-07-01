@@ -129,20 +129,20 @@
   .detailMeal .kcal{ font-family:'Press Start 2P',monospace; font-size:8px; white-space:nowrap; }
   .detailMeal .raw{ margin-top:6px; font-size:18px; color:var(--c1); }
   .detailMeal .meta{ margin-top:7px; font-size:16px; color:var(--c2); }
-  .nutriHead{ border:3px solid var(--c0); background:var(--c4); padding:10px; box-shadow:3px 3px 0 var(--c0); }
-  .nutriHead .h{ font-size:25px; margin-bottom:5px; }
-  .nutriHead .s{ font-size:18px; color:var(--c1); }
+  .nutriHead{ border:3px solid var(--c0); background:var(--c4); padding:12px 12px 11px; box-shadow:3px 3px 0 var(--c0); }
+  .nutriHead .h{ font-size:25px; margin-bottom:8px; line-height:1.05; }
+  .nutriHead .s{ font-size:18px; color:var(--c1); line-height:1.18; }
   .nutriTable{ border:3px solid var(--c0); background:var(--lcd); overflow:hidden; }
   .nutriRow{ display:grid; grid-template-columns:1.15fr .75fr .5fr; gap:6px; padding:8px 9px; border-bottom:2px solid var(--c2); align-items:center; }
   .nutriRow:last-child{ border-bottom:none; }
   .nutriRow .name{ font-size:19px; }
   .nutriRow .val{ font-size:18px; text-align:right; }
   .nutriRow .stat{ font-family:'Press Start 2P',monospace; font-size:7px; text-align:right; }
-  .nutriRow .nNote{ grid-column:1/-1; font-size:15px; color:var(--c1); opacity:.82; line-height:1.15; margin-top:-2px; }
+  .nutriRow .nNote{ grid-column:1/-1; font-size:15px; color:var(--c1); opacity:.82; line-height:1.18; margin-top:2px; }
   .nutriRow.low .stat{ color:var(--c1); }
   .nutriRow.high .stat{ color:var(--c0); }
   .nutriRow.ok .stat{ color:var(--c2); }
-  .noteBox{ border:2px dashed var(--c2); padding:9px; font-size:18px; color:var(--c1); background:rgba(255,255,255,.16); }
+  .noteBox{ border:2px dashed var(--c2); padding:10px; font-size:18px; line-height:1.18; color:var(--c1); background:rgba(255,255,255,.16); }
   .macroBars{ border:3px solid var(--c0); background:var(--lcd); padding:10px; display:flex; flex-direction:column; gap:8px; }
   .mbar{ display:grid; grid-template-columns:70px 1fr 58px; gap:8px; align-items:center; }
   .mbar .lab{ font-family:'Press Start 2P',monospace; font-size:7px; color:var(--c2); }
@@ -152,7 +152,7 @@
   .nutriChart{ border:3px solid var(--c0); background:var(--c4); padding:10px; box-shadow:3px 3px 0 var(--c0); }
   .nutriChartTitle{ font-family:'Press Start 2P',monospace; font-size:8px; color:var(--c2); margin-bottom:8px; }
   .nutriActions{ display:grid; gap:8px; margin:8px 0 10px; }
-  .nutriMeta{ border:2px dashed var(--c2); background:rgba(255,255,255,.22); padding:8px; font-size:16px; line-height:1.15; color:var(--c1); }
+  .nutriMeta{ border:2px dashed var(--c2); background:rgba(255,255,255,.22); padding:9px; font-size:16px; line-height:1.2; color:var(--c1); }
   .nutriMeta.fresh{ border-style:solid; }
   .nutriMeta.stale{ border-color:var(--c0); background:rgba(255,255,255,.34); }
   .nutriMeta.empty{ opacity:.9; }
@@ -162,8 +162,10 @@
   .nutriCol.low{ background:var(--c3); }
   .nutriCol.high{ background:var(--c0); }
   .nutriColLabel{ font-size:12px; color:var(--c1); height:28px; line-height:.9; overflow:hidden; text-align:center; margin-top:4px; }
-  .pillList{ display:flex; flex-wrap:wrap; gap:6px; }
-  .pill{ border:2px solid var(--c0); background:var(--lcd); padding:5px 7px; font-size:17px; }
+  .pillList{ display:flex; flex-wrap:wrap; gap:7px; }
+  .pill{ border:2px solid var(--c0); background:var(--lcd); padding:6px 8px; font-size:17px; line-height:1.05; }
+  .softBlock{ border:2px solid var(--c3); background:rgba(255,255,255,.28); padding:10px; }
+  .softBlock label{ margin-bottom:9px; line-height:1.35; }
 
 
 
@@ -207,9 +209,10 @@
   .sheet{ max-width:520px; margin:0 auto; width:100%; background:var(--lcd); min-height:100dvh;
     display:flex; flex-direction:column; padding-top:env(safe-area-inset-top); }
   .sheet header{ position:sticky; top:0; }
-  .sheet header h2{ font-family:'Press Start 2P',monospace; font-size:12px; }
-  .sheet .body{ flex:1; overflow-y:auto; padding:16px 14px; display:flex; flex-direction:column; gap:14px; }
-  label{ font-family:'Press Start 2P',monospace; font-size:8px; color:var(--c2); display:block; margin-bottom:6px; letter-spacing:0.5px; }
+  .sheet header h2{ font-family:'Press Start 2P',monospace; font-size:12px; line-height:1.35; padding-right:8px; }
+  .sheet .body{ flex:1; overflow-y:auto; padding:16px 14px; display:flex; flex-direction:column; gap:15px; }
+  label{ font-family:'Press Start 2P',monospace; font-size:8px; color:var(--c2); display:block; margin-bottom:8px; letter-spacing:0.5px; line-height:1.35; }
+  #nutriContent{ display:flex; flex-direction:column; gap:14px; min-width:0; }
   input, textarea{ width:100%; font-family:'VT323',monospace; font-size:23px; color:var(--c0);
     background:var(--lcd); border:3px solid var(--c0); padding:9px 10px; outline:none; }
   input:focus, textarea:focus{ background:#ffffff; }
@@ -257,17 +260,17 @@
   .questLog .meal .kc{ font-family:'Press Start 2P',monospace; font-size:7px; text-align:right; }
   .questLog .meal .kc::after{ content:' kcal'; font-family:'VT323',monospace; font-size:13px; color:var(--c2); }
   .questLog .meal .del{ width:20px; height:20px; border-width:2px; font-size:6px; opacity:.65; }
-  .statusGroup{ border:3px solid var(--c0); background:var(--c4); padding:9px; box-shadow:3px 3px 0 var(--c0); }
-  .statusGroupTitle{ font-family:'Press Start 2P',monospace; font-size:8px; color:var(--c2); margin-bottom:8px; }
-  .nutriStatRow{ display:grid; grid-template-columns:78px 1fr 52px; gap:7px; align-items:center; border-bottom:2px solid var(--c3); padding:7px 0; }
+  .statusGroup{ border:3px solid var(--c0); background:var(--c4); padding:11px 10px; box-shadow:3px 3px 0 var(--c0); }
+  .statusGroupTitle{ font-family:'Press Start 2P',monospace; font-size:8px; color:var(--c2); margin-bottom:10px; line-height:1.35; }
+  .nutriStatRow{ display:grid; grid-template-columns:82px 1fr 56px; gap:8px; align-items:center; border-bottom:2px solid var(--c3); padding:8px 0; }
   .nutriStatRow:last-child{ border-bottom:0; }
-  .nutriStatRow .lab{ font-size:18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .nutriStatRow .lab{ font-size:18px; line-height:1.05; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .nutriStatRow .track{ height:13px; border:2px solid var(--c0); background:var(--lcd); overflow:hidden; }
   .nutriStatRow .fill{ height:100%; width:0; background:var(--c2); background-image:linear-gradient(90deg,var(--c1) 0 3px, transparent 3px 6px); background-size:6px 100%; }
   .nutriStatRow.high .fill{ background:var(--c0); }
   .nutriStatRow.low .fill{ background:var(--c3); }
-  .nutriStatRow .num{ font-size:16px; text-align:right; }
-  .nutriStatRow .note{ grid-column:1/-1; font-size:15px; color:var(--c1); margin-top:-3px; }
+  .nutriStatRow .num{ font-size:16px; text-align:right; line-height:1.05; }
+  .nutriStatRow .note{ grid-column:1/-1; font-size:15px; line-height:1.16; color:var(--c1); margin-top:2px; padding-top:1px; }
 
   /* Install prompt */
   .installNudge{
@@ -354,12 +357,12 @@
     .questLog .meal .kc{ font-size:6px; }
     .questLog .meal .kc::after{ font-size:11px; }
     .questLog .meal .del{ width:17px; height:17px; font-size:5px; }
-    .statusGroup{ border-width:2px; padding:7px; }
-    .statusGroupTitle{ font-size:7px; }
-    .nutriStatRow{ grid-template-columns:64px 1fr 44px; gap:5px; padding:5px 0; }
+    .statusGroup{ border-width:2px; padding:8px; }
+    .statusGroupTitle{ font-size:7px; margin-bottom:8px; line-height:1.35; }
+    .nutriStatRow{ grid-template-columns:68px 1fr 46px; gap:6px; padding:6px 0; }
     .nutriStatRow .lab{ font-size:16px; }
     .nutriStatRow .num{ font-size:14px; }
-    .nutriStatRow .note{ font-size:13px; }
+    .nutriStatRow .note{ font-size:13px; line-height:1.18; margin-top:2px; }
 
     .installNudge{ bottom:calc(6px + env(safe-area-inset-bottom)); width:calc(100vw - 16px); padding:7px; box-shadow:3px 3px 0 var(--c0); }
     .installNudge .txt{ font-size:15px; }
@@ -885,8 +888,8 @@ function renderNutrientReport(r, totals){
     ${renderNutrientGroup('FŐ STATOK', groups['FŐ STATOK'])}
     ${renderNutrientGroup('ÁSVÁNYI ANYAGOK', groups['ÁSVÁNYI ANYAGOK'])}
     ${renderNutrientGroup('VITAMINOK', groups['VITAMINOK'])}
-    <div><label>ERŐSSÉGEK</label><div class="pillList">${strengths||'<span class="pill">nincs elég adat</span>'}</div></div>
-    <div><label>FIGYELENDŐ</label><div class="pillList">${gaps||'<span class="pill">nincs elég adat</span>'}</div></div>
+    <div class="softBlock"><label>ERŐSSÉGEK</label><div class="pillList">${strengths||'<span class="pill">nincs elég adat</span>'}</div></div>
+    <div class="softBlock"><label>FIGYELENDŐ</label><div class="pillList">${gaps||'<span class="pill">nincs elég adat</span>'}</div></div>
     <div class="noteBox">${esc(r.practicalSuggestion||'')}</div>
     <div class="hint">${esc(r.caveat||'Becslés · adagpontosságtól függ · nem orvosi tanács.')}</div>`;
 }
