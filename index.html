@@ -59,8 +59,8 @@
   main{ flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:14px; }
 
   /* ---- Hero: gym scene ---- */
-  .stage{ border:3px solid var(--c0); box-shadow:5px 5px 0 var(--c0); background:var(--c4); line-height:0; }
-  .stage svg{ display:block; width:100%; height:auto; }
+  .stage{ border:3px solid var(--c0); box-shadow:5px 5px 0 var(--c0); background:var(--c4); line-height:0; overflow:hidden; }
+  .stage img{ display:block; width:100%; height:auto; aspect-ratio:3/2; object-fit:cover; }
   #scene.bob{ animation:bob 3s ease-in-out infinite; transform-origin:center bottom; }
   @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-1.2px);} }
 
@@ -141,6 +141,73 @@
   .errline.show{ display:block; }
   .hint{ font-size:16px; color:var(--c2); }
 
+
+
+  /* Install prompt */
+  .installNudge{
+    position:fixed; left:50%; bottom:calc(10px + env(safe-area-inset-bottom)); transform:translateX(-50%);
+    width:min(492px, calc(100vw - 20px)); background:var(--lcd); border:3px solid var(--c0);
+    box-shadow:5px 5px 0 var(--c0); padding:9px; display:none; z-index:45; align-items:center; gap:9px;
+  }
+  .installNudge.show{ display:flex; }
+  .installNudge .txt{ flex:1; font-size:17px; line-height:1.05; }
+  .installNudge button{ font-family:'Press Start 2P',monospace; font-size:8px; background:var(--c1); color:var(--lcd); border:2px solid var(--c0); padding:8px 9px; }
+  .installNudge .dismiss{ background:transparent; color:var(--c0); width:27px; padding:8px 0; }
+
+  /* Phone-first compact dashboard: designed to fit a OnePlus 10 class screen without page scroll. */
+  @media (max-width: 460px), (max-height: 900px){
+    body{ font-size:19px; }
+    #screen{ max-width:100vw; height:100dvh; min-height:100dvh; overflow:hidden; }
+    header{ padding:8px 9px 7px; border-bottom-width:2px; }
+    .brand{ gap:6px; }
+    .brand .mark{ width:18px; height:18px; }
+    .brand h1{ font-size:9px; }
+    .datenav{ gap:5px; }
+    .datenav button,.gear{ width:23px; height:23px; border-width:2px; font-size:8px; }
+    #dateLabel{ font-size:17px; min-width:75px; }
+    #dateLabel small{ font-size:11px; }
+    main{ padding:8px; gap:8px; overflow:hidden; }
+    .stage{ border-width:2px; box-shadow:3px 3px 0 var(--c0); }
+    .stage img{ height:min(31dvh, 248px); aspect-ratio:auto; object-fit:cover; object-position:center center; }
+    .bubble{ padding:8px 9px 7px; box-shadow:3px 3px 0 var(--c0); border-width:2px; margin-top:3px; }
+    .bubble .who{ font-size:6px; top:-7px; }
+    .bubble p{ font-size:18px; line-height:1.05; max-height:38px; overflow:hidden; }
+    .bubble::before{ top:-9px; height:9px; border-width:2px; }
+    .panel{ padding:8px 9px 9px; border-width:2px; box-shadow:3px 3px 0 var(--c0); }
+    .panel h2{ font-size:7px; margin-bottom:6px; }
+    .kcalrow .big{ font-size:34px; }
+    .kcalrow .tgt{ font-size:17px; }
+    .bar{ height:11px; border-width:2px; margin:6px 0 7px; }
+    .macros{ gap:5px; }
+    .macro{ padding:3px 2px; border-width:2px; }
+    .macro b{ font-size:21px; }
+    .macro span{ font-size:6px; }
+    .weightline{ margin-top:6px; }
+    .weightline .w{ font-size:20px; }
+    .weightline .trend{ font-size:15px; }
+    .meals ul{ gap:5px; max-height:70px; overflow:hidden; }
+    .meal{ padding:5px 6px; gap:6px; border-width:2px; }
+    .meal .t b{ font-size:18px; max-height:20px; overflow:hidden; }
+    .meal .t small{ font-size:13px; }
+    .meal .kc{ font-size:7px; }
+    .meal .del{ width:21px; height:21px; font-size:7px; }
+    .empty{ font-size:16px; padding:3px; }
+    .actions{ gap:7px; }
+    .btnrow{ gap:7px; }
+    button.pix{ font-size:8px; border-width:2px; box-shadow:3px 3px 0 var(--c0); padding:9px 7px; }
+    button.pix.ghost{ padding:6px; font-size:7px; }
+    .installNudge{ bottom:calc(6px + env(safe-area-inset-bottom)); width:calc(100vw - 16px); padding:7px; box-shadow:3px 3px 0 var(--c0); }
+    .installNudge .txt{ font-size:15px; }
+  }
+
+  @media (max-height: 760px){
+    .stage img{ height:min(28dvh, 210px); }
+    .bubble p{ font-size:16px; max-height:34px; }
+    .meals ul{ max-height:48px; }
+    .weightline{ display:none; }
+    button.pix.ghost{ display:none; }
+  }
+
   @media (prefers-reduced-motion: reduce){ #scene.bob{ animation:none; } }
 </style>
 </head>
@@ -168,150 +235,9 @@
   </header>
 
   <main>
-    <!-- ===== GYM SCENE (greyscale 2.5D) ===== -->
+    <!-- ===== GYM SCENE: progressive 2.5D trainer room ===== -->
     <div class="stage">
-      <svg id="scene" class="bob" viewBox="0 0 160 112" shape-rendering="crispEdges" aria-label="Coach a teremben">
-        <!-- back wall -->
-        <rect x="0" y="0" width="160" height="60" fill="#d5d8dd"/>
-        <rect x="0" y="0" width="160" height="60" fill="#e6e8eb" opacity="0.35"/>
-        <!-- windows -->
-        <g>
-          <rect x="16" y="10" width="34" height="24" fill="#3b3f45"/>
-          <rect x="18" y="12" width="30" height="20" fill="#a9aeb6"/>
-          <rect x="18" y="12" width="30" height="9" fill="#d5d8dd"/>
-          <rect x="32" y="12" width="2" height="20" fill="#3b3f45"/>
-          <rect x="18" y="21" width="30" height="2" fill="#3b3f45"/>
-          <rect x="110" y="10" width="34" height="24" fill="#3b3f45"/>
-          <rect x="112" y="12" width="30" height="20" fill="#a9aeb6"/>
-          <rect x="112" y="12" width="30" height="9" fill="#d5d8dd"/>
-          <rect x="126" y="12" width="2" height="20" fill="#3b3f45"/>
-          <rect x="112" y="21" width="30" height="2" fill="#3b3f45"/>
-        </g>
-        <!-- wall clock -->
-        <rect x="76" y="8" width="8" height="8" fill="#3b3f45"/>
-        <rect x="78" y="10" width="4" height="4" fill="#e6e8eb"/>
-        <rect x="79" y="11" width="1" height="2" fill="#111214"/>
-        <rect x="80" y="11" width="2" height="1" fill="#111214"/>
-        <!-- wall poster (dumbbell) -->
-        <rect x="92" y="12" width="14" height="18" fill="#3b3f45"/>
-        <rect x="94" y="14" width="10" height="14" fill="#d5d8dd"/>
-        <rect x="96" y="20" width="6" height="2" fill="#3b3f45"/>
-        <rect x="95" y="18" width="2" height="6" fill="#3b3f45"/>
-        <rect x="101" y="18" width="2" height="6" fill="#3b3f45"/>
-        <!-- wall base stripe -->
-        <rect x="0" y="54" width="160" height="6" fill="#71767e"/>
-
-        <!-- floor (perspective) -->
-        <polygon points="0,112 160,112 132,60 28,60" fill="#a9aeb6"/>
-        <!-- floor grid: verticals converging -->
-        <g stroke="#71767e" stroke-width="1">
-          <line x1="28" y1="60" x2="0" y2="112"/>
-          <line x1="54" y1="60" x2="40" y2="112"/>
-          <line x1="80" y1="60" x2="80" y2="112"/>
-          <line x1="106" y1="60" x2="120" y2="112"/>
-          <line x1="132" y1="60" x2="160" y2="112"/>
-          <line x1="24" y1="76" x2="136" y2="76"/>
-          <line x1="16" y1="92" x2="144" y2="92"/>
-        </g>
-        <rect x="0" y="60" width="160" height="2" fill="#71767e"/>
-
-        <!-- LEFT: dumbbell rack -->
-        <g>
-          <rect x="6" y="44" width="30" height="22" fill="#3b3f45"/>
-          <rect x="6" y="44" width="30" height="2" fill="#71767e"/>
-          <rect x="6" y="54" width="30" height="2" fill="#71767e"/>
-          <!-- dumbbell pairs -->
-          <g fill="#a9aeb6">
-            <rect x="9" y="47" width="7" height="4"/><rect x="18" y="47" width="7" height="4"/><rect x="27" y="47" width="6" height="4"/>
-            <rect x="9" y="57" width="8" height="5"/><rect x="20" y="57" width="9" height="5"/>
-          </g>
-          <g fill="#111214">
-            <rect x="9" y="48" width="1" height="2"/><rect x="15" y="48" width="1" height="2"/>
-            <rect x="9" y="58" width="1" height="3"/><rect x="16" y="58" width="1" height="3"/>
-          </g>
-        </g>
-
-        <!-- RIGHT: weight bench + kettlebell -->
-        <g>
-          <rect x="118" y="76" width="34" height="6" fill="#71767e"/>       <!-- seat pad -->
-          <rect x="118" y="76" width="34" height="2" fill="#a9aeb6"/>
-          <rect x="146" y="66" width="8" height="12" fill="#71767e"/>        <!-- raised back pad -->
-          <rect x="146" y="66" width="8" height="2" fill="#a9aeb6"/>
-          <rect x="121" y="82" width="4" height="9" fill="#3b3f45"/>         <!-- legs -->
-          <rect x="145" y="82" width="4" height="9" fill="#3b3f45"/>
-          <!-- kettlebell on floor -->
-          <rect x="126" y="86" width="8" height="7" fill="#3b3f45"/>
-          <rect x="127" y="87" width="6" height="5" fill="#71767e"/>
-          <rect x="128" y="83" width="4" height="4" fill="#111214"/>
-          <rect x="129" y="84" width="2" height="2" fill="#a9aeb6"/>
-        </g>
-
-        <!-- floor mat + shadow under trainer -->
-        <polygon points="56,99 104,99 98,89 62,89" fill="#71767e"/>
-        <polygon points="60,97 100,97 96,91 64,91" fill="#8f949c"/>
-        <ellipse cx="80" cy="98" rx="20" ry="4" fill="#5f646b"/>
-
-        <!-- ===== TRAINER (original character) ===== -->
-        <g>
-          <!-- legs / shorts -->
-          <rect x="70" y="76" width="20" height="10" fill="#3b3f45"/>       <!-- shorts -->
-          <rect x="70" y="76" width="20" height="2" fill="#71767e"/>
-          <rect x="79" y="78" width="2" height="8" fill="#111214"/>          <!-- gap -->
-          <rect x="71" y="86" width="7" height="9" fill="#a9aeb6"/>          <!-- left leg -->
-          <rect x="82" y="86" width="7" height="9" fill="#a9aeb6"/>          <!-- right leg -->
-          <rect x="71" y="86" width="7" height="1" fill="#71767e"/>
-          <rect x="82" y="86" width="7" height="1" fill="#71767e"/>
-          <rect x="69" y="95" width="10" height="3" fill="#111214"/>         <!-- shoes -->
-          <rect x="82" y="95" width="10" height="3" fill="#111214"/>
-          <rect x="69" y="95" width="10" height="1" fill="#e6e8eb"/>
-          <rect x="82" y="95" width="10" height="1" fill="#e6e8eb"/>
-
-          <!-- torso outline (bevel) -->
-          <rect x="65" y="55" width="30" height="22" fill="#111214"/>
-          <!-- tank top -->
-          <rect x="67" y="56" width="26" height="20" fill="#d5d8dd"/>
-          <rect x="85" y="56" width="8" height="20" fill="#a9aeb6"/>         <!-- side shade -->
-          <rect x="67" y="56" width="4" height="20" fill="#e6e8eb"/>         <!-- highlight -->
-          <rect x="72" y="56" width="3" height="6" fill="#71767e"/>
-          <rect x="85" y="56" width="3" height="6" fill="#71767e"/>
-          <rect x="75" y="56" width="10" height="3" fill="#71767e"/>
-
-          <!-- left arm (down at side) -->
-          <rect x="61" y="57" width="6" height="17" fill="#111214"/>
-          <rect x="62" y="58" width="4" height="12" fill="#a9aeb6"/>
-          <rect x="61" y="70" width="6" height="4" fill="#a9aeb6"/>          <!-- hand -->
-          <rect x="62" y="58" width="1" height="12" fill="#c3c7cd"/>
-          <!-- right arm (bent up, holding dumbbell) -->
-          <rect x="94" y="57" width="6" height="9" fill="#111214"/>
-          <rect x="95" y="58" width="4" height="8" fill="#a9aeb6"/>
-          <rect x="95" y="52" width="4" height="7" fill="#a9aeb6"/>          <!-- forearm up -->
-          <rect x="94" y="52" width="6" height="1" fill="#111214"/>
-          <!-- dumbbell in right hand -->
-          <rect x="92" y="48" width="10" height="3" fill="#111214"/>
-          <rect x="90" y="47" width="3" height="5" fill="#71767e"/>
-          <rect x="101" y="47" width="3" height="5" fill="#71767e"/>
-
-          <!-- neck -->
-          <rect x="76" y="51" width="8" height="5" fill="#a9aeb6"/>
-          <rect x="76" y="51" width="8" height="1" fill="#71767e"/>
-
-          <!-- head outline -->
-          <rect x="71" y="38" width="18" height="15" fill="#111214"/>
-          <rect x="72" y="39" width="16" height="13" fill="#a9aeb6"/>        <!-- face -->
-          <rect x="84" y="39" width="4" height="13" fill="#8f949c"/>         <!-- face shade -->
-          <!-- hair -->
-          <rect x="71" y="38" width="18" height="5" fill="#3b3f45"/>
-          <rect x="71" y="41" width="3" height="7" fill="#3b3f45"/>
-          <rect x="86" y="41" width="3" height="7" fill="#3b3f45"/>
-          <!-- headband -->
-          <rect x="71" y="43" width="18" height="2" fill="#111214"/>
-          <rect x="71" y="43" width="18" height="1" fill="#71767e"/>
-          <!-- eyes + mouth -->
-          <rect x="75" y="46" width="2" height="2" fill="#111214"/>
-          <rect x="82" y="46" width="2" height="2" fill="#111214"/>
-          <rect x="77" y="50" width="5" height="1" fill="#3b3f45"/>
-        </g>
-      </svg>
+      <img id="scene" class="bob" src="assets/scene-fat.png" alt="Coach a teremben" loading="eager" />
     </div>
 
     <!-- speech bubble -->
@@ -355,6 +281,12 @@
       <button class="pix ghost" id="reportBtn">NAPI JELENTÉS</button>
     </div>
   </main>
+</div>
+
+<div class="installNudge" id="installNudge" role="region" aria-label="Telepítés Androidra">
+  <div class="txt">Telepíthető Androidra kezdőképernyős appként.</div>
+  <button id="installBtn">TELEPÍTÉS</button>
+  <button class="dismiss" id="installDismiss" aria-label="Telepítés elrejtése">X</button>
 </div>
 
 <!-- ADD MEAL -->
@@ -415,6 +347,7 @@
         <div class="hint">Cloudflare Worker URL. Üresen = kézi mód. Az OpenAI kulcs csak a Workerben él, sosem itt.</div></div>
       <div><label>App titok (x-app-secret)</label><input id="setSecret" placeholder="a Worker APP_API_SECRET titka" /></div>
       <button class="pix solid" id="saveSettingsBtn">MENTÉS</button>
+      <button class="pix ghost" id="settingsInstallBtn">TELEPÍTÉS ANDROIDRA</button>
       <button class="pix ghost" id="wipeBtn">MAI NAP TÖRLÉSE</button>
       <div class="hint">MealQuest v0.2 · adatok a te eszközödön (IndexedDB) · offline PWA</div>
     </div>
@@ -423,7 +356,7 @@
 
 <script>
 const DB_NAME='mealquest', DB_VER=1;
-let db, state={ date:isoToday(), settings:{ kcalTarget:2200, backendUrl:'', appSecret:'' }, pendingAI:null };
+let db, deferredInstallPrompt=null, state={ date:isoToday(), settings:{ kcalTarget:2200, backendUrl:'', appSecret:'' }, pendingAI:null };
 
 function isoToday(){ return isoOf(new Date()); }
 function isoOf(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -447,6 +380,35 @@ function getAllByDate(store,date){ return new Promise((res,rej)=>{ const out=[];
 function getAll(store){ return new Promise((res,rej)=>{ const r=tx(store,'readonly').getAll(); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
 function getSetting(key){ return new Promise((res)=>{ const r=tx('settings','readonly').get(key); r.onsuccess=()=>res(r.result?r.result.value:undefined); r.onerror=()=>res(undefined); }); }
 function setSetting(key,value){ return put('settings',{key,value}); }
+
+function totalKcalForMeals(meals){ return meals.reduce((sum,m)=>sum+n(m.kcal),0); }
+
+async function getSceneStage(){
+  const mealsAll=await getAll('meals');
+  let goodDays=0, loggedDays=0;
+  for(let i=0;i<7;i++){
+    const day=shiftDate(state.date,-i);
+    const dayMeals=mealsAll.filter(m=>m.date===day);
+    if(dayMeals.length===0) continue;
+    loggedDays++;
+    const dayKcal=totalKcalForMeals(dayMeals);
+    if(dayKcal>0 && dayKcal<=state.settings.kcalTarget*1.05) goodDays++;
+  }
+  if(goodDays>=5) return 'lean';
+  if(goodDays>=2 || loggedDays>=4) return 'medium';
+  return 'fat';
+}
+
+function setSceneStage(stage){
+  const img=$('scene');
+  const src={
+    fat:'assets/scene-fat.png',
+    medium:'assets/scene-medium.png',
+    lean:'assets/scene-lean.png'
+  }[stage] || 'assets/scene-fat.png';
+  if(!img.src.endsWith(src)) img.src=src;
+  img.dataset.stage=stage;
+}
 
 async function render(){
   const [y,m,d]=state.date.split('-');
@@ -479,6 +441,7 @@ async function render(){
     $('wTrend').textContent = `7n ${sign} ${Math.abs(diff).toFixed(1)}`;
   } else $('wTrend').textContent='';
 
+  setSceneStage(await getSceneStage());
   updateBubble(kcal, meals.length, !!todayW);
 }
 
@@ -563,6 +526,25 @@ $('wipeBtn').onclick=async()=>{ const meals=await getAllByDate('meals',state.dat
 $('prevDay').onclick=()=>{ state.date=shiftDate(state.date,-1); render(); };
 $('nextDay').onclick=()=>{ state.date=shiftDate(state.date, 1); render(); };
 
+function isInstalledPWA(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true; }
+function showInstallNudge(){ if(!isInstalledPWA()) $('installNudge').classList.add('show'); }
+function hideInstallNudge(){ $('installNudge').classList.remove('show'); }
+async function runInstallPrompt(){
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    try{ await deferredInstallPrompt.userChoice; }catch(e){}
+    deferredInstallPrompt=null; hideInstallNudge(); return;
+  }
+  $('bubbleText').textContent='Android Chrome-ban: menü ⋮ → Telepítés / Hozzáadás a kezdőképernyőhöz.';
+  hideInstallNudge();
+}
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredInstallPrompt=e; setTimeout(showInstallNudge, 900); });
+window.addEventListener('appinstalled', ()=>{ deferredInstallPrompt=null; hideInstallNudge(); });
+$('installBtn').onclick=runInstallPrompt;
+$('settingsInstallBtn').onclick=runInstallPrompt;
+$('installDismiss').onclick=()=>{ hideInstallNudge(); localStorage.setItem('mqInstallDismissed','1'); };
+
+
 (async function(){
   await openDB();
   const kt=await getSetting('kcalTarget'); if(kt!==undefined) state.settings.kcalTarget=kt;
@@ -570,6 +552,7 @@ $('nextDay').onclick=()=>{ state.date=shiftDate(state.date, 1); render(); };
   const sc=await getSetting('appSecret'); if(sc!==undefined) state.settings.appSecret=sc;
   refreshAIState(); await render();
   if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+  if(!localStorage.getItem('mqInstallDismissed') && deferredInstallPrompt) showInstallNudge();
 })();
 </script>
 </body>
