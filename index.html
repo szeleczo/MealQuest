@@ -7,8 +7,8 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-title" content="MealQuest" />
-<link rel="apple-touch-icon" href="icon-192.png" />
-<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="./icon-192.png" />
+<link rel="manifest" href="./manifest.webmanifest" />
 <title>MealQuest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -288,7 +288,7 @@
 </div>
 
 <div class="installNudge" id="installNudge" role="region" aria-label="Telepítés Androidra">
-  <div class="txt">Telepíthető Androidra önálló appként.</div>
+  <div class="txt" id="installText">Telepíthető Androidra önálló appként.</div>
   <button id="installBtn">TELEPÍTÉS</button>
   <button class="dismiss" id="installDismiss" aria-label="Telepítés elrejtése">X</button>
 </div>
@@ -531,19 +531,56 @@ $('prevDay').onclick=()=>{ state.date=shiftDate(state.date,-1); render(); };
 $('nextDay').onclick=()=>{ state.date=shiftDate(state.date, 1); render(); };
 
 function isInstalledPWA(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true; }
-function showInstallNudge(){ if(!isInstalledPWA()) $('installNudge').classList.add('show'); }
+function setInstallText(txt){ const el=$('installText'); if(el) el.textContent=txt; }
+function showInstallNudge(txt){ if(txt) setInstallText(txt); if(!isInstalledPWA()) $('installNudge').classList.add('show'); }
 function hideInstallNudge(){ $('installNudge').classList.remove('show'); }
+async function ensureServiceWorkerReady(){
+  if(!('serviceWorker' in navigator)) return {ok:false, reason:'Ez a böngésző nem támogatja a service workert, ezért nem tud rendes PWA telepítést indítani.'};
+  try{
+    const reg=await navigator.serviceWorker.register('./sw.js',{scope:'./'});
+    await navigator.serviceWorker.ready;
+    return {ok:true, controlled:!!navigator.serviceWorker.controller, registration:reg};
+  }catch(err){
+    return {ok:false, reason:'A service worker nem indult el. Frissítsd a GitHub Pages buildet, majd próbáld újra.'};
+  }
+}
 async function runInstallPrompt(){
+  localStorage.removeItem('mqInstallDismissed');
+  if(isInstalledPWA()){
+    $('bubbleText').textContent='Már appként fut. Coach Byte nem telepít kétszer.';
+    hideInstallNudge();
+    return;
+  }
   if(deferredInstallPrompt){
     deferredInstallPrompt.prompt();
     try{ await deferredInstallPrompt.userChoice; }catch(e){}
     deferredInstallPrompt=null; hideInstallNudge(); return;
   }
-  $('bubbleText').textContent='A Chrome még nem PWA-ként kínálja. Frissítsd az oldalt egyszer, várj pár másodpercet, majd csak az „Install app / Telepítés” opciót használd. A „Hozzáadás a kezdőképernyőhöz” gyakran csak böngészős shortcutot készít.';
-  hideInstallNudge();
+  showInstallNudge('Előkészítem a rendes app-telepítést…');
+  $('bubbleText').textContent='Telepítési előkészítés fut. Ha most még shortcutot ajánlott a Chrome, azt hagyd figyelmen kívül.';
+  const ready=await ensureServiceWorkerReady();
+  if(!ready.ok){ $('bubbleText').textContent=ready.reason; hideInstallNudge(); return; }
+  if(!ready.controlled){
+    localStorage.setItem('mqInstallWanted','1');
+    $('bubbleText').textContent='A service worker kész. Frissítek egyet, hogy a Chrome már appként lássa az oldalt.';
+    showInstallNudge('Előkészítés kész. Frissítés…');
+    setTimeout(()=>{ location.replace('./?install=1&t='+Date.now()); }, 700);
+    return;
+  }
+  localStorage.setItem('mqInstallWanted','1');
+  $('bubbleText').textContent='A PWA alapok készen vannak. Várj pár másodpercet, majd nyomd meg újra a TELEPÍTÉS gombot. Ha akkor sem jön fel app-telepítő ablak, a Chrome ezen a címen még nem adta oda a promptot.';
+  showInstallNudge('Készül az app-telepítő. Nyomd meg újra pár másodperc múlva.');
 }
-window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredInstallPrompt=e; setTimeout(showInstallNudge, 900); });
-window.addEventListener('appinstalled', ()=>{ deferredInstallPrompt=null; hideInstallNudge(); });
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault(); deferredInstallPrompt=e;
+  if(localStorage.getItem('mqInstallWanted')){
+    setTimeout(()=>showInstallNudge('Kész: most már önálló appként telepíthető.'), 500);
+    $('bubbleText').textContent='Telepítés kész. Nyomd meg a TELEPÍTÉS gombot, és ne a Chrome menüs shortcutot használd.';
+  }else if(!localStorage.getItem('mqInstallDismissed')){
+    setTimeout(()=>showInstallNudge('Telepíthető Androidra önálló appként.'), 900);
+  }
+});
+window.addEventListener('appinstalled', ()=>{ deferredInstallPrompt=null; localStorage.removeItem('mqInstallWanted'); hideInstallNudge(); });
 $('installBtn').onclick=runInstallPrompt;
 $('settingsInstallBtn').onclick=runInstallPrompt;
 $('installDismiss').onclick=()=>{ hideInstallNudge(); localStorage.setItem('mqInstallDismissed','1'); };
@@ -555,7 +592,8 @@ $('installDismiss').onclick=()=>{ hideInstallNudge(); localStorage.setItem('mqIn
   const bu=await getSetting('backendUrl'); if(bu!==undefined) state.settings.backendUrl=bu;
   const sc=await getSetting('appSecret'); if(sc!==undefined) state.settings.appSecret=sc;
   refreshAIState(); await render();
-  if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+  if(localStorage.getItem('mqInstallWanted') && !deferredInstallPrompt) showInstallNudge('Telepítés előkészítve. Nyomd meg a TELEPÍTÉS gombot.');
+  if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{}); }
   if(!localStorage.getItem('mqInstallDismissed') && deferredInstallPrompt) showInstallNudge();
 })();
 </script>
