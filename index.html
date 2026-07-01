@@ -15,14 +15,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
 <style>
   :root{
-    /* Greyscale handheld LCD palette */
-    --c0:#111214;  /* ink / near-black */
-    --c1:#3b3f45;  /* dark grey */
-    --c2:#71767e;  /* mid grey */
-    --c3:#a9aeb6;  /* light grey */
-    --c4:#d5d8dd;  /* panel light */
-    --lcd:#e6e8eb; /* screen bg */
-    --line:#111214;
+    /* Warm retro RPG / handheld LCD palette */
+    --c0:#1c1711;  /* ink / near-black */
+    --c1:#3d3324;  /* dark umber */
+    --c2:#75684f;  /* muted brass */
+    --c3:#b9ad8a;  /* faded LCD highlight */
+    --c4:#dfd0a7;  /* parchment panel */
+    --lcd:#f1e7c9; /* screen bg */
+    --line:#1c1711;
   }
   *{ box-sizing:border-box; margin:0; padding:0; }
   html,body{ height:100%; }
@@ -227,6 +227,42 @@
 
 
 
+
+  /* v0.3.0 status-screen pass: fewer cards, stronger retro RPG screen logic */
+  .heroPanel{
+    position:relative; background:var(--c4); border:3px solid var(--c0); box-shadow:5px 5px 0 var(--c0);
+    padding:8px; display:flex; flex-direction:column; gap:8px;
+  }
+  .heroStatus{ display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:8px; color:var(--lcd); }
+  .heroStatus span{ background:var(--c1); border:2px solid var(--c0); padding:6px 7px; box-shadow:2px 2px 0 var(--c0); white-space:nowrap; }
+  .heroPanel .stage{ border-width:2px; box-shadow:none; background:var(--lcd); }
+  .heroPanel .bubble{ margin-top:0; box-shadow:3px 3px 0 var(--c0); background:var(--lcd); }
+  .heroPanel .bubble p{ line-height:1.05; }
+  .todayPanel h2{ margin-bottom:8px; }
+  .questLog{ margin-top:10px; border:2px solid var(--c0); background:var(--lcd); padding:7px; cursor:pointer; }
+  .questLog:active{ background:var(--c4); }
+  .questHead{ display:flex; justify-content:space-between; align-items:center; font-size:7px; color:var(--c2); margin-bottom:6px; }
+  .questLog ul{ list-style:none; display:flex; flex-direction:column; gap:5px; }
+  .questLog .meal{ display:grid; grid-template-columns:40px 1fr 44px 22px; align-items:center; gap:6px; border:0; border-bottom:2px solid var(--c3); background:transparent; padding:3px 0 5px; }
+  .questLog .meal:last-child{ border-bottom:0; }
+  .mealTime{ font-size:17px; color:var(--c2); }
+  .questLog .meal .t b{ font-size:19px; line-height:1; }
+  .questLog .meal .t small{ font-size:14px; color:var(--c2); }
+  .questLog .meal .kc{ font-family:'Press Start 2P',monospace; font-size:7px; text-align:right; }
+  .questLog .meal .kc::after{ content:' kcal'; font-family:'VT323',monospace; font-size:13px; color:var(--c2); }
+  .questLog .meal .del{ width:20px; height:20px; border-width:2px; font-size:6px; opacity:.65; }
+  .statusGroup{ border:3px solid var(--c0); background:var(--c4); padding:9px; box-shadow:3px 3px 0 var(--c0); }
+  .statusGroupTitle{ font-family:'Press Start 2P',monospace; font-size:8px; color:var(--c2); margin-bottom:8px; }
+  .nutriStatRow{ display:grid; grid-template-columns:78px 1fr 52px; gap:7px; align-items:center; border-bottom:2px solid var(--c3); padding:7px 0; }
+  .nutriStatRow:last-child{ border-bottom:0; }
+  .nutriStatRow .lab{ font-size:18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .nutriStatRow .track{ height:13px; border:2px solid var(--c0); background:var(--lcd); overflow:hidden; }
+  .nutriStatRow .fill{ height:100%; width:0; background:var(--c2); background-image:linear-gradient(90deg,var(--c1) 0 3px, transparent 3px 6px); background-size:6px 100%; }
+  .nutriStatRow.high .fill{ background:var(--c0); }
+  .nutriStatRow.low .fill{ background:var(--c3); }
+  .nutriStatRow .num{ font-size:16px; text-align:right; }
+  .nutriStatRow .note{ grid-column:1/-1; font-size:15px; color:var(--c1); margin-top:-3px; }
+
   /* Install prompt */
   .installNudge{
     position:fixed; left:50%; bottom:calc(10px + env(safe-area-inset-bottom)); transform:translateX(-50%);
@@ -297,6 +333,28 @@
     .btnrow{ gap:7px; }
     button.pix{ font-size:8px; border-width:2px; box-shadow:3px 3px 0 var(--c0); padding:9px 7px; }
     button.pix.ghost{ padding:6px; font-size:7px; }
+
+    .heroPanel{ padding:5px; border-width:2px; box-shadow:3px 3px 0 var(--c0); gap:5px; }
+    .heroStatus{ font-size:6px; gap:5px; }
+    .heroStatus span{ padding:4px 5px; border-width:2px; }
+    .heroPanel .stage img{ height:min(30dvh, 224px); }
+    .questLog{ margin-top:7px; padding:5px; }
+    .questHead{ font-size:6px; margin-bottom:4px; }
+    .questLog ul{ gap:2px; max-height:64px; overflow:hidden; }
+    .questLog .meal{ grid-template-columns:34px 1fr 39px 18px; gap:4px; padding:2px 0 3px; }
+    .mealTime{ font-size:14px; }
+    .questLog .meal .t b{ font-size:16px; }
+    .questLog .meal .t small{ font-size:12px; }
+    .questLog .meal .kc{ font-size:6px; }
+    .questLog .meal .kc::after{ font-size:11px; }
+    .questLog .meal .del{ width:17px; height:17px; font-size:5px; }
+    .statusGroup{ border-width:2px; padding:7px; }
+    .statusGroupTitle{ font-size:7px; }
+    .nutriStatRow{ grid-template-columns:64px 1fr 44px; gap:5px; padding:5px 0; }
+    .nutriStatRow .lab{ font-size:16px; }
+    .nutriStatRow .num{ font-size:14px; }
+    .nutriStatRow .note{ font-size:13px; }
+
     .installNudge{ bottom:calc(6px + env(safe-area-inset-bottom)); width:calc(100vw - 16px); padding:7px; box-shadow:3px 3px 0 var(--c0); }
     .installNudge .txt{ font-size:15px; }
   }
@@ -304,7 +362,7 @@
   @media (max-height: 760px){
     .stage img{ height:min(28dvh, 210px); }
     .bubble p{ font-size:16px; max-height:34px; }
-    .meals ul{ max-height:48px; }
+    .questLog ul{ max-height:38px; }
     .weightline{ display:none; }
     button.pix.ghost.optional{ display:none; }
   }
@@ -336,16 +394,22 @@
   </header>
 
   <main>
-    <!-- ===== GYM SCENE: progressive 2.5D trainer room ===== -->
-    <div class="stage">
-      <img id="scene" class="bob" src="assets/scene-fat.png" alt="Coach a teremben" loading="eager" />
-    </div>
+    <!-- ===== HERO SCENE: progressive 2.5D trainer room ===== -->
+    <section class="heroPanel" id="heroPanel">
+      <div class="heroStatus chrome">
+        <span id="roomLevel">ROOM LV. 1</span>
+        <span id="routineLevel">RUTIN 0/7</span>
+      </div>
+      <div class="stage">
+        <img id="scene" class="bob" src="assets/scene-fat.png" alt="Coach a teremben" loading="eager" />
+      </div>
 
-    <!-- speech bubble -->
-    <div class="bubble" id="coachBubble" role="button" tabindex="0" aria-label="Napi jelentés megjelenítése">
-      <span class="who">COACH BYTE</span>
-      <p id="bubbleText">…</p>
-    </div>
+      <!-- speech bubble -->
+      <div class="bubble" id="coachBubble" role="button" tabindex="0" aria-label="Napi jelentés megjelenítése">
+        <span class="who">COACH BYTE</span>
+        <p id="bubbleText">…</p>
+      </div>
+    </section>
 
     <!-- Stats -->
     <section class="panel todayPanel" id="todayPanel" role="button" tabindex="0" aria-label="Részletes napi tápanyagok">
@@ -364,13 +428,12 @@
         <div class="w">Súly: <span id="wToday">—</span></div>
         <div class="trend" id="wTrend"></div>
       </div>
-    </section>
 
-    <!-- Meals -->
-    <section class="panel meals" id="mealsPanel" role="button" tabindex="0" aria-label="Teljes napi étkezéslista">
-      <h2>ÉTKEZÉSEK <span class="tapHint">RÉSZLET</span></h2>
-      <ul id="mealList"></ul>
-      <div class="empty" id="mealEmpty">Ma még üres a napló. Coach Byte vár egy adatra.</div>
+      <div class="questLog" id="mealsPanel" role="button" tabindex="0" aria-label="Teljes napi étkezéslista">
+        <div class="questHead chrome"><span>MEAL LOG</span><span>RÉSZLET</span></div>
+        <ul id="mealList"></ul>
+        <div class="empty" id="mealEmpty">Ma még üres a napló. Coach Byte vár egy adatra.</div>
+      </div>
     </section>
 
     <!-- Actions -->
@@ -498,7 +561,7 @@
       <input id="importFile" type="file" accept="application/json,.json" hidden />
       <button class="pix ghost" id="wipeBtn">MAI NAP TÖRLÉSE</button>
       <div class="hint" id="backupHint">Export/import: a naplózott étkezések és súlyadatok mentése JSON fájlba. Az App titok biztonság miatt nem kerül exportba.</div>
-      <div class="hint">MealQuest v0.2.9 · adatok a te eszközödön (IndexedDB) · offline PWA</div>
+      <div class="hint">MealQuest v0.3.0 · adatok a te eszközödön (IndexedDB) · offline PWA</div>
     </div>
   </div>
 </div>
@@ -539,7 +602,7 @@ function downloadTextFile(filename, text, type='application/json'){
 async function exportBackup(){
   const [meals,weights]=await Promise.all([getAll('meals'),getAll('weights')]);
   const backup={
-    app:'MealQuest', version:'0.2.9', schemaVersion:1, exportedAt:new Date().toISOString(),
+    app:'MealQuest', version:'0.3.0', schemaVersion:1, exportedAt:new Date().toISOString(),
     data:{
       meals:meals.sort((a,b)=>(a.date||'').localeCompare(b.date||'') || (a.time||'99').localeCompare(b.time||'99') || n(a.createdAt)-n(b.createdAt)),
       weights:weights.sort((a,b)=>(a.date||'').localeCompare(b.date||'')),
@@ -596,9 +659,17 @@ async function getSceneStage(){
     const dayKcal=totalKcalForMeals(dayMeals);
     if(dayKcal>0 && dayKcal<=state.settings.kcalTarget*1.05) goodDays++;
   }
-  if(goodDays>=5) return 'lean';
-  if(goodDays>=2 || loggedDays>=4) return 'medium';
-  return 'fat';
+  let stage='fat';
+  if(goodDays>=5) stage='lean';
+  else if(goodDays>=2 || loggedDays>=4) stage='medium';
+  state.roomStats={goodDays, loggedDays, stage};
+  return stage;
+}
+function updateRoomState(stage, stats){
+  const level = stage==='lean' ? 3 : (stage==='medium' ? 2 : 1);
+  const names = {fat:'KEZDŐ TEREM', medium:'KONTROLL ALAKUL', lean:'JÓ RUTIN'};
+  $('roomLevel').textContent = `ROOM LV. ${level} — ${names[stage]||names.fat}`;
+  $('routineLevel').textContent = `RUTIN ${stats.goodDays||0}/7`;
 }
 
 function setSceneStage(stage){
@@ -631,10 +702,11 @@ async function render(){
   $('mealEmpty').style.display = meals.length?'none':'block';
   const visibleMeals = meals.slice(0,3);
   visibleMeals.forEach(mm=>{ const li=document.createElement('li'); li.className='meal';
-    li.innerHTML=`<div class="t"><b>${esc(mm.title||mm.rawText||'Étkezés')}</b>${mm.time?`<small>${mm.time}</small>`:''}</div>
+    const time=mm.time||'--:--';
+    li.innerHTML=`<div class="mealTime">${esc(time)}</div><div class="t"><b>${esc(mm.title||mm.rawText||'Étkezés')}</b><small>P ${n(mm.protein)}g · SzH ${n(mm.carbs)}g · Zs ${n(mm.fat)}g</small></div>
       <div class="kc">${n(mm.kcal)}</div><button class="del" aria-label="Törlés">X</button>`;
-    li.querySelector('.del').onclick=async()=>{ await del('meals',mm.id); render(); };
-    li.onclick=(e)=>{ if(!e.target.classList.contains('del')) openDayDetail(); };
+    li.querySelector('.del').onclick=async(e)=>{ e.stopPropagation(); await del('meals',mm.id); render(); };
+    li.onclick=(e)=>{ e.stopPropagation(); if(!e.target.classList.contains('del')) openDayDetail(); };
     ul.appendChild(li);
   });
 
@@ -647,7 +719,9 @@ async function render(){
     $('wTrend').textContent = `7n ${sign} ${Math.abs(diff).toFixed(1)}`;
   } else $('wTrend').textContent='';
 
-  setSceneStage(await getSceneStage());
+  const sceneStage=await getSceneStage();
+  setSceneStage(sceneStage);
+  updateRoomState(sceneStage, state.roomStats||{});
   updateBubble(kcal, meals.length, !!todayW);
 }
 
@@ -716,24 +790,41 @@ function nutrientColumnsHtml(nutrients){
     return `<div class="nutriColWrap"><div class="nutriCol ${cls}" title="${esc(x.name)} ${pct}%" style="height:${pct}%"></div><div class="nutriColLabel">${esc(shortNutriName(x.name))}</div></div>`;
   }).join('')}</div></div>`;
 }
+function nutrientGroupName(name){
+  const n=String(name||'').toLowerCase();
+  if(n.includes('vitamin') || n.includes('folát') || n.includes('folate')) return 'VITAMINOK';
+  if(['kalcium','vas','kálium','magnézium','nátrium'].some(x=>n.includes(x))) return 'ÁSVÁNYI ANYAGOK';
+  return 'FŐ STATOK';
+}
+function renderNutrientGroup(title, items){
+  if(!items.length) return '';
+  return `<div class="statusGroup"><div class="statusGroupTitle">${title}</div>${items.map(x=>{
+    const pct=Math.max(0,Math.min(120,n(x.dailyValuePercent)));
+    const visual=Math.max(3,Math.min(100,pct));
+    const cls=esc(x.status||'unknown');
+    return `<div class="nutriStatRow ${cls}">
+      <div class="lab">${esc(shortNutriName(x.name))}</div>
+      <div class="track"><div class="fill" style="width:${visual}%"></div></div>
+      <div class="num">${n(x.dailyValuePercent)}%</div>
+      <div class="note">${esc(x.name)} · ${Number(x.value||0).toFixed(x.value%1?1:0)} ${esc(x.unit)} · ${esc(x.note||nutrientStatusLabel(x.status))}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
 function renderNutrientReport(r, totals){
   const box=$('nutriContent');
-  const rows=(r.nutrients||[]).map(x=>`<div class="nutriRow ${esc(x.status)}">
-    <div class="name">${esc(x.name)}</div>
-    <div class="val">${Number(x.value||0).toFixed(x.value%1?1:0)} ${esc(x.unit)} · ${n(x.dailyValuePercent)}%</div>
-    <div class="stat">${nutrientStatusLabel(x.status)}</div>
-    <div class="nNote">${esc(x.note||'')}</div>
-  </div>`).join('');
+  const groups={'FŐ STATOK':[], 'ÁSVÁNYI ANYAGOK':[], 'VITAMINOK':[]};
+  (r.nutrients||[]).forEach(x=>{ const g=nutrientGroupName(x.name); groups[g].push(x); });
   const strengths=(r.likelyStrengths||[]).map(x=>`<span class="pill">${esc(x)}</span>`).join('');
   const gaps=(r.likelyGaps||[]).map(x=>`<span class="pill">${esc(x)}</span>`).join('');
   box.innerHTML=`<div class="nutriHead"><div class="h">${esc(r.headline||'Napi tápanyagbecslés')}</div><div class="s">${esc(r.summary||'')}</div></div>
     ${macroBarsHtml(totals||{kcal:0,protein:0,carbs:0,fat:0})}
-    ${nutrientColumnsHtml(r.nutrients||[])}
-    <div class="nutriTable">${rows}</div>
+    ${renderNutrientGroup('FŐ STATOK', groups['FŐ STATOK'])}
+    ${renderNutrientGroup('ÁSVÁNYI ANYAGOK', groups['ÁSVÁNYI ANYAGOK'])}
+    ${renderNutrientGroup('VITAMINOK', groups['VITAMINOK'])}
     <div><label>ERŐSSÉGEK</label><div class="pillList">${strengths||'<span class="pill">nincs elég adat</span>'}</div></div>
     <div><label>FIGYELENDŐ</label><div class="pillList">${gaps||'<span class="pill">nincs elég adat</span>'}</div></div>
     <div class="noteBox">${esc(r.practicalSuggestion||'')}</div>
-    <div class="hint">${esc(r.caveat||'Becslés, nem orvosi tanács.')}</div>`;
+    <div class="hint">${esc(r.caveat||'AI becslés · adagpontosságtól függ · nem orvosi tanács.')}</div>`;
 }
 async function openNutrientReport(){
   $('nutriErr').classList.remove('show'); $('nutriContent').innerHTML=''; show('nutrientOverlay');
@@ -869,7 +960,7 @@ $('dateLabel').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault
 $('calPrevMonth').onclick=async()=>{ state.calendarMonth=addMonths(state.calendarMonth || state.date.slice(0,7),-1); await renderCalendar(); };
 $('calNextMonth').onclick=async()=>{ state.calendarMonth=addMonths(state.calendarMonth || state.date.slice(0,7), 1); await renderCalendar(); };
 $('calTodayBtn').onclick=async()=>{ state.date=isoToday(); state.calendarMonth=state.date.slice(0,7); hide('calendarOverlay'); await render(); };
-$('mealsPanel').onclick=e=>{ if(e.target.closest('.del')) return; openDayDetail(); };
+$('mealsPanel').onclick=e=>{ e.stopPropagation(); if(e.target.closest('.del')) return; openDayDetail(); };
 $('mealsPanel').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openDayDetail(); } };
 
 $('openSettings').onclick=()=>{ $('setTarget').value=state.settings.kcalTarget; $('setBackend').value=state.settings.backendUrl; $('setSecret').value=state.settings.appSecret; show('settingsOverlay'); };
