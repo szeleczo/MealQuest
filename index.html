@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -64,7 +64,7 @@
     color:var(--c0); width:26px; height:26px; cursor:pointer; }
   .gear:active{ background:var(--c0); color:var(--lcd); }
 
-  main{ flex:1; min-height:0; overflow:hidden; padding:14px; display:flex; flex-direction:column; gap:14px; }
+  main{ flex:1; min-height:0; overflow:hidden; padding:14px 14px calc(76px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:14px; }
 
   /* ---- Hero: gym scene ---- */
   .stage{ border:3px solid var(--c0); box-shadow:5px 5px 0 var(--c0); background:var(--c4); line-height:0; overflow:hidden; position:relative; z-index:0; }
@@ -107,6 +107,8 @@
   .weightline{ margin-top:12px; display:flex; justify-content:space-between; align-items:baseline; }
   .weightline .w{ font-size:26px; }
   .weightline .trend{ font-size:18px; color:var(--c2); }
+  .dayFlow{ margin-top:7px; font-size:17px; color:var(--c1); border:2px dashed var(--c2); background:rgba(255,255,255,.22); padding:5px 7px; line-height:1.05; }
+  .activityLine{ margin-top:7px; font-size:18px; color:var(--c0); display:none; border:2px solid var(--c2); background:var(--lcd); padding:5px 7px; line-height:1.05; }
 
   .meals{ cursor:pointer; }
   .meals:active{ transform:translate(2px,2px); box-shadow:3px 3px 0 var(--c0); }
@@ -129,6 +131,12 @@
   .detailMeal .kcal{ font-family:'Press Start 2P',monospace; font-size:8px; white-space:nowrap; }
   .detailMeal .raw{ margin-top:6px; font-size:18px; color:var(--c1); }
   .detailMeal .meta{ margin-top:7px; font-size:16px; color:var(--c2); }
+  .detailWorkout{ border:3px solid var(--c0); background:var(--lcd); padding:10px; box-shadow:3px 3px 0 var(--c0); }
+  .detailWorkout .top{ display:flex; justify-content:space-between; gap:10px; align-items:baseline; }
+  .detailWorkout .name{ font-size:24px; }
+  .detailWorkout .kcal{ font-family:'Press Start 2P',monospace; font-size:8px; white-space:nowrap; }
+  .detailWorkout .raw{ margin-top:6px; font-size:18px; color:var(--c1); }
+  .detailWorkout .meta{ margin-top:7px; font-size:16px; color:var(--c2); }
   .nutriHead{ border:3px solid var(--c0); background:var(--c4); padding:12px 12px 11px; box-shadow:3px 3px 0 var(--c0); }
   .nutriHead .h{ font-size:25px; margin-bottom:8px; line-height:1.05; }
   .nutriHead .s{ font-size:18px; color:var(--c1); line-height:1.18; }
@@ -171,6 +179,16 @@
   .softBlock label{ margin-bottom:9px; line-height:1.35; }
 
 
+  /* Training input helpers + copy actions */
+  .presetGrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+  .presetBtn{ font-family:'Press Start 2P',monospace; font-size:7px; line-height:1.2; background:var(--lcd); color:var(--c0); border:2px solid var(--c0); padding:8px 5px; cursor:pointer; }
+  .presetBtn:active{ background:var(--c0); color:var(--lcd); }
+  .exerciseParseBox{ border:2px dashed var(--c2); padding:10px; background:rgba(255,255,255,.20); display:flex; flex-direction:column; gap:9px; }
+  .exerciseParseBox textarea{ min-height:70px; }
+  .copyActions{ display:flex; gap:8px; align-items:center; }
+  .copyActions .pix{ flex:0 0 auto; min-width:128px; }
+  .copyHint{ font-size:16px; color:var(--c2); line-height:1.15; }
+
 
   /* Calendar overlay */
   .calTop{ display:flex; align-items:center; justify-content:space-between; gap:8px; border:3px solid var(--c0); background:var(--c4); padding:9px; box-shadow:3px 3px 0 var(--c0); }
@@ -186,20 +204,24 @@
   .calDay.selected{ background:var(--c1); color:var(--lcd); }
   .calDay.today::before{ content:'MA'; position:absolute; top:-5px; right:2px; font-family:'Press Start 2P',monospace; font-size:5px; background:var(--lcd); color:var(--c0); border:1px solid var(--c0); padding:2px 2px; }
   .calMarks{ display:flex; gap:2px; min-height:6px; align-items:center; justify-content:center; }
-  .markMeal,.markWeight{ display:block; width:6px; height:6px; border:1px solid var(--c0); }
+  .markMeal,.markWeight,.markWorkout{ display:block; width:6px; height:6px; border:1px solid var(--c0); }
   .markMeal{ background:var(--c0); }
   .markWeight{ background:var(--lcd); }
-  .calDay.selected .markMeal,.calDay.selected .markWeight{ border-color:var(--lcd); }
+  .markWorkout{ background:var(--c2); }
+  .calDay.selected .markMeal,.calDay.selected .markWeight,.calDay.selected .markWorkout{ border-color:var(--lcd); }
   .calDay.selected .markMeal{ background:var(--lcd); }
+  .calDay.selected .markWorkout{ background:var(--lcd); }
   .calLegend{ display:flex; gap:8px; flex-wrap:wrap; font-size:17px; color:var(--c1); align-items:center; }
   .calLegend i{ display:inline-block; width:8px; height:8px; border:1px solid var(--c0); margin-right:3px; vertical-align:middle; }
   .calLegend .lm{ background:var(--c0); }
   .calLegend .lw{ background:var(--lcd); }
+  .calLegend .le{ background:var(--c2); }
   .calActions{ display:flex; gap:8px; }
   .calActions button{ flex:1; }
 
-  .actions{ display:flex; flex-direction:column; gap:10px; }
-  .btnrow{ display:flex; gap:10px; }
+  .actions{ position:absolute; left:14px; right:14px; bottom:calc(10px + env(safe-area-inset-bottom)); z-index:24; display:flex; flex-direction:column; gap:10px; }
+  .btnrow{ display:flex; gap:8px; }
+  .btnrow button.pix{ min-width:0; }
   button.pix{ font-family:'Press Start 2P', monospace; font-size:10px; background:var(--lcd); color:var(--c0);
     border:3px solid var(--c0); box-shadow:4px 4px 0 var(--c0); padding:13px 10px; cursor:pointer; flex:1; letter-spacing:0.5px; }
   button.pix:active{ transform:translate(2px,2px); box-shadow:2px 2px 0 var(--c0); }
@@ -298,7 +320,7 @@
     .datenav button,.gear{ width:23px; height:23px; border-width:2px; font-size:8px; }
     #dateLabel{ font-size:17px; min-width:75px; padding:1px 3px; }
     #dateLabel small{ font-size:11px; }
-    main{ padding:8px; gap:8px; overflow:hidden; }
+    main{ padding:8px 8px calc(60px + env(safe-area-inset-bottom)); gap:8px; overflow:hidden; }
     .stage{ border-width:2px; box-shadow:3px 3px 0 var(--c0); }
     .stage img{ height:min(31dvh, 248px); aspect-ratio:auto; object-fit:cover; object-position:center center; }
     .bubble{ padding:8px 9px 7px; box-shadow:3px 3px 0 var(--c0); border-width:2px; margin-top:6px; }
@@ -318,6 +340,8 @@
     .weightline{ margin-top:6px; }
     .weightline .w{ font-size:20px; }
     .weightline .trend{ font-size:15px; }
+    .dayFlow{ margin-top:5px; font-size:14px; padding:4px 6px; }
+    .activityLine{ margin-top:5px; font-size:15px; padding:4px 6px; }
     .meals ul{ gap:5px; max-height:70px; overflow:hidden; }
     .meal{ padding:5px 6px; gap:6px; border-width:2px; }
     .meal .t b{ font-size:18px; max-height:20px; overflow:hidden; }
@@ -341,9 +365,9 @@
     .calendarGrid{ gap:4px; }
     .calDay{ min-height:38px; font-size:18px; border-width:2px; }
     .calLegend{ font-size:15px; }
-    .actions{ gap:7px; }
-    .btnrow{ gap:7px; }
-    button.pix{ font-size:8px; border-width:2px; box-shadow:3px 3px 0 var(--c0); padding:9px 7px; }
+    .actions{ left:8px; right:8px; bottom:calc(7px + env(safe-area-inset-bottom)); gap:7px; }
+    .btnrow{ gap:6px; }
+    button.pix{ font-size:7px; border-width:2px; box-shadow:3px 3px 0 var(--c0); padding:9px 7px; }
     button.pix.ghost{ padding:6px; font-size:7px; }
 
     .heroPanel{ padding:5px; border-width:2px; box-shadow:3px 3px 0 var(--c0); gap:4px; }
@@ -376,6 +400,7 @@
     .bubble p{ font-size:16px; max-height:34px; }
     .questLog ul{ max-height:38px; }
     .weightline{ display:none; }
+    button.pix{ padding:8px 5px; font-size:6px; }
     button.pix.ghost.optional{ display:none; }
   }
 
@@ -418,31 +443,33 @@
 
       <!-- speech bubble -->
       <div class="bubble" id="coachBubble" role="button" tabindex="0" aria-label="Edző üzenetek váltása">
-        <span class="who">EDZŐ</span>
+        <span class="who">COACH</span>
         <p id="bubbleText">…</p>
       </div>
     </section>
 
     <!-- Stats -->
     <section class="panel todayPanel" id="todayPanel" role="button" tabindex="0" aria-label="Részletes napi tápanyagok">
-      <h2>MAI NAP <span class="tapHint">TÁPANYAG</span></h2>
+      <h2><span data-title="app.today">TODAY</span> <span class="tapHint" data-title="app.nutrients">NUTRIENTS</span></h2>
       <div class="kcalrow">
         <div><span class="big" id="kcalNow">0</span></div>
         <div class="tgt">/ <span id="kcalTgt">2200</span> kcal</div>
       </div>
       <div class="bar" id="kcalBar"><i></i></div>
       <div class="macros">
-        <div class="macro"><b id="mP">0</b><span>FEHÉRJE g</span></div>
-        <div class="macro"><b id="mC">0</b><span>SZÉNH. g</span></div>
-        <div class="macro"><b id="mF">0</b><span>ZSÍR g</span></div>
+        <div class="macro"><b id="mP">0</b><span>PROTEIN g</span></div>
+        <div class="macro"><b id="mC">0</b><span>CARBS g</span></div>
+        <div class="macro"><b id="mF">0</b><span>FAT g</span></div>
       </div>
       <div class="weightline">
-        <div class="w">Súly: <span id="wToday">—</span></div>
+        <div class="w"><span id="weightLabel">Weight</span>: <span id="wToday">—</span></div>
         <div class="trend" id="wTrend"></div>
       </div>
+      <div class="dayFlow" id="dayFlow">FOOD 0 · TRAIN -0 · NET 0</div>
+      <div class="activityLine" id="activityLine"></div>
 
       <div class="questLog" id="mealsPanel" role="button" tabindex="0" aria-label="Teljes napi étkezéslista">
-        <div class="questHead chrome"><span>MEAL LOG</span><span>RÉSZLET</span></div>
+        <div class="questHead chrome"><span data-title="app.mealLog">MEAL LOG</span><span data-title="app.detail">DETAIL</span></div>
         <ul id="mealList"></ul>
         <div class="empty" id="mealEmpty">Ma még üres a napló. Az edző vár egy adatra.</div>
       </div>
@@ -451,8 +478,9 @@
     <!-- Actions -->
     <div class="actions">
       <div class="btnrow">
-        <button class="pix solid" id="addMealBtn">+ ÉTEL</button>
-        <button class="pix" id="addWeightBtn">+ SÚLY</button>
+        <button class="pix solid" id="addMealBtn">+ MEAL</button>
+        <button class="pix" id="addWeightBtn">+ WEIGHT</button>
+        <button class="pix" id="addExerciseBtn">+ TRAIN</button>
       </div>
     </div>
   </main>
@@ -467,11 +495,11 @@
 <!-- ADD MEAL -->
 <div class="overlay" id="mealOverlay">
   <div class="sheet">
-    <header class="chrome"><h2>+ ÉTEL</h2><button class="closebtn" data-close="mealOverlay">X</button></header>
+    <header class="chrome"><h2 data-title="meal.title">+ MEAL</h2><button class="closebtn" data-close="mealOverlay">X</button></header>
     <div class="body">
-      <div><label>Mit ettél? (szabad szöveg)</label>
+      <div><label data-label="meal.what">What did you eat? (free text)</label>
         <textarea id="mealText" placeholder="2 csirkecomb, kb 200g főtt rizs, paradicsom, 1 ayran"></textarea></div>
-      <div><label>Idő (opcionális)</label><input id="mealTime" type="time" /></div>
+      <div><label data-label="meal.time">Time (optional)</label><input id="mealTime" type="time" /></div>
       <button class="pix solid" id="analyzeBtn">BECSLÉS</button>
       <div class="hint" id="aiHint">Automatikus becslés kikapcsolva — add meg a backend URL-t a beállításokban, vagy vidd fel kézzel lentebb.</div>
       <div class="spinner chrome" id="mealSpinner">ELEMZÉS…</div>
@@ -480,20 +508,20 @@
         <div class="ttl" id="pvTitle"></div>
         <div class="range" id="pvRange"></div>
         <div class="grid3">
-          <div class="macro"><b id="pvP">0</b><span>FEH g</span></div>
-          <div class="macro"><b id="pvC">0</b><span>SZH g</span></div>
-          <div class="macro"><b id="pvF">0</b><span>ZS g</span></div>
+          <div class="macro"><b id="pvP">0</b><span>PROT g</span></div>
+          <div class="macro"><b id="pvC">0</b><span>CARB g</span></div>
+          <div class="macro"><b id="pvF">0</b><span>FAT g</span></div>
         </div>
         <div class="note" id="pvNote"></div>
         <div class="assum" id="pvAssum"></div>
       </div>
-      <div><label>Megnevezés</label><input id="mTitle" placeholder="pl. Ebéd — csirke rizzsel" /></div>
+      <div><label data-label="meal.name">Name</label><input id="mTitle" placeholder="pl. Ebéd — csirke rizzsel" /></div>
       <div class="grid3">
-        <div><label>Kcal</label><input id="mKcal" type="number" inputmode="numeric" placeholder="0" /></div>
-        <div><label>Feh. g</label><input id="mProt" type="number" inputmode="numeric" placeholder="0" /></div>
-        <div><label>Zsír g</label><input id="mFat" type="number" inputmode="numeric" placeholder="0" /></div>
+        <div><label data-label="meal.kcal">Kcal</label><input id="mKcal" type="number" inputmode="numeric" placeholder="0" /></div>
+        <div><label data-label="meal.proteinShort">Prot. g</label><input id="mProt" type="number" inputmode="numeric" placeholder="0" /></div>
+        <div><label data-label="meal.fatShort">Fat g</label><input id="mFat" type="number" inputmode="numeric" placeholder="0" /></div>
       </div>
-      <div><label>Szénhidrát g</label><input id="mCarb" type="number" inputmode="numeric" placeholder="0" /></div>
+      <div><label data-label="meal.carbs">Carbs g</label><input id="mCarb" type="number" inputmode="numeric" placeholder="0" /></div>
       <button class="pix solid" id="saveMealBtn">MENTÉS A NAPLÓBA</button>
     </div>
   </div>
@@ -502,12 +530,54 @@
 <!-- ADD WEIGHT -->
 <div class="overlay" id="weightOverlay">
   <div class="sheet">
-    <header class="chrome"><h2>+ SÚLY</h2><button class="closebtn" data-close="weightOverlay">X</button></header>
+    <header class="chrome"><h2 data-title="weight.title">+ WEIGHT</h2><button class="closebtn" data-close="weightOverlay">X</button></header>
     <div class="body">
-      <div><label>Testsúly (kg)</label><input id="wKg" type="number" inputmode="decimal" step="0.1" placeholder="84.2" /></div>
-      <div><label>Megjegyzés (opcionális)</label><input id="wNote" placeholder="reggel, éhgyomorra" /></div>
-      <div class="hint">A napi ingadozás normális. A trend számít, nem egyetlen szám.</div>
+      <div><label data-label="weight.kg">Body weight (kg)</label><input id="wKg" type="number" inputmode="decimal" step="0.1" placeholder="84.2" /></div>
+      <div><label data-label="weight.note">Note (optional)</label><input id="wNote" placeholder="reggel, éhgyomorra" /></div>
+      <div class="hint" data-title="weight.hint">Daily fluctuation is normal. The trend matters, not one number.</div>
       <button class="pix solid" id="saveWeightBtn">SÚLY RÖGZÍTÉSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD EXERCISE -->
+<div class="overlay" id="exerciseOverlay">
+  <div class="sheet">
+    <header class="chrome"><h2 data-title="exercise.title">+ TRAINING</h2><button class="closebtn" data-close="exerciseOverlay">X</button></header>
+    <div class="body">
+      <div><label data-label="exercise.preset">Choose a quick type</label>
+        <div class="presetGrid" id="exercisePresets">
+          <button class="presetBtn" type="button" data-ex="walk">WALK</button>
+          <button class="presetBtn" type="button" data-ex="run">RUN</button>
+          <button class="presetBtn" type="button" data-ex="bike">BIKE</button>
+          <button class="presetBtn" type="button" data-ex="gym">GYM</button>
+          <button class="presetBtn" type="button" data-ex="pushups">PUSH-UPS</button>
+          <button class="presetBtn" type="button" data-ex="squats">SQUATS</button>
+          <button class="presetBtn" type="button" data-ex="plank">PLANK</button>
+          <button class="presetBtn" type="button" data-ex="pullups">PULL-UPS</button>
+          <button class="presetBtn" type="button" data-ex="custom">CUSTOM</button>
+        </div>
+      </div>
+      <div class="exerciseParseBox">
+        <div><label data-label="exercise.freeText">Free text / AI fill</label><textarea id="exFreeText" placeholder="3x12 push-ups, 30 squats, 1 min plank"></textarea></div>
+        <div class="btnrow">
+          <button class="pix ghost" id="parseExerciseBtn" type="button">FILL OFFLINE</button>
+          <button class="pix ghost" id="aiExerciseBtn" type="button">AI FILL</button>
+        </div>
+        <div class="spinner chrome" id="exerciseSpinner">ANALYZING TRAINING…</div>
+        <div class="errline" id="exerciseErr"></div>
+      </div>
+      <div><label data-label="exercise.activity">Activity</label><input id="exActivity" placeholder="gym, walk, run, cycling" /></div>
+      <div><label data-label="exercise.time">Time (optional)</label><input id="exTime" type="time" /></div>
+      <div class="grid3">
+        <div><label data-label="exercise.minutes">Minutes</label><input id="exMinutes" type="number" inputmode="numeric" placeholder="45" /></div>
+        <div><label data-label="exercise.kcal">Burned kcal</label><input id="exKcal" type="number" inputmode="numeric" placeholder="250" /></div>
+        <div><label data-label="exercise.intensity">Intensity</label><input id="exIntensity" placeholder="easy / medium" /></div>
+      </div>
+      <button class="pix ghost" id="estimateExerciseBtn">QUICK ESTIMATE</button>
+      <div><label data-label="exercise.note">Note (optional)</label><input id="exNote" placeholder="upper body, treadmill, stairs" /></div>
+      <div class="hint" data-title="exercise.hint">Training lowers the daily net kcal. It is still only an estimate, but useful for daily control.</div>
+      <button class="pix solid" id="saveExerciseBtn">SAVE TRAINING</button>
     </div>
   </div>
 </div>
@@ -517,18 +587,18 @@
 <!-- CALENDAR -->
 <div class="overlay" id="calendarOverlay">
   <div class="sheet">
-    <header class="chrome"><h2>NAPTÁR</h2><button class="closebtn" data-close="calendarOverlay">X</button></header>
+    <header class="chrome"><h2 data-title="calendar.title">CALENDAR</h2><button class="closebtn" data-close="calendarOverlay">X</button></header>
     <div class="body">
       <div class="calTop">
         <button id="calPrevMonth" aria-label="Előző hónap">&lt;</button>
         <div id="calMonthLabel">—</div>
         <button id="calNextMonth" aria-label="Következő hónap">&gt;</button>
       </div>
-      <div class="calWeek chrome"><span>H</span><span>K</span><span>SZE</span><span>CS</span><span>P</span><span>SZO</span><span>V</span></div>
+      <div class="calWeek chrome" id="calWeek"><span>M</span><span>T</span><span>W</span><span>TH</span><span>F</span><span>SA</span><span>S</span></div>
       <div class="calendarGrid" id="calendarGrid"></div>
-      <div class="calLegend"><span><i class="lm"></i>étkezés</span><span><i class="lw"></i>súly</span><span>MA = mai nap</span></div>
+      <div class="calLegend"><span><i class="lm"></i><span data-title="calendar.meal">meal</span></span><span><i class="lw"></i><span data-title="calendar.weight">weight</span></span><span><i class="le"></i><span data-title="calendar.exercise">training</span></span><span data-title="calendar.todayMark">TODAY = current day</span></div>
       <div class="calActions"><button class="pix solid" id="calTodayBtn">MAI NAP</button></div>
-      <div class="hint">A dátumra koppintva nyílik. Balra/jobbra swipe továbbra is napot vált.</div>
+      <div class="hint" data-title="calendar.hint">Tap the date to open. Left/right swipe still changes days.</div>
     </div>
   </div>
 </div>
@@ -536,9 +606,10 @@
 <!-- DAY DETAIL -->
 <div class="overlay" id="dayOverlay">
   <div class="sheet">
-    <header class="chrome"><h2>TELJES NAP</h2><button class="closebtn" data-close="dayOverlay">X</button></header>
+    <header class="chrome"><h2 data-title="day.title">FULL DAY</h2><button class="closebtn" data-close="dayOverlay">X</button></header>
     <div class="body">
-      <div class="hint">A főképernyő szándékosan tömör. Itt látszik a teljes szöveg, scrollbar nélkül, érintéssel görgetve.</div>
+      <div class="hint" data-title="day.hint">The main screen is intentionally compact. Full text is here, touch-scrollable without visible scrollbars.</div>
+      <div class="copyActions"><button class="pix ghost" id="copyDayLogBtn" type="button" data-title="btn.copyLog">COPY LOG</button><span class="copyHint" id="copyLogHint"></span></div>
       <div class="detailList" id="dayMealFullList"></div>
     </div>
   </div>
@@ -547,12 +618,13 @@
 <!-- EXTRA NUTRIENTS -->
 <div class="overlay" id="nutrientOverlay">
   <div class="sheet">
-    <header class="chrome"><h2>NAPI TÁPANYAGOK</h2><button class="closebtn" data-close="nutrientOverlay">X</button></header>
+    <header class="chrome"><h2 data-title="nutri.title">DAILY NUTRIENTS</h2><button class="closebtn" data-close="nutrientOverlay">X</button></header>
     <div class="body">
-      <div class="hint">A MAI NAP panelről nyílik. Makrók, vitaminok, ásványi anyagok, rost, só és koleszterin becslése. Nem laboreredmény, hanem napi tájékozódás.</div>
+      <div class="hint" data-title="nutri.hint">Opened from the TODAY panel. Estimated macros, vitamins, minerals, fiber, salt and cholesterol. Not a lab result, just daily orientation.</div>
       <div class="nutriActions">
-        <button class="pix solid" id="refreshNutrientsBtn">FRISSÍTÉS / ELEMZÉS</button>
+        <div class="btnrow"><button class="pix solid" id="refreshNutrientsBtn">FRISSÍTÉS / ELEMZÉS</button><button class="pix ghost" id="copyDailySummaryBtn" type="button" data-title="btn.copySummary">COPY SUMMARY</button></div>
         <div class="nutriMeta empty" id="nutriMeta">A részletes tápanyagbecslés csak akkor hív API-t, ha itt frissítést kérsz.</div>
+        <div class="copyHint" id="copySummaryHint"></div>
       </div>
       <div class="spinner chrome" id="nutriSpinner">RÉSZLETES ELEMZÉS…</div>
       <div class="errline" id="nutriErr"></div>
@@ -564,36 +636,107 @@
 <!-- SETTINGS -->
 <div class="overlay" id="settingsOverlay">
   <div class="sheet">
-    <header class="chrome"><h2>BEÁLLÍTÁS</h2><button class="closebtn" data-close="settingsOverlay">X</button></header>
+    <header class="chrome"><h2 data-title="settings.title">SETTINGS</h2><button class="closebtn" data-close="settingsOverlay">X</button></header>
     <div class="body">
-      <div><label>Napi kcal cél</label><input id="setTarget" type="number" inputmode="numeric" placeholder="2200" /></div>
-      <div><label>Backend URL (becsléshez)</label><input id="setBackend" placeholder="https://mealquest.<neved>.workers.dev" />
-        <div class="hint">Cloudflare Worker URL. Üresen = kézi mód. Az API-kulcs csak a Workerben él, sosem itt.</div></div>
-      <div><label>App titok (x-app-secret)</label><input id="setSecret" placeholder="a Worker APP_API_SECRET titka" /></div>
-      <button class="pix solid" id="saveSettingsBtn">MENTÉS</button>
+      <div><label data-label="settings.kcal">Daily kcal target</label><input id="setTarget" type="number" inputmode="numeric" placeholder="2200" /></div>
+      <div><label data-label="settings.backend">Backend URL (for estimates)</label><input id="setBackend" placeholder="https://mealquest.<neved>.workers.dev" />
+        <div class="hint" data-title="settings.backendHint">Cloudflare Worker URL. Empty = manual mode. The API key lives only in the Worker, never here.</div></div>
+      <div><label id="lblSecret" data-label="settings.secret">App secret (x-app-secret)</label><input id="setSecret" placeholder="Worker APP_API_SECRET" /></div>
+      <div><label id="lblLanguage" data-label="settings.language">App language</label><input id="setLanguage" placeholder="English, Hungarian, Spanish…" />
+        <div class="hint" id="languageHint">Default language is English. AI language packs are saved on this device and survive app refreshes.</div></div>
+      <div class="btnrow">
+        <button class="pix ghost" id="useEnglishBtn">ENGLISH</button>
+        <button class="pix ghost" id="useHungarianBtn">MAGYAR</button>
+      </div>
+      <button class="pix ghost" id="localizeBtn">ADAPT LANGUAGE</button>
+      <div class="spinner chrome" id="langSpinner">ADAPTING…</div>
+      <div class="errline" id="langErr"></div>
+      <button class="pix solid" id="saveSettingsBtn">SAVE</button>
       <button class="pix ghost" id="settingsInstallBtn">TELEPÍTÉS</button>
       <button class="pix ghost" id="refreshAppBtn">APP FRISSÍTÉSE</button>
       <button class="pix ghost" id="exportBtn">EXPORT JSON</button>
       <button class="pix ghost" id="importBtn">IMPORT JSON</button>
       <input id="importFile" type="file" accept="application/json,.json" hidden />
       <button class="pix ghost" id="wipeBtn">MAI NAP TÖRLÉSE</button>
-      <div class="hint" id="backupHint">Export/import: a naplózott étkezések és súlyadatok mentése JSON fájlba. Az App titok biztonság miatt nem kerül exportba.</div>
-      <div class="hint">APP FRISSÍTÉSE: csak az offline app-cache-t és service workert cseréli. A napló, a Backend URL és az App titok megmarad.</div>
-      <div class="hint">MealQuest v0.3.6 · adatok a te eszközödön (IndexedDB) · offline PWA</div>
+      <div class="hint" id="backupHint">Export/import saves meals and weights to a JSON file. The App secret is not exported for safety.</div>
+      <div class="hint" data-title="settings.refreshHint">REFRESH APP only refreshes the offline app cache and service worker. Log, Backend URL and App secret remain.</div>
+      <div class="hint" data-title="settings.version">MealQuest v0.4.1 · data on your device (IndexedDB) · offline PWA</div>
     </div>
   </div>
 </div>
 
 <script>
-const DB_NAME='mealquest', DB_VER=1;
+const DB_NAME='mealquest', DB_VER=2;
 let db, deferredInstallPrompt=null, state={
   date:isoToday(),
-  settings:{ kcalTarget:2200, backendUrl:'', appSecret:'' },
+  settings:{ kcalTarget:2200, backendUrl:'', appSecret:'', language:'en', languageLabel:'English', uiPack:null },
   pendingAI:null,
   coachHistory:[],
   coachIndex:-1,
   coachCycleMode:false
 };
+
+
+const UI_EN={
+  'coach.label':'COACH','app.settings':'SETTINGS','app.today':'TODAY','app.nutrients':'NUTRIENTS','app.detail':'DETAIL','app.mealLog':'MEAL LOG','app.emptyDay':'No meals logged yet. The trainer is waiting for data.','app.weight':'Weight','app.roomLv':'ROOM LV. {level}','app.routine':'ROUTINE {good}/7','room.fat':'STARTING ROOM','room.medium':'CONTROL BUILDING','room.lean':'GOOD ROUTINE',
+  'btn.addMeal':'+ MEAL','btn.addWeight':'+ WEIGHT','btn.addExercise':'+ TRAIN','btn.estimate':'ESTIMATE','btn.saveLog':'SAVE TO LOG','btn.save':'SAVE','btn.install':'INSTALL','btn.refreshApp':'REFRESH APP','btn.export':'EXPORT JSON','btn.import':'IMPORT JSON','btn.wipeDay':'DELETE TODAY','btn.refreshNutrients':'REFRESH / ANALYZE','btn.estimateExercise':'QUICK ESTIMATE','btn.english':'ENGLISH','btn.hungarian':'MAGYAR','btn.adaptLanguage':'ADAPT LANGUAGE',
+  'meal.title':'+ MEAL','meal.what':'What did you eat? (free text)','meal.placeholder':'2 chicken legs, about 200g cooked rice, tomato, 1 ayran','meal.time':'Time (optional)','meal.aiOff':'Automatic estimate is off — add the backend URL in settings, or enter values manually below.','meal.spinner':'ANALYZING…','meal.name':'Name','meal.namePlaceholder':'e.g. Lunch — chicken with rice','meal.kcal':'Kcal','meal.proteinShort':'Prot. g','meal.fatShort':'Fat g','meal.carbs':'Carbs g',
+  'weight.title':'+ WEIGHT','weight.kg':'Body weight (kg)','weight.note':'Note (optional)','weight.placeholder':'morning, before breakfast','weight.hint':'Daily fluctuation is normal. The trend matters, not one number.','weight.save':'SAVE WEIGHT',
+  'exercise.title':'+ TRAINING','exercise.activity':'Activity','exercise.time':'Time (optional)','exercise.minutes':'Minutes','exercise.kcal':'Burned kcal','exercise.intensity':'Intensity','exercise.note':'Note (optional)','exercise.hint':'Training lowers the daily net kcal. It is still only an estimate, but useful for daily control.','exercise.save':'SAVE TRAINING','exercise.empty':'No training logged yet.','exercise.saved':'Training logged: -{kcal} kcal. Net day updated.','exercise.auto':'Quick estimate added. Adjust it if needed.',
+  'calendar.title':'CALENDAR','calendar.today':'TODAY','calendar.meal':'meal','calendar.weight':'weight','calendar.exercise':'training','calendar.todayMark':'TODAY = current day','calendar.hint':'Tap the date to open. Left/right swipe still changes days.','calendar.days':'M,T,W,TH,F,SA,S',
+  'day.title':'FULL DAY','day.hint':'The main screen is intentionally compact. Full text is here, touch-scrollable without visible scrollbars.','nutri.title':'DAILY NUTRIENTS','nutri.hint':'Opened from the TODAY panel. Estimated macros, vitamins, minerals, fiber, salt and cholesterol. Not a lab result, just daily orientation.','nutri.meta.empty':'Detailed nutrients only use an API call when you ask for refresh here.','nutri.spinner':'DETAILED ANALYSIS…','nutri.noMeals':'Nothing to analyze yet. Log a meal first.','nutri.noMeals2':'Log a meal first, then there is something to analyze.','nutri.needBackend':'Detailed analysis needs the Backend URL in Settings.','nutri.needBackend2':'Extra nutrient estimation needs the backend URL in settings.','nutri.running':'Detailed analysis running… this uses one API call.','nutri.saved':'Fresh detailed analysis saved: {time}.','nutri.failed':'Detailed nutrient estimate failed: {error}','nutri.cachedFresh':'Last detailed analysis: {time}. Meals have not changed since.','nutri.cachedStale':'A previous analysis exists, but the log changed. Press REFRESH / ANALYZE if you want a new estimate.','nutri.noneCached':'No detailed nutrient estimate yet. Press REFRESH / ANALYZE if you want one. This uses one API call.','nutri.noneCached2':'No detailed daily nutrient estimate yet. The button starts analysis only on request, so it does not waste API calls.','nutri.noData':'not enough data','nutri.chartTitle':'DAILY VALUE % · QUICK VIEW','nutri.mainStats':'MAIN STATS','nutri.minerals':'MINERALS','nutri.vitamins':'VITAMINS','nutri.strengths':'STRENGTHS','nutri.watch':'WATCH','nutri.restOfDay':'REST OF DAY','nutri.trainerNote':'TRAINER NOTE','nutri.caveat':'Estimate · depends on portions · not medical advice.',
+  'settings.title':'SETTINGS','settings.kcal':'Daily kcal target','settings.backend':'Backend URL (for estimates)','settings.backendHint':'Cloudflare Worker URL. Empty = manual mode. The API key lives only in the Worker, never here.','settings.secret':'App secret (x-app-secret)','settings.secretPlaceholder':'Worker APP_API_SECRET','settings.language':'App language','settings.languageHint':'Default language is English. AI language packs are saved on this device and survive app refreshes.','settings.langSaved':'Language saved.','settings.langNeedBackend':'Language adaptation needs Backend URL and App secret first.','settings.langRunning':'Adapting the app language… this uses one API call.','settings.langDone':'Language pack saved: {language}. App updates will not overwrite it.','settings.langFail':'Language adaptation failed: {error}','settings.backup':'Export/import saves meals and weights to a JSON file. The App secret is not exported for safety.','settings.refreshHint':'REFRESH APP only refreshes the offline app cache and service worker. Log, Backend URL and App secret remain.','settings.version':'MealQuest v0.4.1 · data on your device (IndexedDB) · offline PWA',
+  'coach.lowData':'Low data. The trainer does not predict through fog.','coach.good':'Control looks good. Mission continues.','coach.under':'Under target. Fine, but protein could be higher tomorrow.','coach.over':'Over target by about {diff} kcal. Logged. Tomorrow a lighter side dish balances it.','coach.noMealsReport':'No meals logged today. Log first, then the trainer can report.','coach.goodReport':'Control good: {kcal} kcal within the {target} target, protein {protein} g. The logging is the win today.','coach.underReport':'{kcal} kcal, under target. Fine, but protein ({protein} g) could be higher tomorrow.','coach.overReport':'{kcal} kcal, {diff} over target. Logged. Tomorrow a lighter side dish balances it.','coach.installReady':'Already running as an app. No reinstall needed.','coach.refreshing':'Refreshing the app. Log and App secret remain.','coach.refreshedFail':'Refresh failed. The log is safe; try refreshing from the browser.','coach.nutrientsSaved':'Detailed daily nutrient estimate updated. It is saved for this day.','coach.exerciseSaved':'Training logged. Daily net kcal lowered by {kcal}.',
+  'remaining.lotProtein':'About {left} kcal left. Protein could still use about {proteinLeft} g, so choose simple protein + vegetables, with a smaller side dish.','remaining.lot':'About {left} kcal left. Protein is roughly fine, so a normal but not heavy meal works: vegetables + smaller side + simple protein.','remaining.someProtein':'About {left} kcal fits. For the rest of the day, prioritize protein with little side dish.','remaining.some':'About {left} kcal fits. A light dinner / small snack still fits, but I would not force a big side dish.','remaining.closeProtein':'You are close to target. If you still eat, choose a small protein option with little fat and little side dish.','remaining.close':'You are close to the daily target. From here, a light controlled finish is best.','remaining.over':'You are about {over} kcal over target. Not tragic, but today I would keep it to water, vegetables, light protein; no new big meal.','remaining.proteinGap':'Protein may still be about {proteinLeft} g short for a good day.','remaining.carbHigh':'Carbs are already on the higher side, so further side dishes should be reduced.','remaining.fatHigh':'Fat is already on the higher side, so I would avoid oily/cheesy/sausage-heavy finishes.'
+};
+const UI_HU={
+  'coach.label':'EDZŐ','app.settings':'BEÁLLÍTÁS','app.today':'MAI NAP','app.nutrients':'TÁPANYAG','app.detail':'RÉSZLET','app.mealLog':'MEAL LOG','app.emptyDay':'Ma még üres a napló. Az edző vár egy adatra.','app.weight':'Súly','app.roomLv':'ROOM LV. {level}','app.routine':'RUTIN {good}/7','room.fat':'KEZDŐ TEREM','room.medium':'KONTROLL ALAKUL','room.lean':'JÓ RUTIN',
+  'btn.addMeal':'+ ÉTEL','btn.addWeight':'+ SÚLY','btn.addExercise':'+ EDZÉS','btn.estimate':'BECSLÉS','btn.saveLog':'MENTÉS A NAPLÓBA','btn.save':'MENTÉS','btn.install':'TELEPÍTÉS','btn.refreshApp':'APP FRISSÍTÉSE','btn.export':'EXPORT JSON','btn.import':'IMPORT JSON','btn.wipeDay':'MAI NAP TÖRLÉSE','btn.refreshNutrients':'FRISSÍTÉS / ELEMZÉS','btn.estimateExercise':'GYORS BECSLÉS','btn.english':'ENGLISH','btn.hungarian':'MAGYAR','btn.adaptLanguage':'NYELV ÁTALAKÍTÁSA',
+  'meal.title':'+ ÉTEL','meal.what':'Mit ettél? (szabad szöveg)','meal.placeholder':'2 csirkecomb, kb 200g főtt rizs, paradicsom, 1 ayran','meal.time':'Idő (opcionális)','meal.aiOff':'Automatikus becslés kikapcsolva — add meg a backend URL-t a beállításokban, vagy vidd fel kézzel lentebb.','meal.spinner':'ELEMZÉS…','meal.name':'Megnevezés','meal.namePlaceholder':'pl. Ebéd — csirke rizzsel','meal.kcal':'Kcal','meal.proteinShort':'Feh. g','meal.fatShort':'Zsír g','meal.carbs':'Szénhidrát g',
+  'weight.title':'+ SÚLY','weight.kg':'Testsúly (kg)','weight.note':'Megjegyzés (opcionális)','weight.placeholder':'reggel, éhgyomorra','weight.hint':'A napi ingadozás normális. A trend számít, nem egyetlen szám.','weight.save':'SÚLY RÖGZÍTÉSE',
+  'exercise.title':'+ EDZÉS','exercise.activity':'Edzés / mozgás','exercise.time':'Idő (opcionális)','exercise.minutes':'Perc','exercise.kcal':'Elégetett kcal','exercise.intensity':'Intenzitás','exercise.note':'Megjegyzés (opcionális)','exercise.hint':'Az edzés a napi nettó kcal-t csökkenti. Ez is csak becslés, de napi kontrollhoz hasznos.','exercise.save':'EDZÉS RÖGZÍTÉSE','exercise.empty':'Ma még nincs edzés rögzítve.','exercise.saved':'Edzés rögzítve: -{kcal} kcal. A napi nettó frissült.','exercise.auto':'Gyors becslés kitöltve. Ha kell, írd át.',
+  'calendar.title':'NAPTÁR','calendar.today':'MAI NAP','calendar.meal':'étkezés','calendar.weight':'súly','calendar.exercise':'edzés','calendar.todayMark':'MA = mai nap','calendar.hint':'A dátumra koppintva nyílik. Balra/jobbra swipe továbbra is napot vált.','calendar.days':'H,K,SZE,CS,P,SZO,V',
+  'day.title':'TELJES NAP','day.hint':'A főképernyő szándékosan tömör. Itt látszik a teljes szöveg, scrollbar nélkül, érintéssel görgetve.','nutri.title':'NAPI TÁPANYAGOK','nutri.hint':'A MAI NAP panelről nyílik. Makrók, vitaminok, ásványi anyagok, rost, só és koleszterin becslése. Nem laboreredmény, hanem napi tájékozódás.','nutri.meta.empty':'A részletes tápanyagbecslés csak akkor hív API-t, ha itt frissítést kérsz.','nutri.spinner':'RÉSZLETES ELEMZÉS…','nutri.noMeals':'Nincs még mit elemezni. Előbb rögzíts étkezést ezen a napon.','nutri.noMeals2':'Előbb rögzíts étkezést, utána van mit elemezni.','nutri.needBackend':'A részletes elemzéshez kell Backend URL a Beállításokban.','nutri.needBackend2':'Az extra tápanyagbecsléshez kell a backend URL a beállításokban.','nutri.running':'Részletes elemzés fut… ez most egy API-hívás.','nutri.saved':'Friss részletes elemzés mentve: {time}.','nutri.failed':'A részletes tápanyagbecslés nem sikerült: {error}','nutri.cachedFresh':'Utolsó részletes elemzés: {time}. Azóta nem változott a napi étkezéslista.','nutri.cachedStale':'Van korábbi elemzés, de azóta változott a napló. Nyomj FRISSÍTÉS / ELEMZÉS-t, ha új becslést kérsz.','nutri.noneCached':'Ehhez a naphoz még nincs részletes tápanyagbecslés. Nyomj FRISSÍTÉS / ELEMZÉS-t, ha kéred. Ez egy API-hívást használ.','nutri.noneCached2':'Még nincs részletes napi tápanyagbecslés. A gomb csak kérésre indít elemzést, így nem költ feleslegesen API-hívást.','nutri.noData':'nincs elég adat','nutri.chartTitle':'NAPI ÉRTÉK % · GYORS NÉZET','nutri.mainStats':'FŐ STATOK','nutri.minerals':'ÁSVÁNYI ANYAGOK','nutri.vitamins':'VITAMINOK','nutri.strengths':'ERŐSSÉGEK','nutri.watch':'FIGYELENDŐ','nutri.restOfDay':'NAP MARADÉKA','nutri.trainerNote':'EDZŐI MEGJEGYZÉS','nutri.caveat':'Becslés · adagpontosságtól függ · nem orvosi tanács.',
+  'settings.title':'BEÁLLÍTÁS','settings.kcal':'Napi kcal cél','settings.backend':'Backend URL (becsléshez)','settings.backendHint':'Cloudflare Worker URL. Üresen = kézi mód. Az API-kulcs csak a Workerben él, sosem itt.','settings.secret':'App titok (x-app-secret)','settings.secretPlaceholder':'a Worker APP_API_SECRET titka','settings.language':'App nyelve','settings.languageHint':'Az alapnyelv angol. Az AI nyelvi csomag ezen az eszközön mentődik, és appfrissítés nem írja felül.','settings.langSaved':'Nyelv mentve.','settings.langNeedBackend':'A nyelvi átalakításhoz előbb kell Backend URL és App titok.','settings.langRunning':'Az app nyelvi csomagja készül… ez egy API-hívás.','settings.langDone':'Nyelvi csomag mentve: {language}. Appfrissítés nem írja felül.','settings.langFail':'A nyelvi átalakítás nem sikerült: {error}','settings.backup':'Export/import: a naplózott étkezések és súlyadatok mentése JSON fájlba. Az App titok biztonság miatt nem kerül exportba.','settings.refreshHint':'APP FRISSÍTÉSE: csak az offline app-cache-t és service workert cseréli. A napló, a Backend URL és az App titok megmarad.','settings.version':'MealQuest v0.4.1 · adatok a te eszközödön (IndexedDB) · offline PWA',
+  'coach.lowData':'Kevés adat. Az edző ködből nem jósol.','coach.good':'Kontroll rendben. Küldetés folytatható.','coach.under':'Keret alatt. Rendben, de a fehérje lehetne feljebb holnap.','coach.over':'Kb. {diff} kcal a keret fölött. Bejegyezve. Holnap egy könnyebb köret kiegyenlíti.','coach.noMealsReport':'Nincs rögzített étkezés ma. A jelentéshez előbb naplózz.','coach.goodReport':'Kontroll rendben: {kcal} kcal a {target}-es keretben, fehérje {protein} g. A rögzítés a lényeg — ma megvan.','coach.underReport':'{kcal} kcal, keret alatt. Rendben, de a fehérje ({protein} g) lehetne feljebb holnap.','coach.overReport':'{kcal} kcal, {diff} a keret fölött. Bejegyezve. Holnap egy könnyebb köret kiegyenlíti.','coach.installReady':'Már appként fut. Nem kell újratelepíteni.','coach.refreshing':'Frissítem az appot. A napló és az App titok megmarad.','coach.refreshedFail':'Frissítés nem sikerült. A napló nem sérült; próbálj böngészőből frissíteni.','coach.nutrientsSaved':'Részletes napi tápanyagbecslés frissítve. Ez már el van mentve ehhez a naphoz.','coach.exerciseSaved':'Edzés rögzítve. A napi nettó kcal {kcal}-lal csökkent.',
+  'remaining.lotProtein':'Még kb. {left} kcal maradt. Fehérjéből még kb. {proteinLeft} g kellene, ezért egyszerű fehérje + zöldség + kisebb köret jó irány.','remaining.lot':'Még kb. {left} kcal maradt. Fehérje nagyjából rendben, ezért jöhet egy normális, de nem nehéz étkezés: zöldség + kisebb köret + egyszerű fehérje.','remaining.someProtein':'Még kb. {left} kcal fér bele. A nap maradékában inkább fehérjét érdemes pótolni kevés körettel.','remaining.some':'Még kb. {left} kcal fér bele. Könnyű vacsora / kis snack még belefér, de nagy köretet már nem erőltetnék.','remaining.closeProtein':'Már közel vagy a napi célhoz. Ha még ennél, inkább kis fehérjés opciót válassz, kevés zsírral és kevés körettel.','remaining.close':'A napi cél közelében vagy. Innen már inkább csak könnyű, kontrollált lezárás ajánlott.','remaining.over':'A napi cél fölött vagy kb. {over} kcal-lal. Nem tragédia, de ma már inkább víz, zöldség, könnyű fehérje; új nagy étkezést nem érdemes nyitni.','remaining.proteinGap':'Fehérjéből még kb. {proteinLeft} g hiányozhat a jó naphoz.','remaining.carbHigh':'A szénhidrát már magasabb oldalon van, ezért a további köretet érdemes visszafogni.','remaining.fatHigh':'A zsír már magasabb oldalon van, ezért olajos/sajtos/kolbászos zárást nem választanék.'
+};
+
+Object.assign(UI_EN, {
+  'btn.copyLog':'COPY LOG','btn.copySummary':'COPY SUMMARY','btn.fillOffline':'FILL OFFLINE','btn.aiFill':'AI FILL',
+  'exercise.preset':'Choose a quick type','exercise.freeText':'Free text / AI fill','exercise.freePlaceholder':'3x12 push-ups, 30 squats, 1 min plank','exercise.aiNeedBackend':'AI fill needs Backend URL and App secret in Settings.','exercise.aiRunning':'Interpreting training… this uses one API call.','exercise.aiDone':'Training fields filled. Review the kcal before saving.','exercise.aiFailed':'Training AI fill failed: {error}','exercise.offlineDone':'Training fields filled offline. Review and save.','exercise.copyReady':'Copied to clipboard.','exercise.copyFailed':'Clipboard copy failed. Select and copy manually.',
+  'copy.summaryEmpty':'No daily summary to copy yet.','copy.logEmpty':'No daily log to copy yet.'
+});
+Object.assign(UI_HU, {
+  'btn.copyLog':'LOG MÁSOLÁSA','btn.copySummary':'ÖSSZEFOGLALÓ MÁSOLÁSA','btn.fillOffline':'OFFLINE KITÖLTÉS','btn.aiFill':'AI KITÖLTÉS',
+  'exercise.preset':'Gyors edzéstípus','exercise.freeText':'Szabad szöveg / AI kitöltés','exercise.freePlaceholder':'3x12 fekvő, 30 guggolás, 1 perc plank','exercise.aiNeedBackend':'Az AI kitöltéshez Backend URL és App titok kell a Beállításokban.','exercise.aiRunning':'Edzés értelmezése… ez egy API-hívás.','exercise.aiDone':'Edzésmezők kitöltve. Mentés előtt nézd át a kcal-t.','exercise.aiFailed':'Az edzés AI kitöltése nem sikerült: {error}','exercise.offlineDone':'Edzésmezők kitöltve offline. Nézd át, majd mentsd.','exercise.copyReady':'Vágólapra másolva.','exercise.copyFailed':'A vágólapra másolás nem sikerült. Jelöld ki és másold kézzel.',
+  'copy.summaryEmpty':'Nincs még másolható napi összefoglaló.','copy.logEmpty':'Nincs még másolható napi log.'
+});
+
+function langPack(){ return state.settings.uiPack || (String(state.settings.language||'en').toLowerCase().startsWith('hu') ? UI_HU : UI_EN); }
+function t(key, fallback){ const p=langPack(); const hu=String(state.settings.language||'').toLowerCase().startsWith('hu'); return (p && p[key]) || (hu && UI_HU[key]) || UI_EN[key] || fallback || key; }
+function fmt(key, vars, fallback){ let out=t(key, fallback); Object.keys(vars||{}).forEach(k=>{ out=out.replaceAll('{'+k+'}', vars[k]); }); return out; }
+function setText(id, key, fallback){ const el=$(id); if(el) el.textContent=t(key, fallback); }
+function setPlaceholder(id, key, fallback){ const el=$(id); if(el) el.placeholder=t(key, fallback); }
+function currentLanguageName(){ return state.settings.languageLabel || state.settings.language || 'English'; }
+function setLanguageState(code,label,pack){ state.settings.language=code||'en'; state.settings.languageLabel=label||code||'English'; state.settings.uiPack=pack||null; }
+function applyLanguage(){
+  document.documentElement.lang = state.settings.language || 'en';
+  document.title='MealQuest';
+  setText('addMealBtn','btn.addMeal'); setText('addWeightBtn','btn.addWeight'); setText('addExerciseBtn','btn.addExercise'); setText('weightLabel','app.weight');
+  setText('mealEmpty','app.emptyDay'); setText('refreshNutrientsBtn','btn.refreshNutrients'); setText('nutriSpinner','nutri.spinner');
+  setText('analyzeBtn','btn.estimate'); setText('saveMealBtn','btn.saveLog'); setText('saveWeightBtn','weight.save'); setText('saveExerciseBtn','exercise.save'); setText('estimateExerciseBtn','btn.estimateExercise');
+  setText('settingsInstallBtn','btn.install'); setText('installBtn','btn.install'); setText('refreshAppBtn','btn.refreshApp'); setText('exportBtn','btn.export'); setText('importBtn','btn.import'); setText('wipeBtn','btn.wipeDay'); setText('saveSettingsBtn','btn.save');
+  setText('useEnglishBtn','btn.english'); setText('useHungarianBtn','btn.hungarian'); setText('localizeBtn','btn.adaptLanguage'); setText('parseExerciseBtn','btn.fillOffline'); setText('aiExerciseBtn','btn.aiFill');
+  setText('calTodayBtn','calendar.today'); if($('installText')) $('installText').textContent='Install as a standalone app.';
+  setText('aiHint','meal.aiOff'); setText('nutriMeta','nutri.meta.empty'); setText('backupHint','settings.backup'); setText('languageHint','settings.languageHint');
+  setPlaceholder('mealText','meal.placeholder'); setPlaceholder('mTitle','meal.namePlaceholder'); setPlaceholder('wNote','weight.placeholder'); setPlaceholder('exActivity','exercise.activity'); setPlaceholder('exFreeText','exercise.freePlaceholder'); setPlaceholder('exNote','exercise.note'); setPlaceholder('setSecret','settings.secretPlaceholder'); setPlaceholder('setLanguage','settings.language');
+  document.querySelectorAll('[data-title]').forEach(el=>{ el.textContent=t(el.getAttribute('data-title'), el.textContent); });
+  document.querySelectorAll('[data-label]').forEach(el=>{ el.textContent=t(el.getAttribute('data-label'), el.textContent); });
+  const week=$('calWeek'); if(week){ const days=t('calendar.days','M,T,W,TH,F,SA,S').split(','); week.innerHTML=days.map(d=>'<span>'+esc(d)+'</span>').join(''); }
+  const who=document.querySelector('#coachBubble .who'); if(who && !state.coachCycleMode) who.textContent=t('coach.label','COACH');
+}
+function uiCatalogForAI(){ return Object.entries(UI_EN).map(([key,value])=>({key,value})); }
 
 function syncAppHeight(){
   document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
@@ -614,6 +757,7 @@ function openDB(){ return new Promise((res,rej)=>{ const r=indexedDB.open(DB_NAM
   r.onupgradeneeded=e=>{ const d=e.target.result;
     if(!d.objectStoreNames.contains('meals')){ const s=d.createObjectStore('meals',{keyPath:'id'}); s.createIndex('date','date'); }
     if(!d.objectStoreNames.contains('weights')){ const s=d.createObjectStore('weights',{keyPath:'id'}); s.createIndex('date','date'); }
+    if(!d.objectStoreNames.contains('workouts')){ const s=d.createObjectStore('workouts',{keyPath:'id'}); s.createIndex('date','date'); }
     if(!d.objectStoreNames.contains('settings')){ d.createObjectStore('settings',{keyPath:'key'}); } };
   r.onsuccess=e=>{ db=e.target.result; res(db); }; r.onerror=e=>rej(e.target.error); }); }
 function tx(store,mode){ return db.transaction(store,mode).objectStore(store); }
@@ -635,7 +779,7 @@ function downloadTextFile(filename, text, type='application/json'){
 const COACH_HISTORY_LIMIT = 10;
 function coachWhoLabel(txt){
   const el=document.querySelector('#coachBubble .who');
-  if(el) el.textContent = txt || 'EDZŐ';
+  if(el) el.textContent = txt || t('coach.label','COACH');
 }
 function addCoachHistory(text, source){
   text=String(text||'').trim();
@@ -651,14 +795,14 @@ function setCoachMessage(text, opts){
   if(!text) return;
   $('bubbleText').textContent=text;
   if(opts.remember!==false) addCoachHistory(text, opts.source||'coach');
-  if(opts.resetCycle!==false){ state.coachIndex=-1; state.coachCycleMode=false; coachWhoLabel('EDZŐ'); }
+  if(opts.resetCycle!==false){ state.coachIndex=-1; state.coachCycleMode=false; coachWhoLabel(t('coach.label','COACH')); }
 }
 function displayCoachHistory(index){
   const h=state.coachHistory;
   if(!h.length) return false;
   state.coachIndex=((index%h.length)+h.length)%h.length;
   $('bubbleText').textContent=h[state.coachIndex].text;
-  coachWhoLabel('EDZŐ '+(state.coachIndex+1)+'/'+h.length);
+  coachWhoLabel(t('coach.label','COACH')+' '+(state.coachIndex+1)+'/'+h.length);
   return true;
 }
 async function handleCoachBubbleTap(){
@@ -670,24 +814,25 @@ async function handleCoachBubbleTap(){
 }
 
 async function exportBackup(){
-  const [meals,weights]=await Promise.all([getAll('meals'),getAll('weights')]);
+  const [meals,weights,workouts]=await Promise.all([getAll('meals'),getAll('weights'),getAll('workouts')]);
   const backup={
-    app:'MealQuest', version:'0.3.6', schemaVersion:1, exportedAt:new Date().toISOString(),
+    app:'MealQuest', version:'0.4.1', schemaVersion:2, exportedAt:new Date().toISOString(),
     data:{
       meals:meals.sort((a,b)=>(a.date||'').localeCompare(b.date||'') || (a.time||'99').localeCompare(b.time||'99') || n(a.createdAt)-n(b.createdAt)),
       weights:weights.sort((a,b)=>(a.date||'').localeCompare(b.date||'')),
-      settings:{ kcalTarget:state.settings.kcalTarget, backendUrl:state.settings.backendUrl }
+      workouts:workouts.sort((a,b)=>(a.date||'').localeCompare(b.date||'') || (a.time||'99').localeCompare(b.time||'99') || n(a.createdAt)-n(b.createdAt)),
+      settings:{ kcalTarget:state.settings.kcalTarget, backendUrl:state.settings.backendUrl, language:state.settings.language, languageLabel:state.settings.languageLabel, uiPack:state.settings.uiPack }
     },
-    note:'Az appSecret / hozzáférési kód biztonság miatt nincs benne a mentésben.'
+    note:'The appSecret / access code is not included in the backup for safety.'
   };
   const stamp=new Date().toISOString().slice(0,19).replace(/[-:T]/g,'');
   downloadTextFile(`mealquest_backup_${stamp}.json`, JSON.stringify(backup,null,2));
-  setBackupHint(`Export kész: ${meals.length} étkezés, ${weights.length} súlybejegyzés. Az App titok nem került bele.`);
-  setCoachMessage('Backup elkészült. Tartsd meg a JSON fájlt, ez a naplód mentése.', {source:'backup'});
+  setBackupHint(`Export ready: ${meals.length} meals, ${weights.length} weight entries, ${workouts.length} training entries. App secret was not included.`);
+  setCoachMessage('Backup ready. Keep the JSON file; it is your log backup.', {source:'backup'});
 }
 function normaliseMeal(m){
   return { id:String(m.id||uid()), date:String(m.date||isoToday()), time:m.time||null, rawText:String(m.rawText||''),
-    title:String(m.title||m.rawText||'Étkezés'), kcal:n(m.kcal), kcalMin:m.kcalMin==null?null:n(m.kcalMin), kcalMax:m.kcalMax==null?null:n(m.kcalMax),
+    title:String(m.title||m.rawText||'Meal'), kcal:n(m.kcal), kcalMin:m.kcalMin==null?null:n(m.kcalMin), kcalMax:m.kcalMax==null?null:n(m.kcalMax),
     protein:n(m.protein), carbs:n(m.carbs), fat:n(m.fat), confidence:m.confidence||null, trainerNote:m.trainerNote||null,
     source:m.source||'import', createdAt:n(m.createdAt)||Date.now(), updatedAt:Date.now() };
 }
@@ -696,37 +841,128 @@ function normaliseWeight(w){
   return { id:String(w.id||uid()), date:String(w.date||isoToday()), weightKg:isNaN(kg)?0:kg, note:w.note||null,
     createdAt:n(w.createdAt)||Date.now(), updatedAt:Date.now() };
 }
+function normaliseWorkout(w){
+  return { id:String(w.id||uid()), date:String(w.date||isoToday()), time:w.time||null,
+    activity:String(w.activity||w.title||'Training'), minutes:n(w.minutes), burnedKcal:n(w.burnedKcal||w.kcal), intensity:w.intensity||null, note:w.note||null, rawText:w.rawText||null, reps:n(w.reps),
+    source:w.source||'manual', createdAt:n(w.createdAt)||Date.now(), updatedAt:Date.now() };
+}
 async function importBackupFromFile(file){
   try{
     const text=await file.text(); const parsed=JSON.parse(text); const data=parsed.data||parsed;
-    const meals=Array.isArray(data.meals)?data.meals:[]; const weights=Array.isArray(data.weights)?data.weights:[];
-    if(!meals.length && !weights.length) throw new Error('nincs meals/weights adat');
-    const ok=confirm(`Importáljam a mentést?\n\n${meals.length} étkezés és ${weights.length} súlybejegyzés érkezik.\nA meglévő adatokat nem törli, azonos ID esetén frissít.`);
+    const meals=Array.isArray(data.meals)?data.meals:[]; const weights=Array.isArray(data.weights)?data.weights:[]; const workouts=Array.isArray(data.workouts)?data.workouts:[];
+    if(!meals.length && !weights.length && !workouts.length) throw new Error('no log data');
+    const ok=confirm(`Import backup?\n\n${meals.length} meals, ${weights.length} weight entries and ${workouts.length} training entries will be imported.\nExisting data is not deleted; matching IDs are updated.`);
     if(!ok) return;
     for(const m of meals) await put('meals',normaliseMeal(m));
     for(const w of weights) await put('weights',normaliseWeight(w));
+    for(const ex of workouts) await put('workouts',normaliseWorkout(ex));
     if(data.settings && data.settings.kcalTarget){ state.settings.kcalTarget=n(data.settings.kcalTarget)||state.settings.kcalTarget; await setSetting('kcalTarget',state.settings.kcalTarget); }
     if(data.settings && data.settings.backendUrl){ state.settings.backendUrl=String(data.settings.backendUrl); await setSetting('backendUrl',state.settings.backendUrl); }
+    if(data.settings && data.settings.language){ state.settings.language=String(data.settings.language); await setSetting('language',state.settings.language); }
+    if(data.settings && data.settings.languageLabel){ state.settings.languageLabel=String(data.settings.languageLabel); await setSetting('languageLabel',state.settings.languageLabel); }
+    if(data.settings && data.settings.uiPack){ state.settings.uiPack=data.settings.uiPack; await setSetting('uiPack',state.settings.uiPack); applyLanguage(); }
     refreshAIState(); await render();
-    setBackupHint(`Import kész: ${meals.length} étkezés, ${weights.length} súlybejegyzés.`);
-    setCoachMessage('Import kész. A napló visszatöltve. Adat mentve.', {source:'import'});
+    setBackupHint(`Import ready: ${meals.length} meals, ${weights.length} weight entries, ${workouts.length} training entries.`);
+    setCoachMessage('Import ready. Log restored and saved.', {source:'import'});
   }catch(err){
-    setBackupHint('Import hiba: '+err.message);
-    setCoachMessage('Az import nem sikerült. Valószínűleg nem MealQuest JSON fájl.', {source:'import'});
+    setBackupHint('Import error: '+err.message);
+    setCoachMessage('Import failed. This is probably not a MealQuest JSON file.', {source:'import'});
   }
 }
 
 function totalKcalForMeals(meals){ return meals.reduce((sum,m)=>sum+n(m.kcal),0); }
+function totalKcalForWorkouts(workouts){ return workouts.reduce((sum,w)=>sum+n(w.burnedKcal),0); }
+function activityMet(activity){
+  const a=String(activity||'').toLowerCase();
+  if(/run|fut|jog/.test(a)) return 8.5;
+  if(/bike|cycle|bic|kerék|spin/.test(a)) return 7.0;
+  if(/walk|séta|hike|túra/.test(a)) return 3.6;
+  if(/swim|úsz/.test(a)) return 7.0;
+  if(/football|soccer|foci|basket/.test(a)) return 8.0;
+  if(/plank|push|fekv|squat|gugg|sit.?up|felül|pull.?up|húz/.test(a)) return 4.0;
+  if(/gym|weight|súly|edz|train|lift/.test(a)) return 5.5;
+  return 4.5;
+}
+function latestWeightKgSync(){ return state.lastKnownWeightKg || 90; }
+function workoutEstimate(activity, minutes, intensity, weightKg){
+  const mins=n(minutes)||0; if(!mins) return 0;
+  let met=activityMet(activity);
+  const it=String(intensity||'').toLowerCase();
+  if(/easy|light|könny/.test(it)) met*=0.78;
+  if(/hard|intense|erős|nehéz/.test(it)) met*=1.22;
+  const kg=Number(weightKg)||latestWeightKgSync();
+  return Math.max(0, Math.round((met*3.5*kg/200)*mins));
+}
+function estimateRepsMinutes(exercise, reps){
+  reps=n(reps); const e=String(exercise||'').toLowerCase();
+  if(!reps) return 0;
+  if(/plank/.test(e)) return Math.max(1, Math.round(reps/60));
+  if(/pull|húz/.test(e)) return Math.max(1, Math.round(reps*0.12));
+  if(/push|fekv/.test(e)) return Math.max(1, Math.round(reps*0.08));
+  if(/squat|gugg/.test(e)) return Math.max(1, Math.round(reps*0.07));
+  if(/sit|felül|crunch/.test(e)) return Math.max(1, Math.round(reps*0.06));
+  return Math.max(1, Math.round(reps*0.07));
+}
+function parseTrainingTextLocal(text){
+  const raw=String(text||'').trim(); const lower=raw.toLowerCase();
+  if(!raw) return null;
+  const parts=[]; let totalMinutes=0, totalKcal=0, totalReps=0;
+  function add(activity, minutes, intensity, reps){
+    minutes=Math.max(0, Math.round(Number(minutes)||0)); reps=n(reps);
+    const kcal=workoutEstimate(activity, minutes, intensity);
+    if(minutes||reps){ parts.push({activity, minutes, kcal, reps}); totalMinutes+=minutes; totalKcal+=kcal; totalReps+=reps; }
+  }
+  const timeRegex=/(\d+)\s*(?:min|mins|minute|minutes|perc|p)\s*([a-záéíóöőúüű -]*)/gi; let m;
+  while((m=timeRegex.exec(raw))){
+    const mins=n(m[1]); const nearby=(m[2]||'').trim() || lower;
+    let act='Training';
+    if(/walk|séta|hike|túra/.test(nearby)) act='Walk'; else if(/run|fut|jog/.test(nearby)) act='Run'; else if(/bike|cycle|bic|kerék|spin/.test(nearby)) act='Bike'; else if(/gym|súly|weight|edz/.test(nearby)) act='Gym'; else if(/plank/.test(nearby)) act='Plank';
+    add(act, mins, /hard|erős|intense/.test(lower)?'hard':(/easy|könnyű|light/.test(lower)?'easy':'medium'), 0);
+  }
+  const repPatterns=[
+    ['Push-ups',/(\d+)\s*x\s*(\d+)\s*(?:push|fekv)/i,/(\d+)\s*(?:push.?ups?|fekvőtámasz|fekvő)/i],
+    ['Squats',/(\d+)\s*x\s*(\d+)\s*(?:squat|gugg)/i,/(\d+)\s*(?:squats?|guggolás|guggolásból|guggol)/i],
+    ['Sit-ups',/(\d+)\s*x\s*(\d+)\s*(?:sit|crunch|felül)/i,/(\d+)\s*(?:sit.?ups?|crunch|felülés)/i],
+    ['Pull-ups',/(\d+)\s*x\s*(\d+)\s*(?:pull|húz)/i,/(\d+)\s*(?:pull.?ups?|húzódzkodás|húzódzkod)/i]
+  ];
+  repPatterns.forEach(([name,setRe,singleRe])=>{
+    let r=raw.match(setRe); let reps=0;
+    if(r) reps=n(r[1])*n(r[2]); else { r=raw.match(singleRe); if(r) reps=n(r[1]); }
+    if(reps){ add(name, estimateRepsMinutes(name,reps), 'medium', reps); }
+  });
+  const plank=raw.match(/(\d+)\s*(?:sec|second|seconds|mp|másodperc|s)\s*plank|plank\s*(\d+)\s*(?:sec|second|seconds|mp|másodperc|s)/i);
+  if(plank){ const secs=n(plank[1]||plank[2]); add('Plank', Math.max(1, Math.round(secs/60)), 'medium', secs); }
+  if(!parts.length){
+    if(/walk|séta/.test(lower)) add('Walk', 20, 'medium', 0);
+    else if(/run|fut/.test(lower)) add('Run', 20, 'medium', 0);
+    else if(/bike|bic|bring|kerék/.test(lower)) add('Bike', 30, 'medium', 0);
+    else if(/gym|edz|súly|weight/.test(lower)) add('Gym', 45, 'medium', 0);
+  }
+  if(!parts.length) return null;
+  const title=parts.length===1 ? parts[0].activity : parts.map(p=>p.reps?`${p.activity} ${p.reps}`:p.activity).join(' + ');
+  return { activity:title, minutes:Math.max(1,totalMinutes), burnedKcal:Math.max(1,totalKcal), intensity:/hard|erős|intense/.test(lower)?'hard':(/easy|könnyű|light/.test(lower)?'easy':'medium'), note:raw, reps:totalReps, confidence:'medium' };
+}
+function fillExerciseFields(data, source){
+  if(!data) return false;
+  $('exActivity').value=data.activity||data.title||$('exActivity').value;
+  if(data.minutes!==undefined) $('exMinutes').value=n(data.minutes)||'';
+  if(data.burnedKcal!==undefined || data.estimatedKcal!==undefined) $('exKcal').value=n(data.burnedKcal||data.estimatedKcal)||'';
+  if(data.intensity) $('exIntensity').value=data.intensity;
+  if(data.note || data.rawText) $('exNote').value=data.note||data.rawText;
+  state.pendingExerciseAI=source==='ai'?data:null;
+  return true;
+}
 
 async function getSceneStage(){
-  const mealsAll=await getAll('meals');
+  const [mealsAll, workoutsAll]=await Promise.all([getAll('meals'),getAll('workouts')]);
   let goodDays=0, loggedDays=0;
   for(let i=0;i<7;i++){
     const day=shiftDate(state.date,-i);
     const dayMeals=mealsAll.filter(m=>m.date===day);
     if(dayMeals.length===0) continue;
     loggedDays++;
-    const dayKcal=totalKcalForMeals(dayMeals);
+    const dayWorkouts=workoutsAll.filter(w=>w.date===day);
+    const dayKcal=Math.max(0,totalKcalForMeals(dayMeals)-totalKcalForWorkouts(dayWorkouts));
     if(dayKcal>0 && dayKcal<=state.settings.kcalTarget*1.05) goodDays++;
   }
   let stage='fat';
@@ -737,9 +973,9 @@ async function getSceneStage(){
 }
 function updateRoomState(stage, stats){
   const level = stage==='lean' ? 3 : (stage==='medium' ? 2 : 1);
-  const names = {fat:'KEZDŐ TEREM', medium:'KONTROLL ALAKUL', lean:'JÓ RUTIN'};
-  $('roomLevel').textContent = `ROOM LV. ${level} — ${names[stage]||names.fat}`;
-  $('routineLevel').textContent = `RUTIN ${stats.goodDays||0}/7`;
+  const key = stage==='lean' ? 'room.lean' : (stage==='medium' ? 'room.medium' : 'room.fat');
+  $('roomLevel').textContent = fmt('app.roomLv',{level},'ROOM LV. '+level)+' — '+t(key);
+  $('routineLevel').textContent = fmt('app.routine',{good:stats.goodDays||0},'ROUTINE '+(stats.goodDays||0)+'/7');
 }
 
 function setSceneStage(stage){
@@ -755,32 +991,41 @@ function setSceneStage(stage){
 
 async function render(){
   const [y,m,d]=state.date.split('-');
-  const dow=['Vas','Hét','Kedd','Sze','Csüt','Pén','Szo'][new Date(+y,+m-1,+d).getDay()];
-  $('dateLabel').innerHTML = `${m}.${d}<small>${dow}${state.date===isoToday()?' · ma':''}</small>`;
+  const dateObj=new Date(+y,+m-1,+d);
+  const dow=dateObj.toLocaleDateString(state.settings.language || undefined,{weekday:'short'});
+  const todayText=state.date===isoToday()?' · '+t('calendar.today','TODAY').toLowerCase():'';
+  $('dateLabel').innerHTML = `${m}.${d}<small>${esc(dow)}${todayText}</small>`;
   $('kcalTgt').textContent = state.settings.kcalTarget;
 
-  const meals=await getAllByDate('meals',state.date);
+  const [meals, workouts]=await Promise.all([getAllByDate('meals',state.date), getAllByDate('workouts',state.date)]);
   meals.sort((a,b)=> (a.time||'99')<(b.time||'99')?-1:(a.time||'99')>(b.time||'99')?1:a.createdAt-b.createdAt);
   let kcal=0,P=0,C=0,F=0;
   meals.forEach(mm=>{ kcal+=n(mm.kcal); P+=n(mm.protein); C+=n(mm.carbs); F+=n(mm.fat); });
-  $('kcalNow').textContent=kcal; $('mP').textContent=P; $('mC').textContent=C; $('mF').textContent=F;
-  const pct=Math.min(100,Math.round(kcal/state.settings.kcalTarget*100));
+  const burned=totalKcalForWorkouts(workouts);
+  const netKcal=Math.max(0,kcal-burned);
+  $('kcalNow').textContent=netKcal; $('mP').textContent=P; $('mC').textContent=C; $('mF').textContent=F;
+  $('dayFlow').textContent=`FOOD ${kcal} · TRAIN -${burned} · NET ${netKcal}`;
+  const activityLine=$('activityLine');
+  if(workouts.length){ const mins=workouts.reduce((s,w)=>s+n(w.minutes),0); activityLine.style.display='block'; activityLine.textContent=`TRAINING ${mins} min · -${burned} kcal`; }
+  else { activityLine.style.display='none'; activityLine.textContent=''; }
+  const pct=Math.min(100,Math.round(netKcal/state.settings.kcalTarget*100));
   $('kcalBar').querySelector('i').style.width=pct+'%';
-  $('kcalBar').classList.toggle('over', kcal>state.settings.kcalTarget);
+  $('kcalBar').classList.toggle('over', netKcal>state.settings.kcalTarget);
 
   const ul=$('mealList'); ul.innerHTML='';
   $('mealEmpty').style.display = meals.length?'none':'block';
   const visibleMeals = meals.slice(0,3);
   visibleMeals.forEach(mm=>{ const li=document.createElement('li'); li.className='meal';
     const time=mm.time||'--:--';
-    li.innerHTML=`<div class="mealTime">${esc(time)}</div><div class="t"><b>${esc(mm.title||mm.rawText||'Étkezés')}</b><small>P ${n(mm.protein)}g · SzH ${n(mm.carbs)}g · Zs ${n(mm.fat)}g</small></div>
-      <div class="kc">${n(mm.kcal)}</div><button class="del" aria-label="Törlés">X</button>`;
+    li.innerHTML=`<div class="mealTime">${esc(time)}</div><div class="t"><b>${esc(mm.title||mm.rawText||'Meal')}</b><small>P ${n(mm.protein)}g · C ${n(mm.carbs)}g · F ${n(mm.fat)}g</small></div>
+      <div class="kc">${n(mm.kcal)}</div><button class="del" aria-label="Delete">X</button>`;
     li.querySelector('.del').onclick=async(e)=>{ e.stopPropagation(); await del('meals',mm.id); render(); };
     li.onclick=(e)=>{ e.stopPropagation(); if(!e.target.classList.contains('del')) openDayDetail(); };
     ul.appendChild(li);
   });
 
   const weights=await getAll('weights');
+  const lastW=weights.filter(w=>w.date<=state.date).sort((a,b)=>a.date<b.date?1:-1)[0]; state.lastKnownWeightKg=lastW?Number(lastW.weightKg):state.lastKnownWeightKg;
   const todayW=weights.find(w=>w.date===state.date);
   $('wToday').textContent = todayW? todayW.weightKg.toFixed(1)+' kg' : '—';
   const past=weights.filter(w=>w.date<=state.date).sort((a,b)=>a.date<b.date?1:-1);
@@ -792,19 +1037,20 @@ async function render(){
   const sceneStage=await getSceneStage();
   setSceneStage(sceneStage);
   updateRoomState(sceneStage, state.roomStats||{});
-  updateBubble(kcal, meals.length, !!todayW);
+  updateBubble(netKcal, meals.length, !!todayW);
 }
 
 function updateBubble(kcal, mealCount, hasWeight){
-  const t=state.settings.kcalTarget; let line;
-  if(mealCount===0 && !hasWeight){ line='Új nap, tiszta terem. Rögzítsd az elsőt, aztán meglátjuk a terepet.'; }
-  else if(mealCount===0 && hasWeight){ line='Súly megvan. Jöhet az első étkezés a naplóba.'; }
-  else if(kcal < t*0.55){ line='Jó ütem eddig. Nem koplalunk — csak pontosan naplózunk.'; }
-  else if(kcal <= t){ line=`Még ~${t-kcal} kcal fér a mai keretbe. Nyugodt tempó.`; }
-  else if(kcal <= t*1.15){ line='Kicsit a keret fölött. Nem dráma — holnap könnyebb köret.'; }
-  else { line='Nehéz nap kalóriában. Bejegyezve, nem büntetve. Megyünk tovább.'; }
+  const t0=state.settings.kcalTarget; let line;
+  if(mealCount===0 && !hasWeight){ line=t('coach.lowData','Low data. The trainer does not predict through fog.'); }
+  else if(mealCount===0 && hasWeight){ line=t('coach.under','Weight is logged. Add the first meal to the log.'); }
+  else if(kcal < t0*0.55){ line=t('coach.good','Control looks good. Mission continues.'); }
+  else if(kcal <= t0){ line=`${Math.max(0,t0-kcal)} kcal left today. ${t('coach.good','Control looks good. Mission continues.')}`; }
+  else if(kcal <= t0*1.15){ line=fmt('coach.over',{diff:kcal-t0}); }
+  else { line=fmt('coach.over',{diff:kcal-t0}); }
   setCoachMessage(line, {source:'status'});
 }
+
 
 
 async function getDayMealsSorted(){
@@ -812,18 +1058,30 @@ async function getDayMealsSorted(){
   meals.sort((a,b)=> (a.time||'99')<(b.time||'99')?-1:(a.time||'99')>(b.time||'99')?1:a.createdAt-b.createdAt);
   return meals;
 }
+async function getDayWorkoutsSorted(){
+  const workouts=await getAllByDate('workouts',state.date);
+  workouts.sort((a,b)=> (a.time||'99')<(b.time||'99')?-1:(a.time||'99')>(b.time||'99')?1:a.createdAt-b.createdAt);
+  return workouts;
+}
 
 async function openDayDetail(){
-  const meals=await getDayMealsSorted();
+  const [meals, workouts]=await Promise.all([getDayMealsSorted(), getDayWorkoutsSorted()]);
   const box=$('dayMealFullList'); box.innerHTML='';
-  if(!meals.length){ box.innerHTML='<div class="empty">Nincs rögzített étkezés ezen a napon.</div>'; }
+  if(!meals.length && !workouts.length){ box.innerHTML='<div class="empty">'+esc(t('nutri.noMeals2','Log a meal first.'))+'</div>';  }
   meals.forEach(mm=>{
     const el=document.createElement('div'); el.className='detailMeal';
-    const macros=`P ${n(mm.protein)}g · SzH ${n(mm.carbs)}g · Zs ${n(mm.fat)}g`;
-    const range=(mm.kcalMin&&mm.kcalMax)?` · tartomány ${mm.kcalMin}–${mm.kcalMax} kcal`:'';
-    el.innerHTML=`<div class="top"><div class="name">${esc(mm.title||'Étkezés')}</div><div class="kcal">${n(mm.kcal)} kcal</div></div>
+    const macros=`P ${n(mm.protein)}g · C ${n(mm.carbs)}g · F ${n(mm.fat)}g`;
+    const range=(mm.kcalMin&&mm.kcalMax)?` · range ${mm.kcalMin}–${mm.kcalMax} kcal`:'';
+    el.innerHTML=`<div class="top"><div class="name">${esc(mm.title||'Meal')}</div><div class="kcal">${n(mm.kcal)} kcal</div></div>
       <div class="raw">${esc(mm.rawText||'')}</div>
       <div class="meta">${mm.time?esc(mm.time)+' · ':''}${macros}${range}</div>`;
+    box.appendChild(el);
+  });
+  workouts.forEach(w=>{
+    const el=document.createElement('div'); el.className='detailWorkout';
+    el.innerHTML=`<div class="top"><div class="name">${esc(w.activity||'Training')}</div><div class="kcal">-${n(w.burnedKcal)} kcal</div></div>
+      <div class="raw">${esc(w.note||'')}</div>
+      <div class="meta">${w.time?esc(w.time)+' · ':''}${n(w.minutes)} min · ${esc(w.intensity||'')}</div>`;
     box.appendChild(el);
   });
   show('dayOverlay');
@@ -832,7 +1090,7 @@ async function openDayDetail(){
 function mealTotals(meals){
   return meals.reduce((a,m)=>{ a.kcal+=n(m.kcal); a.protein+=n(m.protein); a.carbs+=n(m.carbs); a.fat+=n(m.fat); return a; },{kcal:0,protein:0,carbs:0,fat:0});
 }
-function nutrientStatusLabel(st){ return {low:'kevés',ok:'ok',high:'magas',unknown:'?'}[st] || '?'; }
+function nutrientStatusLabel(st){ return {low:'low',ok:'ok',high:'high',unknown:'?'}[st] || '?'; }
 function shortNutriName(name){
   const map={'Koleszterin':'Kol.','Kalcium':'Ca','Vas':'Fe','Kálium':'K','Magnézium':'Mg','Rost':'Rost','Nátrium':'Na','Só':'Só','C-vitamin':'C','D-vitamin':'D','B12-vitamin':'B12','Omega-3':'Ω3','Cukor':'Cuk.'};
   return map[name] || String(name||'').replace('vitamin','vit.').slice(0,6);
@@ -845,43 +1103,44 @@ function macroBarsHtml(totals){
   const fatSoft=Math.max(70, Math.round(state.settings.kcalTarget*0.04));
   const items=[
     ['KCAL', totals.kcal, 'kcal', kcalPct],
-    ['FEH.', totals.protein, 'g', barPct(totals.protein,proteinTarget)],
-    ['SZH.', totals.carbs, 'g', barPct(totals.carbs,carbSoft)],
-    ['ZSÍR', totals.fat, 'g', barPct(totals.fat,fatSoft)]
+    ['PROT', totals.protein, 'g', barPct(totals.protein,proteinTarget)],
+    ['CARB', totals.carbs, 'g', barPct(totals.carbs,carbSoft)],
+    ['FAT', totals.fat, 'g', barPct(totals.fat,fatSoft)]
   ];
   return `<div class="macroBars">${items.map(i=>`<div class="mbar"><div class="lab">${i[0]}</div><div class="track"><div class="fill" style="width:${i[3]}%"></div></div><div class="num">${i[1]} ${i[2]}</div></div>`).join('')}</div>`;
 }
 
 function remainingDayAdvice(totals){
   const target=n(state.settings.kcalTarget)||2200;
-  const left=target-n(totals.kcal);
+  const left=target-Math.max(0,n(totals.kcal)-n(totals.exerciseKcal));
   const proteinTarget=Math.max(90, Math.round(target*0.05));
   const proteinLeft=proteinTarget-n(totals.protein);
   const carbHigh=n(totals.carbs)>Math.max(230, Math.round(target*0.13));
   const fatHigh=n(totals.fat)>Math.max(85, Math.round(target*0.045));
   const pieces=[];
   if(left>700){
-    if(proteinLeft>25) pieces.push(`Még kb. ${left} kcal maradt. Érdemes egy rendes, fehérjedús étkezést bevinni: tojás, túró/görög joghurt, tonhal vagy hús + zöldség; köret mérsékelten.`);
-    else pieces.push(`Még kb. ${left} kcal maradt. Fehérje nagyjából rendben, ezért jöhet egy normális, de nem nehéz étkezés: zöldség + kisebb köret + egyszerű fehérje.`);
+    if(proteinLeft>25) pieces.push(fmt('remaining.lotProtein',{left,proteinLeft}));
+    else pieces.push(fmt('remaining.lot',{left}));
   }else if(left>300){
-    if(proteinLeft>20) pieces.push(`Még kb. ${left} kcal fér bele. A nap maradékában inkább fehérjét érdemes pótolni kevés körettel.`);
-    else pieces.push(`Még kb. ${left} kcal fér bele. Könnyű vacsora / kis snack még belefér, de nagy köretet már nem erőltetnék.`);
+    if(proteinLeft>20) pieces.push(fmt('remaining.someProtein',{left}));
+    else pieces.push(fmt('remaining.some',{left}));
   }else if(left>=0){
-    if(proteinLeft>20) pieces.push(`Már közel vagy a napi célhoz. Ha még ennél, inkább kis fehérjés opciót válassz, kevés zsírral és kevés körettel.`);
-    else pieces.push(`A napi cél közelében vagy. Innen már inkább csak könnyű, kontrollált lezárás ajánlott.`);
+    if(proteinLeft>20) pieces.push(t('remaining.closeProtein'));
+    else pieces.push(t('remaining.close'));
   }else{
-    pieces.push(`A napi cél fölött vagy kb. ${Math.abs(left)} kcal-lal. Nem tragédia, de ma már inkább víz, zöldség, könnyű fehérje; új nagy étkezést nem érdemes nyitni.`);
+    pieces.push(fmt('remaining.over',{over:Math.abs(left)}));
   }
-  if(proteinLeft>30) pieces.push(`Fehérjéből még kb. ${proteinLeft} g hiányozhat a jó naphoz.`);
-  if(carbHigh) pieces.push('A szénhidrát már magasabb oldalon van, ezért a további köretet érdemes visszafogni.');
-  if(fatHigh) pieces.push('A zsír már magasabb oldalon van, ezért olajos/sajtos/kolbászos zárást nem választanék.');
+  if(proteinLeft>30) pieces.push(fmt('remaining.proteinGap',{proteinLeft}));
+  if(carbHigh) pieces.push(t('remaining.carbHigh'));
+  if(fatHigh) pieces.push(t('remaining.fatHigh'));
   return pieces.join(' ');
 }
+
 
 function nutrientColumnsHtml(nutrients){
   const items=(nutrients||[]).filter(x=>x.dailyValuePercent!==undefined && x.status!=='unknown').slice(0,10);
   if(!items.length) return '';
-  return `<div class="nutriChart"><div class="nutriChartTitle">NAPI ÉRTÉK % · GYORS NÉZET</div><div class="nutriCols">${items.map(x=>{
+  return `<div class="nutriChart"><div class="nutriChartTitle">${esc(t('nutri.chartTitle'))}</div><div class="nutriCols">${items.map(x=>{
     const pct=Math.max(4,Math.min(100,n(x.dailyValuePercent)));
     const cls=esc(x.status||'ok');
     return `<div class="nutriColWrap"><div class="nutriCol ${cls}" title="${esc(x.name)} ${pct}%" style="height:${pct}%"></div><div class="nutriColLabel">${esc(shortNutriName(x.name))}</div></div>`;
@@ -889,9 +1148,9 @@ function nutrientColumnsHtml(nutrients){
 }
 function nutrientGroupName(name){
   const n=String(name||'').toLowerCase();
-  if(n.includes('vitamin') || n.includes('folát') || n.includes('folate')) return 'VITAMINOK';
-  if(['kalcium','vas','kálium','magnézium','nátrium'].some(x=>n.includes(x))) return 'ÁSVÁNYI ANYAGOK';
-  return 'FŐ STATOK';
+  if(n.includes('vitamin') || n.includes('vitamina') || n.includes('vitamine') || n.includes('folát') || n.includes('folate') || n.includes('folato') || n.includes('folsäure')) return 'vitamins';
+  if(['kalcium','calcium','calcio','vas','iron','hierro','eisen','kálium','potassium','potasio','kalium','magnézium','magnesium','magnesio','nátrium','sodium','sodio','natrium'].some(x=>n.includes(x))) return 'minerals';
+  return 'main';
 }
 function renderNutrientGroup(title, items){
   if(!items.length) return '';
@@ -909,22 +1168,22 @@ function renderNutrientGroup(title, items){
 }
 function renderNutrientReport(r, totals){
   const box=$('nutriContent');
-  const groups={'FŐ STATOK':[], 'ÁSVÁNYI ANYAGOK':[], 'VITAMINOK':[]};
+  const groups={main:[], minerals:[], vitamins:[]};
   (r.nutrients||[]).forEach(x=>{ const g=nutrientGroupName(x.name); groups[g].push(x); });
   const strengths=(r.likelyStrengths||[]).map(x=>`<span class="pill">${esc(x)}</span>`).join('');
   const gaps=(r.likelyGaps||[]).map(x=>`<span class="pill">${esc(x)}</span>`).join('');
-  box.innerHTML=`<div class="nutriHead"><div class="h">${esc(r.headline||'Napi tápanyagbecslés')}</div><div class="s">${esc(r.summary||'')}</div></div>
+  box.innerHTML=`<div class="nutriHead"><div class="h">${esc(r.headline||t('nutri.title'))}</div><div class="s">${esc(r.summary||'')}</div></div>
     ${macroBarsHtml(totals||{kcal:0,protein:0,carbs:0,fat:0})}
-    ${renderNutrientGroup('FŐ STATOK', groups['FŐ STATOK'])}
-    ${renderNutrientGroup('ÁSVÁNYI ANYAGOK', groups['ÁSVÁNYI ANYAGOK'])}
-    ${renderNutrientGroup('VITAMINOK', groups['VITAMINOK'])}
-    <div class="softBlock"><label>ERŐSSÉGEK</label><div class="pillList">${strengths||'<span class="pill">nincs elég adat</span>'}</div></div>
-    <div class="softBlock"><label>FIGYELENDŐ</label><div class="pillList">${gaps||'<span class="pill">nincs elég adat</span>'}</div></div>
+    ${renderNutrientGroup(t('nutri.mainStats'), groups.main)}
+    ${renderNutrientGroup(t('nutri.minerals'), groups.minerals)}
+    ${renderNutrientGroup(t('nutri.vitamins'), groups.vitamins)}
+    <div class="softBlock"><label>${esc(t('nutri.strengths'))}</label><div class="pillList">${strengths||'<span class="pill">'+esc(t('nutri.noData'))+'</span>'}</div></div>
+    <div class="softBlock"><label>${esc(t('nutri.watch'))}</label><div class="pillList">${gaps||'<span class="pill">'+esc(t('nutri.noData'))+'</span>'}</div></div>
     <div class="noteStack">
-      <div class="noteBox"><label>NAP MARADÉKA</label><p>${esc(remainingDayAdvice(totals||{kcal:0,protein:0,carbs:0,fat:0}))}</p></div>
-      <div class="noteBox"><label>EDZŐI MEGJEGYZÉS</label><p>${esc(r.practicalSuggestion||'')}</p></div>
+      <div class="noteBox"><label>${esc(t('nutri.restOfDay'))}</label><p>${esc(remainingDayAdvice(totals||{kcal:0,protein:0,carbs:0,fat:0}))}</p></div>
+      <div class="noteBox"><label>${esc(t('nutri.trainerNote'))}</label><p>${esc(r.practicalSuggestion||'')}</p></div>
     </div>
-    <div class="hint">${esc(r.caveat||'Becslés · adagpontosságtól függ · nem orvosi tanács.')}</div>`;
+    <div class="hint">${esc(r.caveat||t('nutri.caveat'))}</div>`;
 }
 function mealSignature(meals){
   const raw=(meals||[]).map(m=>[
@@ -937,7 +1196,7 @@ function mealSignature(meals){
 }
 function nutrientCacheKey(date){ return 'nutrientReport:'+date; }
 function formatTimeStamp(ms){
-  if(!ms) return 'ismeretlen idő';
+  if(!ms) return 'unknown time';
   const d=new Date(ms);
   return `${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
@@ -956,48 +1215,50 @@ async function openNutrientReport(){
   show('nutrientOverlay');
   const meals=await getDayMealsSorted();
   if(!meals.length){
-    setNutriMeta('Nincs még mit elemezni. Előbb rögzíts étkezést ezen a napon.', 'empty');
-    $('nutriContent').innerHTML='<div class="empty">Előbb rögzíts étkezést, utána van mit elemezni.</div>';
+    setNutriMeta(t('nutri.noMeals'), 'empty');
+    $('nutriContent').innerHTML='<div class="empty">'+esc(t('nutri.noMeals2'))+'</div>';
     return;
   }
-  const totals=mealTotals(meals);
-  const sig=mealSignature(meals);
+  const workouts=await getDayWorkoutsSorted();
+  const totals=mealTotals(meals); totals.exerciseKcal=totalKcalForWorkouts(workouts);
+  const sig=mealSignature(meals)+'|ex:'+mealSignature(workouts.map(w=>({id:w.id,date:w.date,time:w.time,title:w.activity,rawText:w.note,kcal:w.burnedKcal,protein:0,carbs:0,fat:0,updatedAt:w.updatedAt,createdAt:w.createdAt})));
   const cached=await getCachedNutrientReport(state.date);
   if(cached && cached.report){
     renderNutrientReport(cached.report, cached.totals || totals);
     if(cached.signature===sig){
-      setNutriMeta('Utolsó részletes elemzés: '+formatTimeStamp(cached.updatedAt)+'. Azóta nem változott a napi étkezéslista.', 'fresh');
+      setNutriMeta(fmt('nutri.cachedFresh',{time:formatTimeStamp(cached.updatedAt)}), 'fresh');
     }else{
-      setNutriMeta('Van korábbi elemzés, de azóta változott a napló. Nyomj FRISSÍTÉS / ELEMZÉS-t, ha új becslést kérsz.', 'stale');
+      setNutriMeta(t('nutri.cachedStale'), 'stale');
     }
     return;
   }
-  setNutriMeta('Ehhez a naphoz még nincs részletes tápanyagbecslés. Nyomj FRISSÍTÉS / ELEMZÉS-t, ha kéred. Ez egy API-hívást használ.', 'empty');
-  $('nutriContent').innerHTML='<div class="empty">Még nincs részletes napi tápanyagbecslés. A gomb csak kérésre indít elemzést, így nem költ feleslegesen API-hívást.</div>';
+  setNutriMeta(t('nutri.noneCached'), 'empty');
+  $('nutriContent').innerHTML='<div class="empty">'+esc(t('nutri.noneCached2'))+'</div>';
 }
 async function refreshNutrientReport(){
   $('nutriErr').classList.remove('show');
   const meals=await getDayMealsSorted();
   if(!meals.length){
-    setNutriMeta('Nincs még mit elemezni ezen a napon.', 'empty');
-    $('nutriContent').innerHTML='<div class="empty">Előbb rögzíts étkezést.</div>';
+    setNutriMeta(t('nutri.noMeals'), 'empty');
+    $('nutriContent').innerHTML='<div class="empty">'+esc(t('nutri.noMeals2'))+'</div>';
     return;
   }
   if(!state.settings.backendUrl){
-    setNutriMeta('A részletes elemzéshez kell Backend URL a Beállításokban.', 'empty');
-    $('nutriContent').innerHTML='<div class="empty">Az extra tápanyagbecsléshez kell a backend URL a beállításokban.</div>';
+    setNutriMeta(t('nutri.needBackend'), 'empty');
+    $('nutriContent').innerHTML='<div class="empty">'+esc(t('nutri.needBackend2'))+'</div>';
     return;
   }
-  const totals=mealTotals(meals);
-  const sig=mealSignature(meals);
+  const workouts=await getDayWorkoutsSorted();
+  const totals=mealTotals(meals); totals.exerciseKcal=totalKcalForWorkouts(workouts);
+  const sig=mealSignature(meals)+'|ex:'+mealSignature(workouts.map(w=>({id:w.id,date:w.date,time:w.time,title:w.activity,rawText:w.note,kcal:w.burnedKcal,protein:0,carbs:0,fat:0,updatedAt:w.updatedAt,createdAt:w.createdAt})));
   const btn=$('refreshNutrientsBtn');
   if(btn) btn.disabled=true;
   $('nutriSpinner').classList.add('show');
-  setNutriMeta('Részletes elemzés fut… ez most egy API-hívás.', 'stale');
+  setNutriMeta(t('nutri.running'), 'stale');
   try{
     const body={ date:state.date, meals:meals.map(m=>({time:m.time,title:m.title,rawText:m.rawText,kcal:n(m.kcal),protein:n(m.protein),carbs:n(m.carbs),fat:n(m.fat)})),
       totalKcal:totals.kcal,totalProtein:totals.protein,totalCarbs:totals.carbs,totalFat:totals.fat,
-      userContext:{ language:'hu', goal:'weight_loss', dailyKcalTarget:state.settings.kcalTarget } };
+      userContext:{ language:currentLanguageName(), goal:'weight_loss', dailyKcalTarget:state.settings.kcalTarget } };
     const res=await fetch(state.settings.backendUrl.replace(/\/$/,'')+'/api/analyze-nutrients',{
       method:'POST', headers:{ 'Content-Type':'application/json', 'x-app-secret':state.settings.appSecret }, body:JSON.stringify(body) });
     if(!res.ok){
@@ -1009,26 +1270,118 @@ async function refreshNutrientReport(){
     const payload={ date:state.date, signature:sig, report, totals, updatedAt:Date.now(), schemaVersion:1 };
     await saveCachedNutrientReport(state.date, payload);
     renderNutrientReport(report, totals);
-    setNutriMeta('Friss részletes elemzés mentve: '+formatTimeStamp(payload.updatedAt)+'.', 'fresh');
-    setCoachMessage('Részletes napi tápanyagbecslés frissítve. Ez már el van mentve ehhez a naphoz.', {source:'nutrients'});
+    setNutriMeta(fmt('nutri.saved',{time:formatTimeStamp(payload.updatedAt)}), 'fresh');
+    setCoachMessage(t('coach.nutrientsSaved'), {source:'nutrients'});
   }catch(err){
-    $('nutriErr').textContent='A részletes tápanyagbecslés nem sikerült: '+err.message;
+    $('nutriErr').textContent=fmt('nutri.failed',{error:err.message});
     $('nutriErr').classList.add('show');
     const cached=await getCachedNutrientReport(state.date);
     if(cached && cached.report){
       renderNutrientReport(cached.report, cached.totals || totals);
-      setNutriMeta('Frissítés nem sikerült. A korábbi mentett elemzést mutatom: '+formatTimeStamp(cached.updatedAt)+'.', 'stale');
+      setNutriMeta('Refresh failed. Showing previous saved analysis: '+formatTimeStamp(cached.updatedAt)+'.', 'stale');
     }else{
-      setNutriMeta('Frissítés nem sikerült. Nincs korábbi mentett elemzés ehhez a naphoz.', 'empty');
+      setNutriMeta('Refresh failed. No previous saved analysis for this day.', 'empty');
     }
   }finally{
     $('nutriSpinner').classList.remove('show');
     if(btn) btn.disabled=false;
   }
 }
+async function copyToClipboard(text){
+  text=String(text||'').trim(); if(!text) return false;
+  try{ await navigator.clipboard.writeText(text); return true; }
+  catch(_e){
+    try{ const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.select(); const ok=document.execCommand('copy'); ta.remove(); return ok; }catch(_){ return false; }
+  }
+}
+async function buildDailyLogText(){
+  const [meals, workouts, weights]=await Promise.all([getDayMealsSorted(), getDayWorkoutsSorted(), getAll('weights')]);
+  const w=weights.find(x=>x.date===state.date); const totals=mealTotals(meals); const burn=totalKcalForWorkouts(workouts); const net=Math.max(0,totals.kcal-burn);
+  const lines=[`MealQuest daily log — ${state.date}`, `Target: ${state.settings.kcalTarget} kcal`, `Food: ${totals.kcal} kcal · Training: -${burn} kcal · Net: ${net} kcal`, `Macros: P ${totals.protein}g · C ${totals.carbs}g · F ${totals.fat}g`];
+  if(w) lines.push(`Weight: ${Number(w.weightKg).toFixed(1)} kg${w.note?' · '+w.note:''}`);
+  if(meals.length){ lines.push('', 'Meals:'); meals.forEach(m=>lines.push(`- ${m.time||'--:--'} · ${m.title||m.rawText||'Meal'} · ${n(m.kcal)} kcal · P ${n(m.protein)}g C ${n(m.carbs)}g F ${n(m.fat)}g${m.rawText?' · '+m.rawText:''}`)); }
+  if(workouts.length){ lines.push('', 'Training:'); workouts.forEach(x=>lines.push(`- ${x.time||'--:--'} · ${x.activity||'Training'} · ${n(x.minutes)} min · -${n(x.burnedKcal)} kcal${x.note?' · '+x.note:''}`)); }
+  return lines.join('\n');
+}
+async function buildDailySummaryText(){
+  const [meals, workouts, weights, cached]=await Promise.all([getDayMealsSorted(), getDayWorkoutsSorted(), getAll('weights'), getCachedNutrientReport(state.date)]);
+  if(!meals.length && !workouts.length) return '';
+  const w=weights.find(x=>x.date===state.date); const totals=mealTotals(meals); const burn=totalKcalForWorkouts(workouts); const net=Math.max(0,totals.kcal-burn);
+  const lines=[`MealQuest daily summary — ${state.date}`, `Net: ${net} / ${state.settings.kcalTarget} kcal`, `Food: ${totals.kcal} kcal · Training: -${burn} kcal`, `Macros: P ${totals.protein}g · C ${totals.carbs}g · F ${totals.fat}g`];
+  if(w) lines.push(`Weight: ${Number(w.weightKg).toFixed(1)} kg`);
+  if(cached && cached.report){ const r=cached.report; if(r.headline) lines.push('', r.headline); if(r.summary) lines.push(r.summary); if(Array.isArray(r.likelyStrengths)&&r.likelyStrengths.length) lines.push('Strengths: '+r.likelyStrengths.join('; ')); if(Array.isArray(r.likelyGaps)&&r.likelyGaps.length) lines.push('Watch: '+r.likelyGaps.join('; ')); if(r.practicalSuggestion) lines.push('Trainer note: '+r.practicalSuggestion); }
+  lines.push('', 'Rest of day: '+remainingDayAdvice({...totals, exerciseKcal:burn}));
+  return lines.join('\n');
+}
+async function copyDailyLog(){
+  const txt=await buildDailyLogText(); const hint=$('copyLogHint');
+  if(!txt){ if(hint) hint.textContent=t('copy.logEmpty'); return; }
+  const ok=await copyToClipboard(txt); if(hint) hint.textContent=ok?t('exercise.copyReady'):t('exercise.copyFailed');
+  setCoachMessage(ok?t('exercise.copyReady'):t('exercise.copyFailed'), {source:'copy'});
+}
+async function copyDailySummary(){
+  const txt=await buildDailySummaryText(); const hint=$('copySummaryHint');
+  if(!txt){ if(hint) hint.textContent=t('copy.summaryEmpty'); return; }
+  const ok=await copyToClipboard(txt); if(hint) hint.textContent=ok?t('exercise.copyReady'):t('exercise.copyFailed');
+  setCoachMessage(ok?t('exercise.copyReady'):t('exercise.copyFailed'), {source:'copy'});
+}
+
 function refreshAIState(){ const on=!!state.settings.backendUrl;
   $('analyzeBtn').style.display=on?'block':'none'; $('aiHint').style.display=on?'none':'block'; }
 
+async function persistLanguageSettings(){
+  await setSetting('language', state.settings.language);
+  await setSetting('languageLabel', state.settings.languageLabel);
+  await setSetting('uiPack', state.settings.uiPack);
+}
+async function useBuiltInLanguage(code){
+  if(code==='hu') setLanguageState('hu','Hungarian / Magyar',UI_HU);
+  else setLanguageState('en','English',null);
+  await persistLanguageSettings();
+  $('setLanguage').value=currentLanguageName();
+  $('langErr').classList.remove('show');
+  applyLanguage();
+  await render();
+  setCoachMessage(fmt('settings.langDone',{language:currentLanguageName()}), {source:'language'});
+}
+async function adaptLanguageWithAI(){
+  $('langErr').classList.remove('show');
+  const requested=($('setLanguage').value||'').trim();
+  if(!requested) return;
+  state.settings.backendUrl=$('setBackend').value.trim();
+  state.settings.appSecret=$('setSecret').value.trim();
+  if(!state.settings.backendUrl || !state.settings.appSecret){
+    $('langErr').textContent=t('settings.langNeedBackend'); $('langErr').classList.add('show'); return;
+  }
+  $('langSpinner').classList.add('show');
+  $('localizeBtn').disabled=true;
+  setText('languageHint','settings.langRunning');
+  try{
+    const body={ targetLanguage:requested, sourceLocale:'en', uiCatalog:uiCatalogForAI() };
+    const res=await fetch(state.settings.backendUrl.replace(/\/$/,'')+'/api/localize-ui',{
+      method:'POST', headers:{ 'Content-Type':'application/json', 'x-app-secret':state.settings.appSecret }, body:JSON.stringify(body)
+    });
+    if(!res.ok){ let detail=''; try{detail=await res.text();}catch(_e){} throw new Error('HTTP '+res.status+(detail?' · '+detail.slice(0,160):'')); }
+    const data=await res.json();
+    const allowed=new Set(Object.keys(UI_EN));
+    const pack={};
+    (data.translations||[]).forEach(x=>{ if(x && allowed.has(x.key) && typeof x.value==='string') pack[x.key]=x.value.slice(0,260); });
+    if(Object.keys(pack).length<20) throw new Error('too few translated keys');
+    setLanguageState(data.languageCode || requested.toLowerCase().slice(0,12), data.languageName || requested, pack);
+    await persistLanguageSettings();
+    $('setLanguage').value=currentLanguageName();
+    applyLanguage(); await render();
+    setText('languageHint','settings.langDone');
+    $('languageHint').textContent=fmt('settings.langDone',{language:currentLanguageName()});
+    setCoachMessage(fmt('settings.langDone',{language:currentLanguageName()}), {source:'language'});
+  }catch(err){
+    $('langErr').textContent=fmt('settings.langFail',{error:err.message}); $('langErr').classList.add('show');
+    setText('languageHint','settings.languageHint');
+  }finally{
+    $('langSpinner').classList.remove('show');
+    $('localizeBtn').disabled=false;
+  }
+}
 
 function addMonths(ym, delta){
   const [y,m]=ym.split('-').map(Number);
@@ -1037,9 +1390,11 @@ function addMonths(ym, delta){
 }
 function monthLabelHu(ym){
   const [y,m]=ym.split('-').map(Number);
-  const names=['január','február','március','április','május','június','július','augusztus','szeptember','október','november','december'];
-  return `${y} · ${names[m-1].toUpperCase()}`;
+  const d=new Date(y,m-1,1);
+  const month=d.toLocaleDateString(state.settings.language || undefined,{month:'long'}).toUpperCase();
+  return `${y} · ${month}`;
 }
+
 async function openCalendar(){
   state.calendarMonth=state.date.slice(0,7);
   await renderCalendar();
@@ -1049,9 +1404,10 @@ async function renderCalendar(){
   const ym=state.calendarMonth || state.date.slice(0,7);
   const [y,m]=ym.split('-').map(Number);
   $('calMonthLabel').textContent=monthLabelHu(ym);
-  const [meals,weights]=await Promise.all([getAll('meals'),getAll('weights')]);
+  const [meals,weights,workouts]=await Promise.all([getAll('meals'),getAll('weights'),getAll('workouts')]);
   const mealDates=new Set(meals.map(x=>x.date));
   const weightDates=new Set(weights.map(x=>x.date));
+  const workoutDates=new Set(workouts.map(x=>x.date));
   const first=new Date(y,m-1,1);
   const offset=(first.getDay()+6)%7; // Monday-first
   const days=new Date(y,m,0).getDate();
@@ -1063,11 +1419,11 @@ async function renderCalendar(){
     btn.type='button'; btn.className='calDay';
     if(num<1 || num>days){ btn.classList.add('out'); btn.innerHTML='<span></span><span class="calMarks"></span>'; grid.appendChild(btn); continue; }
     const iso=`${y}-${String(m).padStart(2,'0')}-${String(num).padStart(2,'0')}`;
-    const hasMeal=mealDates.has(iso), hasWeight=weightDates.has(iso);
+    const hasMeal=mealDates.has(iso), hasWeight=weightDates.has(iso), hasWorkout=workoutDates.has(iso);
     if(iso===state.date) btn.classList.add('selected');
     if(iso===isoToday()) btn.classList.add('today');
-    btn.setAttribute('aria-label', `${iso}${hasMeal?' étkezés':''}${hasWeight?' súly':''}`);
-    btn.innerHTML=`<span>${num}</span><span class="calMarks">${hasMeal?'<i class="markMeal"></i>':''}${hasWeight?'<i class="markWeight"></i>':''}</span>`;
+    btn.setAttribute('aria-label', `${iso}${hasMeal?' '+t('calendar.meal','meal'):''}${hasWeight?' '+t('calendar.weight','weight'):''}${hasWorkout?' '+t('calendar.exercise','training'):''}`);
+    btn.innerHTML=`<span>${num}</span><span class="calMarks">${hasMeal?'<i class="markMeal"></i>':''}${hasWeight?'<i class="markWeight"></i>':''}${hasWorkout?'<i class="markWorkout"></i>':''}</span>`;
     btn.onclick=async()=>{ state.date=iso; hide('calendarOverlay'); await render(); };
     grid.appendChild(btn);
   }
@@ -1085,7 +1441,7 @@ $('analyzeBtn').onclick=async()=>{
   $('mealErr').classList.remove('show'); $('mealPreview').classList.remove('show'); $('mealSpinner').classList.add('show');
   try{
     const body={ date:state.date, time:$('mealTime').value||undefined, rawText:raw,
-      userContext:{ language:'hu', goal:'weight_loss', dailyKcalTarget:state.settings.kcalTarget, simpleDietStyle:true } };
+      userContext:{ language:currentLanguageName(), goal:'weight_loss', dailyKcalTarget:state.settings.kcalTarget, simpleDietStyle:true } };
     const res=await fetch(state.settings.backendUrl.replace(/\/$/,'')+'/api/analyze-meal',{
       method:'POST', headers:{ 'Content-Type':'application/json', 'x-app-secret':state.settings.appSecret }, body:JSON.stringify(body) });
     if(!res.ok) throw new Error('HTTP '+res.status);
@@ -1099,7 +1455,7 @@ $('analyzeBtn').onclick=async()=>{
     if(aiCoachMsg) rememberCoachMessage(aiCoachMsg, 'meal-estimate');
     $('mealPreview').classList.add('show');
     $('mTitle').value=a.title||''; $('mKcal').value=a.estimatedKcal; $('mProt').value=a.proteinG; $('mCarb').value=a.carbsG; $('mFat').value=a.fatG;
-  }catch(err){ $('mealErr').textContent='Az automatikus becslés nem sikerült ('+err.message+'). Vidd fel kézzel, vagy ellenőrizd a backend URL-t.'; $('mealErr').classList.add('show'); }
+  }catch(err){ $('mealErr').textContent='Automatic estimate failed ('+err.message+'). Enter it manually or check the backend URL.'; $('mealErr').classList.add('show'); }
   finally{ $('mealSpinner').classList.remove('show'); }
 };
 
@@ -1108,7 +1464,7 @@ $('saveMealBtn').onclick=async()=>{
   if(!title && !raw && !$('mKcal').value) return;
   const a=state.pendingAI;
   const meal={ id:uid(), date:state.date, time:$('mealTime').value||null, rawText:raw,
-    title:title||raw||'Étkezés', kcal:n($('mKcal').value), kcalMin:a?a.kcalMin:null, kcalMax:a?a.kcalMax:null,
+    title:title||raw||'Meal', kcal:n($('mKcal').value), kcalMin:a?a.kcalMin:null, kcalMax:a?a.kcalMax:null,
     protein:n($('mProt').value), carbs:n($('mCarb').value), fat:n($('mFat').value),
     confidence:a?a.confidence:null, trainerNote:a?a.trainerNote:null, source:a?'ai':'manual', createdAt:Date.now(), updatedAt:Date.now() };
   await put('meals',meal); hide('mealOverlay'); render();
@@ -1121,13 +1477,53 @@ $('saveWeightBtn').onclick=async()=>{ const kg=parseFloat($('wKg').value); if(is
     createdAt:existing?existing.createdAt:Date.now(), updatedAt:Date.now() };
   await put('weights',w); hide('weightOverlay'); render(); };
 
+
+$('addExerciseBtn').onclick=()=>{ ['exFreeText','exActivity','exTime','exMinutes','exKcal','exIntensity','exNote'].forEach(i=>$(i).value=''); $('exerciseErr').classList.remove('show'); $('exerciseSpinner').classList.remove('show'); state.pendingExerciseAI=null; show('exerciseOverlay'); };
+const EX_PRESETS={
+  walk:{activity:'Walk',minutes:30,intensity:'medium'}, run:{activity:'Run',minutes:20,intensity:'medium'}, bike:{activity:'Bike',minutes:30,intensity:'medium'}, gym:{activity:'Gym',minutes:45,intensity:'medium'},
+  pushups:{activity:'Push-ups',minutes:3,intensity:'medium',note:'3x10 push-ups'}, squats:{activity:'Squats',minutes:3,intensity:'medium',note:'3x15 squats'}, plank:{activity:'Plank',minutes:2,intensity:'medium',note:'2 min plank'}, pullups:{activity:'Pull-ups',minutes:3,intensity:'medium',note:'3x5 pull-ups'}, custom:{activity:'Training',minutes:'',intensity:'medium'}
+};
+document.querySelectorAll('#exercisePresets .presetBtn').forEach(btn=>btn.onclick=()=>{ const p=EX_PRESETS[btn.dataset.ex]||EX_PRESETS.custom; fillExerciseFields({...p,burnedKcal:p.minutes?workoutEstimate(p.activity,p.minutes,p.intensity):0}, 'preset'); if(p.note) $('exFreeText').value=p.note; });
+$('parseExerciseBtn').onclick=()=>{ const parsed=parseTrainingTextLocal($('exFreeText').value||$('exNote').value||$('exActivity').value); if(parsed){ fillExerciseFields(parsed,'offline'); setCoachMessage(t('exercise.offlineDone'), {source:'training'}); } };
+$('aiExerciseBtn').onclick=async()=>{
+  const raw=($('exFreeText').value||'').trim(); if(raw.length<2) return;
+  if(!state.settings.backendUrl || !state.settings.appSecret){ $('exerciseErr').textContent=t('exercise.aiNeedBackend'); $('exerciseErr').classList.add('show'); return; }
+  $('exerciseErr').classList.remove('show'); $('exerciseSpinner').classList.add('show'); setCoachMessage(t('exercise.aiRunning'), {source:'training'});
+  try{
+    const weights=await getAll('weights'); const w=weights.filter(x=>x.date<=state.date).sort((a,b)=>a.date<b.date?1:-1)[0];
+    const body={ date:state.date, rawText:raw, weightKg:w?Number(w.weightKg):undefined, userContext:{ language:currentLanguageName(), dailyKcalTarget:state.settings.kcalTarget } };
+    const res=await fetch(state.settings.backendUrl.replace(/\/$/,'')+'/api/analyze-exercise',{ method:'POST', headers:{ 'Content-Type':'application/json', 'x-app-secret':state.settings.appSecret }, body:JSON.stringify(body) });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json(); fillExerciseFields({activity:data.activity, minutes:data.minutes, burnedKcal:data.burnedKcal, intensity:data.intensity, note:data.note||raw, reps:data.reps||0, confidence:data.confidence}, 'ai');
+    setCoachMessage(t('exercise.aiDone'), {source:'training'});
+  }catch(err){ $('exerciseErr').textContent=fmt('exercise.aiFailed',{error:err.message}); $('exerciseErr').classList.add('show'); }
+  finally{ $('exerciseSpinner').classList.remove('show'); }
+};
+$('estimateExerciseBtn').onclick=()=>{
+  const local=parseTrainingTextLocal($('exFreeText').value);
+  if(local){ fillExerciseFields(local,'offline'); setCoachMessage(t('exercise.offlineDone'), {source:'training'}); return; }
+  const kcal=workoutEstimate($('exActivity').value, $('exMinutes').value, $('exIntensity').value);
+  if(kcal>0){ $('exKcal').value=kcal; setCoachMessage(t('exercise.auto'), {source:'training'}); }
+};
+$('saveExerciseBtn').onclick=async()=>{
+  const activity=$('exActivity').value.trim(); const minutes=n($('exMinutes').value);
+  let kcal=n($('exKcal').value);
+  if(!kcal && minutes) kcal=workoutEstimate(activity, minutes, $('exIntensity').value);
+  if(!activity && !minutes && !kcal && !$('exFreeText').value.trim()) return;
+  const ai=state.pendingExerciseAI;
+  const w={ id:uid(), date:state.date, time:$('exTime').value||null, activity:activity||'Training', minutes, burnedKcal:kcal,
+    intensity:$('exIntensity').value.trim()||null, note:$('exNote').value.trim()||$('exFreeText').value.trim()||null, rawText:$('exFreeText').value.trim()||null, reps:ai?n(ai.reps):0,
+    confidence:ai?ai.confidence:null, source:ai?'ai':'manual', createdAt:Date.now(), updatedAt:Date.now() };
+  await put('workouts',w); hide('exerciseOverlay'); setCoachMessage(fmt('coach.exerciseSaved',{kcal}), {source:'training'}); render();
+};
+
 async function showDailyReport(fromBubble){
   const meals=await getAllByDate('meals',state.date); let kcal=0,P=0; meals.forEach(m=>{ kcal+=n(m.kcal); P+=n(m.protein); });
-  const t=state.settings.kcalTarget; let head;
-  if(meals.length===0){ head='Nincs rögzített étkezés ma. A jelentéshez előbb naplózz.'; }
-  else if(kcal<=t && P>=t*0.03){ head=`Kontroll rendben: ${kcal} kcal a ${t}-es keretben, fehérje ${P} g. A rögzítés a lényeg — ma megvan.`; }
-  else if(kcal<=t){ head=`${kcal} kcal, keret alatt. Rendben, de a fehérje (${P} g) lehetne feljebb holnap.`; }
-  else { head=`${kcal} kcal, ${kcal-t} a keret fölött. Bejegyezve. Holnap egy könnyebb köret kiegyenlíti.`; }
+  const t0=state.settings.kcalTarget; let head;
+  if(meals.length===0){ head=t('coach.noMealsReport'); }
+  else if(kcal<=t0 && P>=t0*0.03){ head=fmt('coach.goodReport',{kcal,target:t0,protein:P}); }
+  else if(kcal<=t0){ head=fmt('coach.underReport',{kcal,protein:P}); }
+  else { head=fmt('coach.overReport',{kcal,diff:kcal-t0}); }
   setCoachMessage(head, {source:'daily', resetCycle:false});
   if(fromBubble){
     state.coachCycleMode=true;
@@ -1136,7 +1532,10 @@ async function showDailyReport(fromBubble){
   }
 }
 
+
 $('refreshNutrientsBtn').onclick=refreshNutrientReport;
+$('copyDailySummaryBtn').onclick=copyDailySummary;
+$('copyDayLogBtn').onclick=copyDailyLog;
 $('todayPanel').onclick=openNutrientReport;
 $('todayPanel').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openNutrientReport(); } };
 $('coachBubble').onclick=handleCoachBubbleTap;
@@ -1151,15 +1550,19 @@ $('calTodayBtn').onclick=async()=>{ state.date=isoToday(); state.calendarMonth=s
 $('mealsPanel').onclick=e=>{ e.stopPropagation(); if(e.target.closest('.del')) return; openDayDetail(); };
 $('mealsPanel').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openDayDetail(); } };
 
-$('openSettings').onclick=()=>{ $('setTarget').value=state.settings.kcalTarget; $('setBackend').value=state.settings.backendUrl; $('setSecret').value=state.settings.appSecret; show('settingsOverlay'); };
+$('openSettings').onclick=()=>{ $('setTarget').value=state.settings.kcalTarget; $('setBackend').value=state.settings.backendUrl; $('setSecret').value=state.settings.appSecret; $('setLanguage').value=currentLanguageName(); $('langErr').classList.remove('show'); setText('languageHint','settings.languageHint'); show('settingsOverlay'); };
 $('saveSettingsBtn').onclick=async()=>{
   state.settings.kcalTarget=n($('setTarget').value)||2200; state.settings.backendUrl=$('setBackend').value.trim(); state.settings.appSecret=$('setSecret').value.trim();
-  await setSetting('kcalTarget',state.settings.kcalTarget); await setSetting('backendUrl',state.settings.backendUrl); await setSetting('appSecret',state.settings.appSecret);
-  hide('settingsOverlay'); refreshAIState(); render(); };
-$('wipeBtn').onclick=async()=>{ const meals=await getAllByDate('meals',state.date); for(const m of meals) await del('meals',m.id); hide('settingsOverlay'); render(); };
+  const requestedLang=($('setLanguage').value||'').trim(); if(requestedLang && requestedLang!==currentLanguageName()){ state.settings.languageLabel=requestedLang; }
+  await setSetting('kcalTarget',state.settings.kcalTarget); await setSetting('backendUrl',state.settings.backendUrl); await setSetting('appSecret',state.settings.appSecret); await setSetting('language',state.settings.language); await setSetting('languageLabel',state.settings.languageLabel); await setSetting('uiPack',state.settings.uiPack);
+  hide('settingsOverlay'); refreshAIState(); applyLanguage(); render(); };
+$('wipeBtn').onclick=async()=>{ const [meals,workouts]=await Promise.all([getAllByDate('meals',state.date), getAllByDate('workouts',state.date)]); for(const m of meals) await del('meals',m.id); for(const w of workouts) await del('workouts',w.id); hide('settingsOverlay'); render(); };
 $('exportBtn').onclick=exportBackup;
 $('importBtn').onclick=()=>{ $('importFile').value=''; $('importFile').click(); };
 $('importFile').onchange=async()=>{ const f=$('importFile').files && $('importFile').files[0]; if(f) await importBackupFromFile(f); };
+$('useEnglishBtn').onclick=()=>useBuiltInLanguage('en');
+$('useHungarianBtn').onclick=()=>useBuiltInLanguage('hu');
+$('localizeBtn').onclick=adaptLanguageWithAI;
 
 $('prevDay').onclick=()=>{ state.date=shiftDate(state.date,-1); render(); };
 $('nextDay').onclick=()=>{ state.date=shiftDate(state.date, 1); render(); };
@@ -1181,17 +1584,17 @@ function setInstallText(txt){ const el=$('installText'); if(el) el.textContent=t
 function showInstallNudge(txt){ if(txt) setInstallText(txt); if(!isInstalledPWA()) $('installNudge').classList.add('show'); }
 function hideInstallNudge(){ $('installNudge').classList.remove('show'); }
 async function ensureServiceWorkerReady(){
-  if(!('serviceWorker' in navigator)) return {ok:false, reason:'Ez a böngésző nem támogatja a service workert, ezért nem tud rendes PWA telepítést indítani.'};
+  if(!('serviceWorker' in navigator)) return {ok:false, reason:'This browser does not support service workers, so it cannot start full PWA installation.'};
   try{
     const reg=await navigator.serviceWorker.register('./sw.js',{scope:'./'});
     await navigator.serviceWorker.ready;
     return {ok:true, controlled:!!navigator.serviceWorker.controller, registration:reg};
   }catch(err){
-    return {ok:false, reason:'A service worker nem indult el. Frissítsd a GitHub Pages buildet, majd próbáld újra.'};
+    return {ok:false, reason:'Service worker did not start. Refresh the GitHub Pages build and try again.'};
   }
 }
 async function refreshAppShell(){
-  setCoachMessage('Frissítem az appot. A napló és az App titok megmarad.', {source:'system'});
+  setCoachMessage(t('coach.refreshing'), {source:'system'});
   try{
     if('serviceWorker' in navigator){
       const regs=await navigator.serviceWorker.getRegistrations();
@@ -1205,14 +1608,14 @@ async function refreshAppShell(){
     const base=location.href.split('#')[0].split('?')[0];
     setTimeout(()=>{ location.replace(base+'?refresh='+Date.now()); }, 350);
   }catch(err){
-    setCoachMessage('Frissítés nem sikerült. A napló nem sérült; próbálj böngészőből frissíteni.', {source:'system'});
+    setCoachMessage(t('coach.refreshedFail'), {source:'system'});
   }
 }
 
 async function runInstallPrompt(){
   localStorage.removeItem('mqInstallDismissed');
   if(isInstalledPWA()){
-    setCoachMessage('Már appként fut. Nem kell újratelepíteni.', {source:'install'});
+    setCoachMessage(t('coach.installReady'), {source:'install'});
     hideInstallNudge();
     return;
   }
@@ -1221,28 +1624,28 @@ async function runInstallPrompt(){
     try{ await deferredInstallPrompt.userChoice; }catch(e){}
     deferredInstallPrompt=null; hideInstallNudge(); return;
   }
-  showInstallNudge('Előkészítem a rendes app-telepítést…');
-  setCoachMessage('Telepítési előkészítés fut. Ha most még böngészős shortcutot ajánl, azt hagyd figyelmen kívül.', {source:'install'});
+  showInstallNudge('Preparing app installation…');
+  setCoachMessage('Preparing installation. If the browser offers only a shortcut, ignore it for now.', {source:'install'});
   const ready=await ensureServiceWorkerReady();
   if(!ready.ok){ setCoachMessage(ready.reason, {source:'install'}); hideInstallNudge(); return; }
   if(!ready.controlled){
     localStorage.setItem('mqInstallWanted','1');
-    setCoachMessage('A service worker kész. Frissítek egyet, hogy a böngésző már appként lássa az oldalt.', {source:'install'});
-    showInstallNudge('Előkészítés kész. Frissítés…');
+    setCoachMessage('Service worker ready. Refreshing once so the browser can see the page as an app.', {source:'install'});
+    showInstallNudge('Preparation ready. Refreshing…');
     setTimeout(()=>{ location.replace('./?install=1&t='+Date.now()); }, 700);
     return;
   }
   localStorage.setItem('mqInstallWanted','1');
-  setCoachMessage('A PWA alapok készen vannak. Várj pár másodpercet, majd nyomd meg újra a TELEPÍTÉS gombot. Ha akkor sem jön fel app-telepítő ablak, a böngésző ezen a címen még nem adta oda a promptot.', {source:'install'});
-  showInstallNudge('Készül az app-telepítő. Nyomd meg újra pár másodperc múlva.');
+  setCoachMessage('PWA basics are ready. Wait a few seconds, then press INSTALL again. If no app install dialog appears, the browser has not provided the prompt on this URL yet.', {source:'install'});
+  showInstallNudge('App installer is preparing. Press again in a few seconds.');
 }
 window.addEventListener('beforeinstallprompt', e=>{
   e.preventDefault(); deferredInstallPrompt=e;
   if(localStorage.getItem('mqInstallWanted')){
-    setTimeout(()=>showInstallNudge('Kész: most már önálló appként telepíthető.'), 500);
-    setCoachMessage('Telepítés kész. Nyomd meg a TELEPÍTÉS gombot, és ne a böngésző menüs shortcutját használd.', {source:'install'});
+    setTimeout(()=>showInstallNudge('Ready: install as a standalone app.'), 500);
+    setCoachMessage('Installation ready. Press INSTALL and avoid the browser menu shortcut.', {source:'install'});
   }else if(!localStorage.getItem('mqInstallDismissed')){
-    setTimeout(()=>showInstallNudge('Telepíthető önálló appként.'), 900);
+    setTimeout(()=>showInstallNudge('Install as a standalone app.'), 900);
   }
 });
 window.addEventListener('appinstalled', ()=>{ deferredInstallPrompt=null; localStorage.removeItem('mqInstallWanted'); hideInstallNudge(); });
@@ -1257,8 +1660,11 @@ $('installDismiss').onclick=()=>{ hideInstallNudge(); localStorage.setItem('mqIn
   const kt=await getSetting('kcalTarget'); if(kt!==undefined) state.settings.kcalTarget=kt;
   const bu=await getSetting('backendUrl'); if(bu!==undefined) state.settings.backendUrl=bu;
   const sc=await getSetting('appSecret'); if(sc!==undefined) state.settings.appSecret=sc;
-  refreshAIState(); await render();
-  if(localStorage.getItem('mqInstallWanted') && !deferredInstallPrompt) showInstallNudge('Telepítés előkészítve. Nyomd meg a TELEPÍTÉS gombot.');
+  const lg=await getSetting('language'); if(lg!==undefined) state.settings.language=lg;
+  const ll=await getSetting('languageLabel'); if(ll!==undefined) state.settings.languageLabel=ll;
+  const up=await getSetting('uiPack'); if(up!==undefined) state.settings.uiPack=up;
+  applyLanguage(); refreshAIState(); await render();
+  if(localStorage.getItem('mqInstallWanted') && !deferredInstallPrompt) showInstallNudge('Installation prepared. Press INSTALL.');
   if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{}); }
   if(!localStorage.getItem('mqInstallDismissed') && deferredInstallPrompt) showInstallNudge();
 })();

@@ -2,7 +2,7 @@
   "id": "mealquest-pwa",
   "name": "MealQuest",
   "short_name": "MealQuest",
-  "description": "Retro étkezés- és testsúlynapló beépített edzői visszajelzéssel.",
+  "description": "Retro food and weight log with trainer-style feedback.",
   "start_url": "./?source=pwa",
   "scope": "./",
   "display": "standalone",
