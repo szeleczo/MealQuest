@@ -667,11 +667,28 @@
       <button class="pix ghost" id="refreshAppBtn">APP FRISSÍTÉSE</button>
       <button class="pix ghost" id="exportBtn">EXPORT JSON</button>
       <button class="pix ghost" id="importBtn">IMPORT JSON</button>
+      <button class="pix ghost" id="storageDoctorBtn">STORAGE DOCTOR</button>
       <input id="importFile" type="file" accept="application/json,.json" hidden />
       <button class="pix ghost" id="wipeBtn">MAI NAP TÖRLÉSE</button>
       <div class="hint" id="backupHint">Export/import saves meals and weights to a JSON file. The App secret is not exported for safety.</div>
       <div class="hint" data-title="settings.refreshHint">REFRESH APP only refreshes the offline app cache and service worker. Log, Backend URL and App secret remain.</div>
-      <div class="hint" data-title="settings.version">MealQuest v0.4.3 · data on your device (IndexedDB) · offline PWA</div>
+      <div class="hint" data-title="settings.version">MealQuest v0.4.4 · data on your device (IndexedDB) · offline PWA</div>
+    </div>
+  </div>
+</div>
+
+<!-- STORAGE DOCTOR -->
+<div class="overlay" id="storageDoctorOverlay">
+  <div class="sheet">
+    <header class="chrome"><h2>STORAGE DOCTOR</h2><button class="closebtn" data-close="storageDoctorOverlay">X</button></header>
+    <div class="body">
+      <div class="hint">This reads the local MealQuest database directly without running the normal app render. It does not delete or modify the log.</div>
+      <div class="softBlock" id="storageDoctorReport">Not checked yet.</div>
+      <div class="btnrow">
+        <button class="pix solid" id="storageScanBtn">SCAN STORAGE</button>
+        <button class="pix ghost" id="storageRawExportBtn">RAW EXPORT</button>
+      </div>
+      <div class="hint">If counts are zero here, the browser storage for this exact URL/origin is empty. If counts are visible here but the main screen is empty, the issue is a render/index bug and the raw export can rescue the data.</div>
     </div>
   </div>
 </div>
@@ -690,13 +707,13 @@ let db, deferredInstallPrompt=null, state={
 
 const UI_EN={
   'coach.label':'COACH','app.settings':'SETTINGS','app.today':'TODAY','app.nutrients':'NUTRIENTS','app.detail':'DETAIL','app.mealLog':'MEAL LOG','app.emptyDay':'No meals logged yet. The trainer is waiting for data.','app.weight':'Weight','app.roomLv':'ROOM LV. {level}','app.routine':'ROUTINE {good}/7','room.fat':'STARTING ROOM','room.medium':'CONTROL BUILDING','room.lean':'GOOD ROUTINE',
-  'btn.addMeal':'+ MEAL','btn.addWeight':'+ WEIGHT','btn.addExercise':'+ TRAIN','btn.estimate':'ESTIMATE','btn.saveLog':'SAVE TO LOG','btn.save':'SAVE','btn.install':'INSTALL','btn.refreshApp':'REFRESH APP','btn.export':'EXPORT JSON','btn.import':'IMPORT JSON','btn.wipeDay':'DELETE TODAY','btn.refreshNutrients':'REFRESH / ANALYZE','btn.estimateExercise':'QUICK ESTIMATE','btn.english':'ENGLISH','btn.hungarian':'MAGYAR','btn.adaptLanguage':'ADAPT LANGUAGE',
+  'btn.addMeal':'+ MEAL','btn.addWeight':'+ WEIGHT','btn.addExercise':'+ TRAIN','btn.storageDoctor':'STORAGE DOCTOR','btn.estimate':'ESTIMATE','btn.saveLog':'SAVE TO LOG','btn.save':'SAVE','btn.install':'INSTALL','btn.refreshApp':'REFRESH APP','btn.export':'EXPORT JSON','btn.import':'IMPORT JSON','btn.wipeDay':'DELETE TODAY','btn.refreshNutrients':'REFRESH / ANALYZE','btn.estimateExercise':'QUICK ESTIMATE','btn.english':'ENGLISH','btn.hungarian':'MAGYAR','btn.adaptLanguage':'ADAPT LANGUAGE',
   'meal.title':'+ MEAL','meal.what':'What did you eat? (free text)','meal.placeholder':'2 chicken legs, about 200g cooked rice, tomato, 1 ayran','meal.time':'Time (optional)','meal.aiOff':'Automatic estimate is off — add the backend URL in settings, or enter values manually below.','meal.spinner':'ANALYZING…','meal.name':'Name','meal.namePlaceholder':'e.g. Lunch — chicken with rice','meal.kcal':'Kcal','meal.proteinShort':'Prot. g','meal.fatShort':'Fat g','meal.carbs':'Carbs g',
   'weight.title':'+ WEIGHT','weight.kg':'Body weight (kg)','weight.note':'Note (optional)','weight.placeholder':'morning, before breakfast','weight.hint':'Daily fluctuation is normal. The trend matters, not one number.','weight.save':'SAVE WEIGHT',
   'exercise.title':'+ TRAINING','exercise.activity':'Activity','exercise.time':'Time (optional)','exercise.minutes':'Minutes','exercise.kcal':'Burned kcal','exercise.intensity':'Intensity','exercise.note':'Note (optional)','exercise.hint':'Training lowers the daily net kcal. It is still only an estimate, but useful for daily control.','exercise.save':'SAVE TRAINING','exercise.empty':'No training logged yet.','exercise.saved':'Training logged: -{kcal} kcal. Net day updated.','exercise.auto':'Quick estimate added. Adjust it if needed.',
   'calendar.title':'CALENDAR','calendar.today':'TODAY','calendar.meal':'meal','calendar.weight':'weight','calendar.exercise':'training','calendar.todayMark':'TODAY = current day','calendar.hint':'Tap the date to open. Left/right swipe still changes days.','calendar.days':'M,T,W,TH,F,SA,S',
   'day.title':'FULL DAY','day.hint':'The main screen is intentionally compact. Full text is here, touch-scrollable without visible scrollbars.','nutri.title':'DAILY NUTRIENTS','nutri.hint':'Opened from the TODAY panel. Estimated macros, vitamins, minerals, fiber, salt and cholesterol. Not a lab result, just daily orientation.','nutri.meta.empty':'Detailed nutrients only use an API call when you ask for refresh here.','nutri.spinner':'DETAILED ANALYSIS…','nutri.noMeals':'Nothing to analyze yet. Log a meal first.','nutri.noMeals2':'Log a meal first, then there is something to analyze.','nutri.needBackend':'Detailed analysis needs the Backend URL in Settings.','nutri.needBackend2':'Extra nutrient estimation needs the backend URL in settings.','nutri.running':'Detailed analysis running… this uses one API call.','nutri.saved':'Fresh detailed analysis saved: {time}.','nutri.failed':'Detailed nutrient estimate failed: {error}','nutri.cachedFresh':'Last detailed analysis: {time}. Meals have not changed since.','nutri.cachedStale':'A previous analysis exists, but the log changed. Press REFRESH / ANALYZE if you want a new estimate.','nutri.noneCached':'No detailed nutrient estimate yet. Press REFRESH / ANALYZE if you want one. This uses one API call.','nutri.noneCached2':'No detailed daily nutrient estimate yet. The button starts analysis only on request, so it does not waste API calls.','nutri.noData':'not enough data','nutri.chartTitle':'DAILY VALUE % · QUICK VIEW','nutri.mainStats':'MAIN STATS','nutri.minerals':'MINERALS','nutri.vitamins':'VITAMINS','nutri.strengths':'STRENGTHS','nutri.watch':'WATCH','nutri.restOfDay':'REST OF DAY','nutri.trainerNote':'TRAINER NOTE','nutri.caveat':'Estimate · depends on portions · not medical advice.',
-  'settings.title':'SETTINGS','settings.kcal':'Daily kcal target','settings.backend':'Backend URL (for estimates)','settings.backendHint':'Cloudflare Worker URL. Empty = manual mode. The API key lives only in the Worker, never here.','settings.secret':'App secret (x-app-secret)','settings.secretPlaceholder':'Worker APP_API_SECRET','settings.language':'App language','settings.languageHint':'Default language is English. AI language packs are saved on this device and survive app refreshes.','settings.trainerCharacter':'Trainer character','settings.trainerMale':'Male','settings.trainerFemale':'Female','settings.trainerHint':'Only changes the room character artwork. Your log and targets stay the same.','settings.langSaved':'Language saved.','settings.langNeedBackend':'Language adaptation needs Backend URL and App secret first.','settings.langRunning':'Adapting the app language… this uses one API call.','settings.langDone':'Language pack saved: {language}. App updates will not overwrite it.','settings.langFail':'Language adaptation failed: {error}','settings.backup':'Export/import saves meals and weights to a JSON file. The App secret is not exported for safety.','settings.refreshHint':'REFRESH APP only refreshes the offline app cache and service worker. Log, Backend URL and App secret remain.','settings.version':'MealQuest v0.4.3 · data on your device (IndexedDB) · offline PWA',
+  'settings.title':'SETTINGS','settings.kcal':'Daily kcal target','settings.backend':'Backend URL (for estimates)','settings.backendHint':'Cloudflare Worker URL. Empty = manual mode. The API key lives only in the Worker, never here.','settings.secret':'App secret (x-app-secret)','settings.secretPlaceholder':'Worker APP_API_SECRET','settings.language':'App language','settings.languageHint':'Default language is English. AI language packs are saved on this device and survive app refreshes.','settings.trainerCharacter':'Trainer character','settings.trainerMale':'Male','settings.trainerFemale':'Female','settings.trainerHint':'Only changes the room character artwork. Your log and targets stay the same.','settings.langSaved':'Language saved.','settings.langNeedBackend':'Language adaptation needs Backend URL and App secret first.','settings.langRunning':'Adapting the app language… this uses one API call.','settings.langDone':'Language pack saved: {language}. App updates will not overwrite it.','settings.langFail':'Language adaptation failed: {error}','settings.backup':'Export/import saves meals and weights to a JSON file. The App secret is not exported for safety.','settings.refreshHint':'REFRESH APP only refreshes the offline app cache and service worker. Log, Backend URL and App secret remain.','settings.version':'MealQuest v0.4.4 · data on your device (IndexedDB) · offline PWA',
   'coach.lowData':'Low data. The trainer does not predict through fog.','coach.good':'Control looks good. Mission continues.','coach.under':'Under target. Fine, but protein could be higher tomorrow.','coach.over':'Over target by about {diff} kcal. Logged. Tomorrow a lighter side dish balances it.','coach.noMealsReport':'No meals logged today. Log first, then the trainer can report.','coach.goodReport':'Control good: {kcal} kcal within the {target} target, protein {protein} g. The logging is the win today.','coach.underReport':'{kcal} kcal, under target. Fine, but protein ({protein} g) could be higher tomorrow.','coach.overReport':'{kcal} kcal, {diff} over target. Logged. Tomorrow a lighter side dish balances it.','coach.installReady':'Already running as an app. No reinstall needed.','coach.refreshing':'Refreshing the app. Log and App secret remain.','coach.refreshedFail':'Refresh failed. The log is safe; try refreshing from the browser.','coach.nutrientsSaved':'Detailed daily nutrient estimate updated. It is saved for this day.','coach.exerciseSaved':'Training logged. Daily net kcal lowered by {kcal}.',
   'remaining.lotProtein':'About {left} kcal left. Protein could still use about {proteinLeft} g, so choose simple protein + vegetables, with a smaller side dish.','remaining.lot':'About {left} kcal left. Protein is roughly fine, so a normal but not heavy meal works: vegetables + smaller side + simple protein.','remaining.someProtein':'About {left} kcal fits. For the rest of the day, prioritize protein with little side dish.','remaining.some':'About {left} kcal fits. A light dinner / small snack still fits, but I would not force a big side dish.','remaining.closeProtein':'You are close to target. If you still eat, choose a small protein option with little fat and little side dish.','remaining.close':'You are close to the daily target. From here, a light controlled finish is best.','remaining.over':'You are about {over} kcal over target. Not tragic, but today I would keep it to water, vegetables, light protein; no new big meal.','remaining.proteinGap':'Protein may still be about {proteinLeft} g short for a good day.','remaining.carbHigh':'Carbs are already on the higher side, so further side dishes should be reduced.','remaining.fatHigh':'Fat is already on the higher side, so I would avoid oily/cheesy/sausage-heavy finishes.'
 };
@@ -708,7 +725,7 @@ const UI_HU={
   'exercise.title':'+ EDZÉS','exercise.activity':'Edzés / mozgás','exercise.time':'Idő (opcionális)','exercise.minutes':'Perc','exercise.kcal':'Elégetett kcal','exercise.intensity':'Intenzitás','exercise.note':'Megjegyzés (opcionális)','exercise.hint':'Az edzés a napi nettó kcal-t csökkenti. Ez is csak becslés, de napi kontrollhoz hasznos.','exercise.save':'EDZÉS RÖGZÍTÉSE','exercise.empty':'Ma még nincs edzés rögzítve.','exercise.saved':'Edzés rögzítve: -{kcal} kcal. A napi nettó frissült.','exercise.auto':'Gyors becslés kitöltve. Ha kell, írd át.',
   'calendar.title':'NAPTÁR','calendar.today':'MAI NAP','calendar.meal':'étkezés','calendar.weight':'súly','calendar.exercise':'edzés','calendar.todayMark':'MA = mai nap','calendar.hint':'A dátumra koppintva nyílik. Balra/jobbra swipe továbbra is napot vált.','calendar.days':'H,K,SZE,CS,P,SZO,V',
   'day.title':'TELJES NAP','day.hint':'A főképernyő szándékosan tömör. Itt látszik a teljes szöveg, scrollbar nélkül, érintéssel görgetve.','nutri.title':'NAPI TÁPANYAGOK','nutri.hint':'A MAI NAP panelről nyílik. Makrók, vitaminok, ásványi anyagok, rost, só és koleszterin becslése. Nem laboreredmény, hanem napi tájékozódás.','nutri.meta.empty':'A részletes tápanyagbecslés csak akkor hív API-t, ha itt frissítést kérsz.','nutri.spinner':'RÉSZLETES ELEMZÉS…','nutri.noMeals':'Nincs még mit elemezni. Előbb rögzíts étkezést ezen a napon.','nutri.noMeals2':'Előbb rögzíts étkezést, utána van mit elemezni.','nutri.needBackend':'A részletes elemzéshez kell Backend URL a Beállításokban.','nutri.needBackend2':'Az extra tápanyagbecsléshez kell a backend URL a beállításokban.','nutri.running':'Részletes elemzés fut… ez most egy API-hívás.','nutri.saved':'Friss részletes elemzés mentve: {time}.','nutri.failed':'A részletes tápanyagbecslés nem sikerült: {error}','nutri.cachedFresh':'Utolsó részletes elemzés: {time}. Azóta nem változott a napi étkezéslista.','nutri.cachedStale':'Van korábbi elemzés, de azóta változott a napló. Nyomj FRISSÍTÉS / ELEMZÉS-t, ha új becslést kérsz.','nutri.noneCached':'Ehhez a naphoz még nincs részletes tápanyagbecslés. Nyomj FRISSÍTÉS / ELEMZÉS-t, ha kéred. Ez egy API-hívást használ.','nutri.noneCached2':'Még nincs részletes napi tápanyagbecslés. A gomb csak kérésre indít elemzést, így nem költ feleslegesen API-hívást.','nutri.noData':'nincs elég adat','nutri.chartTitle':'NAPI ÉRTÉK % · GYORS NÉZET','nutri.mainStats':'FŐ STATOK','nutri.minerals':'ÁSVÁNYI ANYAGOK','nutri.vitamins':'VITAMINOK','nutri.strengths':'ERŐSSÉGEK','nutri.watch':'FIGYELENDŐ','nutri.restOfDay':'NAP MARADÉKA','nutri.trainerNote':'EDZŐI MEGJEGYZÉS','nutri.caveat':'Becslés · adagpontosságtól függ · nem orvosi tanács.',
-  'settings.title':'BEÁLLÍTÁS','settings.kcal':'Napi kcal cél','settings.backend':'Backend URL (becsléshez)','settings.backendHint':'Cloudflare Worker URL. Üresen = kézi mód. Az API-kulcs csak a Workerben él, sosem itt.','settings.secret':'App titok (x-app-secret)','settings.secretPlaceholder':'a Worker APP_API_SECRET titka','settings.language':'App nyelve','settings.languageHint':'Az alapnyelv angol. Az AI nyelvi csomag ezen az eszközön mentődik, és appfrissítés nem írja felül.','settings.trainerCharacter':'Edző karakter','settings.trainerMale':'Férfi','settings.trainerFemale':'Női','settings.trainerHint':'Csak a terem karakterképét cseréli. A napló és a célok változatlanok maradnak.','settings.langSaved':'Nyelv mentve.','settings.langNeedBackend':'A nyelvi átalakításhoz előbb kell Backend URL és App titok.','settings.langRunning':'Az app nyelvi csomagja készül… ez egy API-hívás.','settings.langDone':'Nyelvi csomag mentve: {language}. Appfrissítés nem írja felül.','settings.langFail':'A nyelvi átalakítás nem sikerült: {error}','settings.backup':'Export/import: a naplózott étkezések és súlyadatok mentése JSON fájlba. Az App titok biztonság miatt nem kerül exportba.','settings.refreshHint':'APP FRISSÍTÉSE: csak az offline app-cache-t és service workert cseréli. A napló, a Backend URL és az App titok megmarad.','settings.version':'MealQuest v0.4.3 · adatok a te eszközödön (IndexedDB) · offline PWA',
+  'settings.title':'BEÁLLÍTÁS','settings.kcal':'Napi kcal cél','settings.backend':'Backend URL (becsléshez)','settings.backendHint':'Cloudflare Worker URL. Üresen = kézi mód. Az API-kulcs csak a Workerben él, sosem itt.','settings.secret':'App titok (x-app-secret)','settings.secretPlaceholder':'a Worker APP_API_SECRET titka','settings.language':'App nyelve','settings.languageHint':'Az alapnyelv angol. Az AI nyelvi csomag ezen az eszközön mentődik, és appfrissítés nem írja felül.','settings.trainerCharacter':'Edző karakter','settings.trainerMale':'Férfi','settings.trainerFemale':'Női','settings.trainerHint':'Csak a terem karakterképét cseréli. A napló és a célok változatlanok maradnak.','settings.langSaved':'Nyelv mentve.','settings.langNeedBackend':'A nyelvi átalakításhoz előbb kell Backend URL és App titok.','settings.langRunning':'Az app nyelvi csomagja készül… ez egy API-hívás.','settings.langDone':'Nyelvi csomag mentve: {language}. Appfrissítés nem írja felül.','settings.langFail':'A nyelvi átalakítás nem sikerült: {error}','settings.backup':'Export/import: a naplózott étkezések és súlyadatok mentése JSON fájlba. Az App titok biztonság miatt nem kerül exportba.','settings.refreshHint':'APP FRISSÍTÉSE: csak az offline app-cache-t és service workert cseréli. A napló, a Backend URL és az App titok megmarad.','settings.version':'MealQuest v0.4.4 · adatok a te eszközödön (IndexedDB) · offline PWA',
   'coach.lowData':'Kevés adat. Az edző ködből nem jósol.','coach.good':'Kontroll rendben. Küldetés folytatható.','coach.under':'Keret alatt. Rendben, de a fehérje lehetne feljebb holnap.','coach.over':'Kb. {diff} kcal a keret fölött. Bejegyezve. Holnap egy könnyebb köret kiegyenlíti.','coach.noMealsReport':'Nincs rögzített étkezés ma. A jelentéshez előbb naplózz.','coach.goodReport':'Kontroll rendben: {kcal} kcal a {target}-es keretben, fehérje {protein} g. A rögzítés a lényeg — ma megvan.','coach.underReport':'{kcal} kcal, keret alatt. Rendben, de a fehérje ({protein} g) lehetne feljebb holnap.','coach.overReport':'{kcal} kcal, {diff} a keret fölött. Bejegyezve. Holnap egy könnyebb köret kiegyenlíti.','coach.installReady':'Már appként fut. Nem kell újratelepíteni.','coach.refreshing':'Frissítem az appot. A napló és az App titok megmarad.','coach.refreshedFail':'Frissítés nem sikerült. A napló nem sérült; próbálj böngészőből frissíteni.','coach.nutrientsSaved':'Részletes napi tápanyagbecslés frissítve. Ez már el van mentve ehhez a naphoz.','coach.exerciseSaved':'Edzés rögzítve. A napi nettó kcal {kcal}-lal csökkent.',
   'remaining.lotProtein':'Még kb. {left} kcal maradt. Fehérjéből még kb. {proteinLeft} g kellene, ezért egyszerű fehérje + zöldség + kisebb köret jó irány.','remaining.lot':'Még kb. {left} kcal maradt. Fehérje nagyjából rendben, ezért jöhet egy normális, de nem nehéz étkezés: zöldség + kisebb köret + egyszerű fehérje.','remaining.someProtein':'Még kb. {left} kcal fér bele. A nap maradékában inkább fehérjét érdemes pótolni kevés körettel.','remaining.some':'Még kb. {left} kcal fér bele. Könnyű vacsora / kis snack még belefér, de nagy köretet már nem erőltetnék.','remaining.closeProtein':'Már közel vagy a napi célhoz. Ha még ennél, inkább kis fehérjés opciót válassz, kevés zsírral és kevés körettel.','remaining.close':'A napi cél közelében vagy. Innen már inkább csak könnyű, kontrollált lezárás ajánlott.','remaining.over':'A napi cél fölött vagy kb. {over} kcal-lal. Nem tragédia, de ma már inkább víz, zöldség, könnyű fehérje; új nagy étkezést nem érdemes nyitni.','remaining.proteinGap':'Fehérjéből még kb. {proteinLeft} g hiányozhat a jó naphoz.','remaining.carbHigh':'A szénhidrát már magasabb oldalon van, ezért a további köretet érdemes visszafogni.','remaining.fatHigh':'A zsír már magasabb oldalon van, ezért olajos/sajtos/kolbászos zárást nem választanék.'
 };
@@ -764,6 +781,72 @@ function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(
 function n(v){ v=parseInt(v,10); return isNaN(v)?0:v; }
 function $(id){ return document.getElementById(id); }
 function esc(s){ return (s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])); }
+
+
+let lastStorageDoctorPayload=null;
+function rawOpenMealQuestDB(){
+  return new Promise((res,rej)=>{
+    if(!('indexedDB' in window)){ rej(new Error('IndexedDB is not available')); return; }
+    const r=indexedDB.open(DB_NAME); // no version: do not trigger upgrades/migrations
+    const timer=setTimeout(()=>rej(new Error('Raw database open timed out. Close every MealQuest tab/PWA instance and try again.')), 10000);
+    r.onsuccess=e=>{ clearTimeout(timer); res(e.target.result); };
+    r.onerror=e=>{ clearTimeout(timer); rej(e.target.error || new Error('Raw database open failed')); };
+    r.onblocked=()=>{ clearTimeout(timer); rej(new Error('Raw database open was blocked by another open MealQuest tab/app.')); };
+    r.onupgradeneeded=e=>{ try{ e.target.transaction.abort(); }catch(_){}; clearTimeout(timer); rej(new Error('No existing MealQuest database was found for this browser origin.')); };
+  });
+}
+function rawReadStore(rawDb, store){
+  return new Promise((res,rej)=>{
+    try{
+      if(!rawDb.objectStoreNames.contains(store)){ res([]); return; }
+      const tr=rawDb.transaction(store,'readonly');
+      const req=tr.objectStore(store).getAll();
+      req.onsuccess=()=>res(req.result||[]);
+      req.onerror=()=>rej(req.error || new Error('Could not read '+store));
+    }catch(err){ rej(err); }
+  });
+}
+async function scanMealQuestStorage(download){
+  const report=$('storageDoctorReport');
+  if(report) report.textContent='Scanning local storage…';
+  let dbs=[];
+  try{ if(indexedDB.databases) dbs=await indexedDB.databases(); }catch(_){}
+  let rawDb=null;
+  try{
+    rawDb=await rawOpenMealQuestDB();
+    const stores=Array.from(rawDb.objectStoreNames||[]);
+    const [meals,weights,workouts,settings]=await Promise.all([
+      rawReadStore(rawDb,'meals'), rawReadStore(rawDb,'weights'), rawReadStore(rawDb,'workouts'), rawReadStore(rawDb,'settings')
+    ]);
+    const dateSet=new Set([].concat(meals,weights,workouts).map(x=>x&&x.date).filter(Boolean));
+    const dates=Array.from(dateSet).sort();
+    const payload={
+      app:'MealQuest', type:'raw-storage-diagnostic', exportedAt:new Date().toISOString(),
+      origin:location.origin, path:location.pathname, dbName:DB_NAME, dbVersion:rawDb.version,
+      stores, counts:{meals:meals.length, weights:weights.length, workouts:workouts.length, settings:settings.length, dates:dates.length},
+      firstDate:dates[0]||null, lastDate:dates[dates.length-1]||null,
+      browserDatabases:dbs,
+      data:{meals,weights,workouts,settings}
+    };
+    lastStorageDoctorPayload=payload;
+    const currentOrigin=esc(location.origin+location.pathname);
+    if(report){
+      report.innerHTML=`<div><b>Origin:</b> ${currentOrigin}</div>`+
+        `<div><b>DB:</b> ${esc(DB_NAME)} · version ${rawDb.version}</div>`+
+        `<div><b>Stores:</b> ${stores.map(esc).join(', ')||'none'}</div>`+
+        `<div><b>Meals:</b> ${meals.length} · <b>Weights:</b> ${weights.length} · <b>Trainings:</b> ${workouts.length}</div>`+
+        `<div><b>Dates:</b> ${dates.length}${dates.length?' · '+esc(dates[0])+' → '+esc(dates[dates.length-1]):''}</div>`+
+        `<div style="margin-top:8px">${meals.length||weights.length||workouts.length?'Data is present in local storage. Use RAW EXPORT before further experiments.':'No log rows found in this origin. This usually means site data was cleared or the app is now running on a different origin/path than the old install.'}</div>`;
+    }
+    if(download){ downloadTextFile('mealquest_RAW_STORAGE_'+new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')+'.json', JSON.stringify(payload,null,2)); }
+    try{ rawDb.close(); }catch(_){}
+    return payload;
+  }catch(err){
+    lastStorageDoctorPayload={app:'MealQuest', type:'raw-storage-diagnostic-error', exportedAt:new Date().toISOString(), origin:location.origin, path:location.pathname, dbName:DB_NAME, error:String(err&&err.message||err), browserDatabases:dbs};
+    if(report){ report.innerHTML=`<div><b>Storage scan failed:</b> ${esc(String(err&&err.message||err))}</div><div style="margin-top:8px">Close every MealQuest tab/PWA instance and retry. Do not clear site data before exporting.</div>`; }
+    throw err;
+  }
+}
 
 function timeoutPromise(label, ms=10000){
   return new Promise((_,rej)=>setTimeout(()=>rej(new Error(label+' timed out')), ms));
@@ -876,7 +959,7 @@ async function handleCoachBubbleTap(){
 async function exportBackup(){
   const [meals,weights,workouts]=await Promise.all([getAll('meals'),getAll('weights'),getAll('workouts')]);
   const backup={
-    app:'MealQuest', version:'0.4.3', schemaVersion:2, exportedAt:new Date().toISOString(),
+    app:'MealQuest', version:'0.4.4', schemaVersion:2, exportedAt:new Date().toISOString(),
     data:{
       meals:meals.sort((a,b)=>(a.date||'').localeCompare(b.date||'') || (a.time||'99').localeCompare(b.time||'99') || n(a.createdAt)-n(b.createdAt)),
       weights:weights.sort((a,b)=>(a.date||'').localeCompare(b.date||'')),
@@ -1671,6 +1754,10 @@ $('wipeBtn').onclick=async()=>{ const [meals,workouts]=await Promise.all([getAll
 $('exportBtn').onclick=exportBackup;
 $('importBtn').onclick=()=>{ $('importFile').value=''; $('importFile').click(); };
 $('importFile').onchange=async()=>{ const f=$('importFile').files && $('importFile').files[0]; if(f) await importBackupFromFile(f); };
+$('storageDoctorBtn').onclick=async()=>{ show('storageDoctorOverlay'); try{ await scanMealQuestStorage(false); }catch(_){} };
+$('storageScanBtn').onclick=async()=>{ try{ await scanMealQuestStorage(false); }catch(_){} };
+$('storageRawExportBtn').onclick=async()=>{ try{ await scanMealQuestStorage(true); }catch(err){ if(lastStorageDoctorPayload) downloadTextFile('mealquest_RAW_STORAGE_ERROR_'+new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')+'.json', JSON.stringify(lastStorageDoctorPayload,null,2)); } };
+
 $('useEnglishBtn').onclick=()=>useBuiltInLanguage('en');
 $('useHungarianBtn').onclick=()=>useBuiltInLanguage('hu');
 $('localizeBtn').onclick=adaptLanguageWithAI;
@@ -1776,6 +1863,7 @@ $('installDismiss').onclick=()=>{ hideInstallNudge(); localStorage.setItem('mqIn
     console.error('MealQuest database open failed', err);
     const msg='Local log storage did not open. Close other MealQuest tabs/apps and use APP REFRESH. Your existing log should remain on this device.';
     const el=$('bubbleText'); if(el) el.textContent=msg;
+    try{ show('storageDoctorOverlay'); await scanMealQuestStorage(false); }catch(_){}
     return;
   }
   const kt=await getSetting('kcalTarget'); if(kt!==undefined) state.settings.kcalTarget=kt;
@@ -1790,6 +1878,7 @@ $('installDismiss').onclick=()=>{ hideInstallNudge(); localStorage.setItem('mqIn
   if(localStorage.getItem('mqInstallWanted') && !deferredInstallPrompt) showInstallNudge('Installation prepared. Press INSTALL.');
   if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{}); }
   if(!localStorage.getItem('mqInstallDismissed') && deferredInstallPrompt) showInstallNudge();
+  if(new URLSearchParams(location.search).get('doctor')==='1'){ show('storageDoctorOverlay'); try{ await scanMealQuestStorage(false); }catch(_){} }
 })();
 </script>
 </body>

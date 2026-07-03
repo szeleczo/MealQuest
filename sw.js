@@ -1,5 +1,5 @@
-/* MealQuest service worker v0.4.3 */
-const CACHE = 'mealquest-v0-4-3';
+/* MealQuest service worker v0.4.4 */
+const CACHE = 'mealquest-v0-4-4';
 const ASSETS = ['./?source=pwa','./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-maskable-512.png','./assets/scene-fat.png','./assets/scene-medium.png','./assets/scene-lean.png','./assets/scene-female-fat.png','./assets/scene-female-medium.png','./assets/scene-female-lean.png'];
 
 self.addEventListener('install', e => {
