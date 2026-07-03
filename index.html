@@ -672,7 +672,7 @@
       <button class="pix ghost" id="wipeBtn">MAI NAP TÖRLÉSE</button>
       <div class="hint" id="backupHint">Export/import saves meals and weights to a JSON file. The App secret is not exported for safety.</div>
       <div class="hint" data-title="settings.refreshHint">REFRESH APP only refreshes the offline app cache and service worker. Log, Backend URL and App secret remain.</div>
-      <div class="hint" data-title="settings.version">MealQuest v0.4.4 · data on your device (IndexedDB) · offline PWA</div>
+      <div class="hint" data-title="settings.version">MealQuest v0.4.5 · data on your device (IndexedDB + emergency mirror) · offline PWA</div>
     </div>
   </div>
 </div>
@@ -686,9 +686,13 @@
       <div class="softBlock" id="storageDoctorReport">Not checked yet.</div>
       <div class="btnrow">
         <button class="pix solid" id="storageScanBtn">SCAN STORAGE</button>
-        <button class="pix ghost" id="storageRawExportBtn">RAW EXPORT</button>
+        <button class="pix ghost" id="storageDeepScanBtn">DEEP SCAN</button>
       </div>
-      <div class="hint">If counts are zero here, the browser storage for this exact URL/origin is empty. If counts are visible here but the main screen is empty, the issue is a render/index bug and the raw export can rescue the data.</div>
+      <div class="btnrow">
+        <button class="pix ghost" id="storageRawExportBtn">RAW EXPORT</button>
+        <button class="pix ghost" id="storageMirrorRestoreBtn">RESTORE MIRROR</button>
+      </div>
+      <div class="hint">SCAN reads the current MealQuest database. DEEP SCAN checks every IndexedDB database, localStorage, sessionStorage and the emergency mirror on this origin. RESTORE MIRROR can rebuild the log from the double-save mirror if IndexedDB becomes empty.</div>
     </div>
   </div>
 </div>
@@ -713,7 +717,7 @@ const UI_EN={
   'exercise.title':'+ TRAINING','exercise.activity':'Activity','exercise.time':'Time (optional)','exercise.minutes':'Minutes','exercise.kcal':'Burned kcal','exercise.intensity':'Intensity','exercise.note':'Note (optional)','exercise.hint':'Training lowers the daily net kcal. It is still only an estimate, but useful for daily control.','exercise.save':'SAVE TRAINING','exercise.empty':'No training logged yet.','exercise.saved':'Training logged: -{kcal} kcal. Net day updated.','exercise.auto':'Quick estimate added. Adjust it if needed.',
   'calendar.title':'CALENDAR','calendar.today':'TODAY','calendar.meal':'meal','calendar.weight':'weight','calendar.exercise':'training','calendar.todayMark':'TODAY = current day','calendar.hint':'Tap the date to open. Left/right swipe still changes days.','calendar.days':'M,T,W,TH,F,SA,S',
   'day.title':'FULL DAY','day.hint':'The main screen is intentionally compact. Full text is here, touch-scrollable without visible scrollbars.','nutri.title':'DAILY NUTRIENTS','nutri.hint':'Opened from the TODAY panel. Estimated macros, vitamins, minerals, fiber, salt and cholesterol. Not a lab result, just daily orientation.','nutri.meta.empty':'Detailed nutrients only use an API call when you ask for refresh here.','nutri.spinner':'DETAILED ANALYSIS…','nutri.noMeals':'Nothing to analyze yet. Log a meal first.','nutri.noMeals2':'Log a meal first, then there is something to analyze.','nutri.needBackend':'Detailed analysis needs the Backend URL in Settings.','nutri.needBackend2':'Extra nutrient estimation needs the backend URL in settings.','nutri.running':'Detailed analysis running… this uses one API call.','nutri.saved':'Fresh detailed analysis saved: {time}.','nutri.failed':'Detailed nutrient estimate failed: {error}','nutri.cachedFresh':'Last detailed analysis: {time}. Meals have not changed since.','nutri.cachedStale':'A previous analysis exists, but the log changed. Press REFRESH / ANALYZE if you want a new estimate.','nutri.noneCached':'No detailed nutrient estimate yet. Press REFRESH / ANALYZE if you want one. This uses one API call.','nutri.noneCached2':'No detailed daily nutrient estimate yet. The button starts analysis only on request, so it does not waste API calls.','nutri.noData':'not enough data','nutri.chartTitle':'DAILY VALUE % · QUICK VIEW','nutri.mainStats':'MAIN STATS','nutri.minerals':'MINERALS','nutri.vitamins':'VITAMINS','nutri.strengths':'STRENGTHS','nutri.watch':'WATCH','nutri.restOfDay':'REST OF DAY','nutri.trainerNote':'TRAINER NOTE','nutri.caveat':'Estimate · depends on portions · not medical advice.',
-  'settings.title':'SETTINGS','settings.kcal':'Daily kcal target','settings.backend':'Backend URL (for estimates)','settings.backendHint':'Cloudflare Worker URL. Empty = manual mode. The API key lives only in the Worker, never here.','settings.secret':'App secret (x-app-secret)','settings.secretPlaceholder':'Worker APP_API_SECRET','settings.language':'App language','settings.languageHint':'Default language is English. AI language packs are saved on this device and survive app refreshes.','settings.trainerCharacter':'Trainer character','settings.trainerMale':'Male','settings.trainerFemale':'Female','settings.trainerHint':'Only changes the room character artwork. Your log and targets stay the same.','settings.langSaved':'Language saved.','settings.langNeedBackend':'Language adaptation needs Backend URL and App secret first.','settings.langRunning':'Adapting the app language… this uses one API call.','settings.langDone':'Language pack saved: {language}. App updates will not overwrite it.','settings.langFail':'Language adaptation failed: {error}','settings.backup':'Export/import saves meals and weights to a JSON file. The App secret is not exported for safety.','settings.refreshHint':'REFRESH APP only refreshes the offline app cache and service worker. Log, Backend URL and App secret remain.','settings.version':'MealQuest v0.4.4 · data on your device (IndexedDB) · offline PWA',
+  'settings.title':'SETTINGS','settings.kcal':'Daily kcal target','settings.backend':'Backend URL (for estimates)','settings.backendHint':'Cloudflare Worker URL. Empty = manual mode. The API key lives only in the Worker, never here.','settings.secret':'App secret (x-app-secret)','settings.secretPlaceholder':'Worker APP_API_SECRET','settings.language':'App language','settings.languageHint':'Default language is English. AI language packs are saved on this device and survive app refreshes.','settings.trainerCharacter':'Trainer character','settings.trainerMale':'Male','settings.trainerFemale':'Female','settings.trainerHint':'Only changes the room character artwork. Your log and targets stay the same.','settings.langSaved':'Language saved.','settings.langNeedBackend':'Language adaptation needs Backend URL and App secret first.','settings.langRunning':'Adapting the app language… this uses one API call.','settings.langDone':'Language pack saved: {language}. App updates will not overwrite it.','settings.langFail':'Language adaptation failed: {error}','settings.backup':'Export/import saves meals and weights to a JSON file. The App secret is not exported for safety.','settings.refreshHint':'REFRESH APP only refreshes the offline app cache and service worker. Log, Backend URL and App secret remain.','settings.version':'MealQuest v0.4.5 · data on your device (IndexedDB + emergency mirror) · offline PWA',
   'coach.lowData':'Low data. The trainer does not predict through fog.','coach.good':'Control looks good. Mission continues.','coach.under':'Under target. Fine, but protein could be higher tomorrow.','coach.over':'Over target by about {diff} kcal. Logged. Tomorrow a lighter side dish balances it.','coach.noMealsReport':'No meals logged today. Log first, then the trainer can report.','coach.goodReport':'Control good: {kcal} kcal within the {target} target, protein {protein} g. The logging is the win today.','coach.underReport':'{kcal} kcal, under target. Fine, but protein ({protein} g) could be higher tomorrow.','coach.overReport':'{kcal} kcal, {diff} over target. Logged. Tomorrow a lighter side dish balances it.','coach.installReady':'Already running as an app. No reinstall needed.','coach.refreshing':'Refreshing the app. Log and App secret remain.','coach.refreshedFail':'Refresh failed. The log is safe; try refreshing from the browser.','coach.nutrientsSaved':'Detailed daily nutrient estimate updated. It is saved for this day.','coach.exerciseSaved':'Training logged. Daily net kcal lowered by {kcal}.',
   'remaining.lotProtein':'About {left} kcal left. Protein could still use about {proteinLeft} g, so choose simple protein + vegetables, with a smaller side dish.','remaining.lot':'About {left} kcal left. Protein is roughly fine, so a normal but not heavy meal works: vegetables + smaller side + simple protein.','remaining.someProtein':'About {left} kcal fits. For the rest of the day, prioritize protein with little side dish.','remaining.some':'About {left} kcal fits. A light dinner / small snack still fits, but I would not force a big side dish.','remaining.closeProtein':'You are close to target. If you still eat, choose a small protein option with little fat and little side dish.','remaining.close':'You are close to the daily target. From here, a light controlled finish is best.','remaining.over':'You are about {over} kcal over target. Not tragic, but today I would keep it to water, vegetables, light protein; no new big meal.','remaining.proteinGap':'Protein may still be about {proteinLeft} g short for a good day.','remaining.carbHigh':'Carbs are already on the higher side, so further side dishes should be reduced.','remaining.fatHigh':'Fat is already on the higher side, so I would avoid oily/cheesy/sausage-heavy finishes.'
 };
@@ -725,7 +729,7 @@ const UI_HU={
   'exercise.title':'+ EDZÉS','exercise.activity':'Edzés / mozgás','exercise.time':'Idő (opcionális)','exercise.minutes':'Perc','exercise.kcal':'Elégetett kcal','exercise.intensity':'Intenzitás','exercise.note':'Megjegyzés (opcionális)','exercise.hint':'Az edzés a napi nettó kcal-t csökkenti. Ez is csak becslés, de napi kontrollhoz hasznos.','exercise.save':'EDZÉS RÖGZÍTÉSE','exercise.empty':'Ma még nincs edzés rögzítve.','exercise.saved':'Edzés rögzítve: -{kcal} kcal. A napi nettó frissült.','exercise.auto':'Gyors becslés kitöltve. Ha kell, írd át.',
   'calendar.title':'NAPTÁR','calendar.today':'MAI NAP','calendar.meal':'étkezés','calendar.weight':'súly','calendar.exercise':'edzés','calendar.todayMark':'MA = mai nap','calendar.hint':'A dátumra koppintva nyílik. Balra/jobbra swipe továbbra is napot vált.','calendar.days':'H,K,SZE,CS,P,SZO,V',
   'day.title':'TELJES NAP','day.hint':'A főképernyő szándékosan tömör. Itt látszik a teljes szöveg, scrollbar nélkül, érintéssel görgetve.','nutri.title':'NAPI TÁPANYAGOK','nutri.hint':'A MAI NAP panelről nyílik. Makrók, vitaminok, ásványi anyagok, rost, só és koleszterin becslése. Nem laboreredmény, hanem napi tájékozódás.','nutri.meta.empty':'A részletes tápanyagbecslés csak akkor hív API-t, ha itt frissítést kérsz.','nutri.spinner':'RÉSZLETES ELEMZÉS…','nutri.noMeals':'Nincs még mit elemezni. Előbb rögzíts étkezést ezen a napon.','nutri.noMeals2':'Előbb rögzíts étkezést, utána van mit elemezni.','nutri.needBackend':'A részletes elemzéshez kell Backend URL a Beállításokban.','nutri.needBackend2':'Az extra tápanyagbecsléshez kell a backend URL a beállításokban.','nutri.running':'Részletes elemzés fut… ez most egy API-hívás.','nutri.saved':'Friss részletes elemzés mentve: {time}.','nutri.failed':'A részletes tápanyagbecslés nem sikerült: {error}','nutri.cachedFresh':'Utolsó részletes elemzés: {time}. Azóta nem változott a napi étkezéslista.','nutri.cachedStale':'Van korábbi elemzés, de azóta változott a napló. Nyomj FRISSÍTÉS / ELEMZÉS-t, ha új becslést kérsz.','nutri.noneCached':'Ehhez a naphoz még nincs részletes tápanyagbecslés. Nyomj FRISSÍTÉS / ELEMZÉS-t, ha kéred. Ez egy API-hívást használ.','nutri.noneCached2':'Még nincs részletes napi tápanyagbecslés. A gomb csak kérésre indít elemzést, így nem költ feleslegesen API-hívást.','nutri.noData':'nincs elég adat','nutri.chartTitle':'NAPI ÉRTÉK % · GYORS NÉZET','nutri.mainStats':'FŐ STATOK','nutri.minerals':'ÁSVÁNYI ANYAGOK','nutri.vitamins':'VITAMINOK','nutri.strengths':'ERŐSSÉGEK','nutri.watch':'FIGYELENDŐ','nutri.restOfDay':'NAP MARADÉKA','nutri.trainerNote':'EDZŐI MEGJEGYZÉS','nutri.caveat':'Becslés · adagpontosságtól függ · nem orvosi tanács.',
-  'settings.title':'BEÁLLÍTÁS','settings.kcal':'Napi kcal cél','settings.backend':'Backend URL (becsléshez)','settings.backendHint':'Cloudflare Worker URL. Üresen = kézi mód. Az API-kulcs csak a Workerben él, sosem itt.','settings.secret':'App titok (x-app-secret)','settings.secretPlaceholder':'a Worker APP_API_SECRET titka','settings.language':'App nyelve','settings.languageHint':'Az alapnyelv angol. Az AI nyelvi csomag ezen az eszközön mentődik, és appfrissítés nem írja felül.','settings.trainerCharacter':'Edző karakter','settings.trainerMale':'Férfi','settings.trainerFemale':'Női','settings.trainerHint':'Csak a terem karakterképét cseréli. A napló és a célok változatlanok maradnak.','settings.langSaved':'Nyelv mentve.','settings.langNeedBackend':'A nyelvi átalakításhoz előbb kell Backend URL és App titok.','settings.langRunning':'Az app nyelvi csomagja készül… ez egy API-hívás.','settings.langDone':'Nyelvi csomag mentve: {language}. Appfrissítés nem írja felül.','settings.langFail':'A nyelvi átalakítás nem sikerült: {error}','settings.backup':'Export/import: a naplózott étkezések és súlyadatok mentése JSON fájlba. Az App titok biztonság miatt nem kerül exportba.','settings.refreshHint':'APP FRISSÍTÉSE: csak az offline app-cache-t és service workert cseréli. A napló, a Backend URL és az App titok megmarad.','settings.version':'MealQuest v0.4.4 · adatok a te eszközödön (IndexedDB) · offline PWA',
+  'settings.title':'BEÁLLÍTÁS','settings.kcal':'Napi kcal cél','settings.backend':'Backend URL (becsléshez)','settings.backendHint':'Cloudflare Worker URL. Üresen = kézi mód. Az API-kulcs csak a Workerben él, sosem itt.','settings.secret':'App titok (x-app-secret)','settings.secretPlaceholder':'a Worker APP_API_SECRET titka','settings.language':'App nyelve','settings.languageHint':'Az alapnyelv angol. Az AI nyelvi csomag ezen az eszközön mentődik, és appfrissítés nem írja felül.','settings.trainerCharacter':'Edző karakter','settings.trainerMale':'Férfi','settings.trainerFemale':'Női','settings.trainerHint':'Csak a terem karakterképét cseréli. A napló és a célok változatlanok maradnak.','settings.langSaved':'Nyelv mentve.','settings.langNeedBackend':'A nyelvi átalakításhoz előbb kell Backend URL és App titok.','settings.langRunning':'Az app nyelvi csomagja készül… ez egy API-hívás.','settings.langDone':'Nyelvi csomag mentve: {language}. Appfrissítés nem írja felül.','settings.langFail':'A nyelvi átalakítás nem sikerült: {error}','settings.backup':'Export/import: a naplózott étkezések és súlyadatok mentése JSON fájlba. Az App titok biztonság miatt nem kerül exportba.','settings.refreshHint':'APP FRISSÍTÉSE: csak az offline app-cache-t és service workert cseréli. A napló, a Backend URL és az App titok megmarad.','settings.version':'MealQuest v0.4.5 · adatok az eszközödön (IndexedDB + vészmentés) · offline PWA',
   'coach.lowData':'Kevés adat. Az edző ködből nem jósol.','coach.good':'Kontroll rendben. Küldetés folytatható.','coach.under':'Keret alatt. Rendben, de a fehérje lehetne feljebb holnap.','coach.over':'Kb. {diff} kcal a keret fölött. Bejegyezve. Holnap egy könnyebb köret kiegyenlíti.','coach.noMealsReport':'Nincs rögzített étkezés ma. A jelentéshez előbb naplózz.','coach.goodReport':'Kontroll rendben: {kcal} kcal a {target}-es keretben, fehérje {protein} g. A rögzítés a lényeg — ma megvan.','coach.underReport':'{kcal} kcal, keret alatt. Rendben, de a fehérje ({protein} g) lehetne feljebb holnap.','coach.overReport':'{kcal} kcal, {diff} a keret fölött. Bejegyezve. Holnap egy könnyebb köret kiegyenlíti.','coach.installReady':'Már appként fut. Nem kell újratelepíteni.','coach.refreshing':'Frissítem az appot. A napló és az App titok megmarad.','coach.refreshedFail':'Frissítés nem sikerült. A napló nem sérült; próbálj böngészőből frissíteni.','coach.nutrientsSaved':'Részletes napi tápanyagbecslés frissítve. Ez már el van mentve ehhez a naphoz.','coach.exerciseSaved':'Edzés rögzítve. A napi nettó kcal {kcal}-lal csökkent.',
   'remaining.lotProtein':'Még kb. {left} kcal maradt. Fehérjéből még kb. {proteinLeft} g kellene, ezért egyszerű fehérje + zöldség + kisebb köret jó irány.','remaining.lot':'Még kb. {left} kcal maradt. Fehérje nagyjából rendben, ezért jöhet egy normális, de nem nehéz étkezés: zöldség + kisebb köret + egyszerű fehérje.','remaining.someProtein':'Még kb. {left} kcal fér bele. A nap maradékában inkább fehérjét érdemes pótolni kevés körettel.','remaining.some':'Még kb. {left} kcal fér bele. Könnyű vacsora / kis snack még belefér, de nagy köretet már nem erőltetnék.','remaining.closeProtein':'Már közel vagy a napi célhoz. Ha még ennél, inkább kis fehérjés opciót válassz, kevés zsírral és kevés körettel.','remaining.close':'A napi cél közelében vagy. Innen már inkább csak könnyű, kontrollált lezárás ajánlott.','remaining.over':'A napi cél fölött vagy kb. {over} kcal-lal. Nem tragédia, de ma már inkább víz, zöldség, könnyű fehérje; új nagy étkezést nem érdemes nyitni.','remaining.proteinGap':'Fehérjéből még kb. {proteinLeft} g hiányozhat a jó naphoz.','remaining.carbHigh':'A szénhidrát már magasabb oldalon van, ezért a további köretet érdemes visszafogni.','remaining.fatHigh':'A zsír már magasabb oldalon van, ezért olajos/sajtos/kolbászos zárást nem választanék.'
 };
@@ -878,12 +882,14 @@ function txObj(store,mode){ if(!db) throw new Error('Database is not ready'); re
 function tx(store,mode){ return txObj(store,mode).objectStore(store); }
 function put(store,val){ return withTimeout(new Promise((res,rej)=>{
   try{ const tr=txObj(store,'readwrite'); tr.objectStore(store).put(val);
-    tr.oncomplete=()=>res(); tr.onerror=()=>rej(tr.error||new Error('Save failed')); tr.onabort=()=>rej(tr.error||new Error('Save aborted'));
+    tr.oncomplete=()=>{ mirrorPut(store,val); res(); };
+    tr.onerror=()=>rej(tr.error||new Error('Save failed')); tr.onabort=()=>rej(tr.error||new Error('Save aborted'));
   }catch(err){ rej(err); }
 }), 'Save '+store); }
 function del(store,key){ return withTimeout(new Promise((res,rej)=>{
   try{ const tr=txObj(store,'readwrite'); tr.objectStore(store).delete(key);
-    tr.oncomplete=()=>res(); tr.onerror=()=>rej(tr.error||new Error('Delete failed')); tr.onabort=()=>rej(tr.error||new Error('Delete aborted'));
+    tr.oncomplete=()=>{ mirrorDelete(store,key); res(); };
+    tr.onerror=()=>rej(tr.error||new Error('Delete failed')); tr.onabort=()=>rej(tr.error||new Error('Delete aborted'));
   }catch(err){ rej(err); }
 }), 'Delete '+store); }
 function getAllByDate(store,date){ return withTimeout(new Promise((res,rej)=>{
@@ -912,6 +918,163 @@ function downloadTextFile(filename, text, type='application/json'){
   const blob=new Blob([text],{type}); const url=URL.createObjectURL(blob);
   const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click();
   setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1200);
+}
+
+
+/* Emergency double-save mirror.
+   IndexedDB remains the primary log store. Every meal/weight/training record is also
+   mirrored to localStorage so a future DB migration/cache issue is easier to rescue.
+   The app secret is intentionally not mirrored. */
+const MIRROR_PREFIX='mealquest::mirror::v1::';
+const MIRROR_STORES=new Set(['meals','weights','workouts','settings']);
+function mirrorKey(store,key){ return MIRROR_PREFIX+store+'::'+String(key); }
+function safeCloneForMirror(store,val){
+  try{
+    const copy=JSON.parse(JSON.stringify(val||{}));
+    if(store==='settings' && copy.key==='appSecret') return null;
+    return copy;
+  }catch(_){ return null; }
+}
+function mirrorPut(store,val){
+  try{
+    if(!MIRROR_STORES.has(store) || !val) return;
+    const key=store==='settings'?val.key:val.id;
+    if(!key) return;
+    const copy=safeCloneForMirror(store,val);
+    if(copy==null) return;
+    localStorage.setItem(mirrorKey(store,key), JSON.stringify(copy));
+    localStorage.setItem(MIRROR_PREFIX+'meta::lastWrite', JSON.stringify({at:new Date().toISOString(), store, key:String(key)}));
+  }catch(err){ console.warn('MealQuest mirror write failed', err); }
+}
+function mirrorDelete(store,key){
+  try{
+    if(!MIRROR_STORES.has(store) || !key) return;
+    localStorage.removeItem(mirrorKey(store,key));
+    localStorage.setItem(MIRROR_PREFIX+'meta::lastWrite', JSON.stringify({at:new Date().toISOString(), store, key:String(key), deleted:true}));
+  }catch(err){ console.warn('MealQuest mirror delete failed', err); }
+}
+function readEmergencyMirror(){
+  const out={meals:[],weights:[],workouts:[],settings:[],meta:[]};
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i); if(!k || !k.startsWith(MIRROR_PREFIX)) continue;
+      const rest=k.slice(MIRROR_PREFIX.length);
+      const part=rest.split('::')[0];
+      let val; try{ val=JSON.parse(localStorage.getItem(k)); }catch(_){ val=localStorage.getItem(k); }
+      if(part==='meals') out.meals.push(val);
+      else if(part==='weights') out.weights.push(val);
+      else if(part==='workouts') out.workouts.push(val);
+      else if(part==='settings') out.settings.push(val);
+      else out.meta.push({key:k,value:val});
+    }
+  }catch(err){ out.error=String(err&&err.message||err); }
+  return out;
+}
+function storageObject(kind){
+  const src=kind==='session'?sessionStorage:localStorage;
+  const rows=[];
+  try{
+    for(let i=0;i<src.length;i++){
+      const key=src.key(i); let value=src.getItem(key);
+      let parsed=null; try{ parsed=JSON.parse(value); }catch(_){}
+      if(/secret|token|key/i.test(key)) value='[redacted]';
+      if(parsed && parsed.key && /secret|token|key/i.test(String(parsed.key))) parsed={...parsed,value:'[redacted]'};
+      rows.push({key,value:parsed||value});
+    }
+  }catch(err){ rows.push({error:String(err&&err.message||err)}); }
+  return rows;
+}
+function sanitizeRecordForExport(store,rec){
+  try{
+    const c=JSON.parse(JSON.stringify(rec));
+    if(store==='settings' && c && /secret|token|key/i.test(String(c.key||''))) c.value='[redacted]';
+    return c;
+  }catch(_){ return rec; }
+}
+async function openExistingIndexedDB(name){
+  return new Promise((res,rej)=>{
+    const r=indexedDB.open(name);
+    const timer=setTimeout(()=>rej(new Error('Open timed out: '+name)), 10000);
+    r.onsuccess=e=>{ clearTimeout(timer); res(e.target.result); };
+    r.onerror=e=>{ clearTimeout(timer); rej(e.target.error||new Error('Open failed: '+name)); };
+    r.onblocked=()=>{ clearTimeout(timer); rej(new Error('Open blocked: '+name)); };
+    r.onupgradeneeded=e=>{ try{ e.target.transaction.abort(); }catch(_){}; clearTimeout(timer); rej(new Error('Database did not previously exist: '+name)); };
+  });
+}
+async function readEntireIndexedDB(name){
+  const raw=await openExistingIndexedDB(name);
+  const dbInfo={name, version:raw.version, stores:{}, counts:{}};
+  try{
+    const storeNames=Array.from(raw.objectStoreNames||[]);
+    for(const storeName of storeNames){
+      try{
+        const rows=await rawReadStore(raw, storeName);
+        dbInfo.stores[storeName]=rows.map(x=>sanitizeRecordForExport(storeName,x));
+        dbInfo.counts[storeName]=rows.length;
+      }catch(err){
+        dbInfo.stores[storeName]={error:String(err&&err.message||err)};
+        dbInfo.counts[storeName]='error';
+      }
+    }
+  }finally{ try{ raw.close(); }catch(_){} }
+  return dbInfo;
+}
+async function deepScanStorage(download){
+  const report=$('storageDoctorReport');
+  if(report) report.textContent='Deep scanning local storage…';
+  const payload={app:'MealQuest', type:'deep-storage-diagnostic', exportedAt:new Date().toISOString(), origin:location.origin, path:location.pathname, indexedDB:[], localStorage:[], sessionStorage:[], emergencyMirror:null, summary:{}};
+  let dbs=[];
+  try{ if(indexedDB.databases) dbs=await indexedDB.databases(); }catch(err){ payload.indexedDBError='indexedDB.databases unavailable: '+String(err&&err.message||err); }
+  payload.browserDatabases=dbs;
+  for(const info of dbs){
+    if(!info || !info.name) continue;
+    try{ payload.indexedDB.push(await readEntireIndexedDB(info.name)); }
+    catch(err){ payload.indexedDB.push({name:info.name, error:String(err&&err.message||err)}); }
+  }
+  payload.localStorage=storageObject('local');
+  payload.sessionStorage=storageObject('session');
+  payload.emergencyMirror=readEmergencyMirror();
+  const mealquestDb=payload.indexedDB.find(x=>x.name===DB_NAME) || null;
+  const mqCounts=mealquestDb && mealquestDb.counts ? mealquestDb.counts : {};
+  const mir=payload.emergencyMirror || {};
+  payload.summary={
+    indexedDBs:payload.indexedDB.length,
+    mealquestMeals:Number(mqCounts.meals||0), mealquestWeights:Number(mqCounts.weights||0), mealquestWorkouts:Number(mqCounts.workouts||0),
+    mirrorMeals:(mir.meals||[]).length, mirrorWeights:(mir.weights||[]).length, mirrorWorkouts:(mir.workouts||[]).length,
+    localStorageKeys:payload.localStorage.length, sessionStorageKeys:payload.sessionStorage.length
+  };
+  lastStorageDoctorPayload=payload;
+  if(report){
+    const s=payload.summary;
+    const dbList=payload.indexedDB.map(d=>esc(d.name||'(unnamed)')+(d.error?' error':'')).join(', ') || 'none';
+    report.innerHTML=`<div><b>Origin:</b> ${esc(location.origin+location.pathname)}</div>`+
+      `<div><b>IndexedDB DBs:</b> ${dbList}</div>`+
+      `<div><b>MealQuest DB:</b> meals ${s.mealquestMeals} · weights ${s.mealquestWeights} · trainings ${s.mealquestWorkouts}</div>`+
+      `<div><b>Emergency mirror:</b> meals ${s.mirrorMeals} · weights ${s.mirrorWeights} · trainings ${s.mirrorWorkouts}</div>`+
+      `<div><b>localStorage/sessionStorage:</b> ${s.localStorageKeys} / ${s.sessionStorageKeys} keys</div>`+
+      `<div style="margin-top:8px">${s.mealquestMeals+s.mealquestWeights+s.mealquestWorkouts+s.mirrorMeals+s.mirrorWeights+s.mirrorWorkouts?'Data-like rows were found. Use RAW EXPORT now. If the IndexedDB side is empty but the mirror has rows, RESTORE MIRROR can rebuild the app log.':'No log rows or mirror rows were found on this origin.'}</div>`;
+  }
+  if(download){ downloadTextFile('mealquest_DEEP_STORAGE_'+new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')+'.json', JSON.stringify(payload,null,2)); }
+  return payload;
+}
+async function restoreMirrorToDB(){
+  const mirror=readEmergencyMirror();
+  const total=(mirror.meals||[]).length+(mirror.weights||[]).length+(mirror.workouts||[]).length;
+  const report=$('storageDoctorReport');
+  if(!total){ if(report) report.innerHTML='<b>No emergency mirror rows found.</b>'; return; }
+  const ok=confirm(`Restore emergency mirror into IndexedDB?\n\n${mirror.meals.length} meals, ${mirror.weights.length} weights, ${mirror.workouts.length} trainings.\nExisting matching IDs will be updated.`);
+  if(!ok) return;
+  for(const m of mirror.meals||[]) await put('meals',normaliseMeal(m));
+  for(const w of mirror.weights||[]) await put('weights',normaliseWeight(w));
+  for(const ex of mirror.workouts||[]) await put('workouts',normaliseWorkout(ex));
+  if(report) report.innerHTML=`<b>Mirror restored.</b><br>${mirror.meals.length} meals · ${mirror.weights.length} weights · ${mirror.workouts.length} trainings`;
+  await safeRender({retry:true});
+}
+async function syncMirrorFromIndexedDB(){
+  try{
+    const [meals,weights,workouts]=await Promise.all([getAll('meals'),getAll('weights'),getAll('workouts')]);
+    meals.forEach(x=>mirrorPut('meals',x)); weights.forEach(x=>mirrorPut('weights',x)); workouts.forEach(x=>mirrorPut('workouts',x));
+  }catch(err){ console.warn('Mirror sync from IndexedDB failed', err); }
 }
 
 const COACH_HISTORY_LIMIT = 10;
@@ -959,14 +1122,15 @@ async function handleCoachBubbleTap(){
 async function exportBackup(){
   const [meals,weights,workouts]=await Promise.all([getAll('meals'),getAll('weights'),getAll('workouts')]);
   const backup={
-    app:'MealQuest', version:'0.4.4', schemaVersion:2, exportedAt:new Date().toISOString(),
+    app:'MealQuest', version:'0.4.5', schemaVersion:3, exportedAt:new Date().toISOString(),
     data:{
       meals:meals.sort((a,b)=>(a.date||'').localeCompare(b.date||'') || (a.time||'99').localeCompare(b.time||'99') || n(a.createdAt)-n(b.createdAt)),
       weights:weights.sort((a,b)=>(a.date||'').localeCompare(b.date||'')),
       workouts:workouts.sort((a,b)=>(a.date||'').localeCompare(b.date||'') || (a.time||'99').localeCompare(b.time||'99') || n(a.createdAt)-n(b.createdAt)),
-      settings:{ kcalTarget:state.settings.kcalTarget, backendUrl:state.settings.backendUrl, language:state.settings.language, languageLabel:state.settings.languageLabel, uiPack:state.settings.uiPack, trainerCharacter:state.settings.trainerCharacter }
+      settings:{ kcalTarget:state.settings.kcalTarget, backendUrl:state.settings.backendUrl, language:state.settings.language, languageLabel:state.settings.languageLabel, uiPack:state.settings.uiPack, trainerCharacter:state.settings.trainerCharacter },
+      emergencyMirrorCounts:(()=>{ const m=readEmergencyMirror(); return {meals:m.meals.length, weights:m.weights.length, workouts:m.workouts.length}; })()
     },
-    note:'The appSecret / access code is not included in the backup for safety.'
+    note:'The appSecret / access code is not included in the backup for safety. v0.4.5 also keeps a local emergency mirror for future recovery.'
   };
   const stamp=new Date().toISOString().slice(0,19).replace(/[-:T]/g,'');
   downloadTextFile(`mealquest_backup_${stamp}.json`, JSON.stringify(backup,null,2));
@@ -1754,9 +1918,11 @@ $('wipeBtn').onclick=async()=>{ const [meals,workouts]=await Promise.all([getAll
 $('exportBtn').onclick=exportBackup;
 $('importBtn').onclick=()=>{ $('importFile').value=''; $('importFile').click(); };
 $('importFile').onchange=async()=>{ const f=$('importFile').files && $('importFile').files[0]; if(f) await importBackupFromFile(f); };
-$('storageDoctorBtn').onclick=async()=>{ show('storageDoctorOverlay'); try{ await scanMealQuestStorage(false); }catch(_){} };
+$('storageDoctorBtn').onclick=async()=>{ show('storageDoctorOverlay'); try{ await deepScanStorage(false); }catch(_){ try{ await scanMealQuestStorage(false); }catch(__){} } };
 $('storageScanBtn').onclick=async()=>{ try{ await scanMealQuestStorage(false); }catch(_){} };
-$('storageRawExportBtn').onclick=async()=>{ try{ await scanMealQuestStorage(true); }catch(err){ if(lastStorageDoctorPayload) downloadTextFile('mealquest_RAW_STORAGE_ERROR_'+new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')+'.json', JSON.stringify(lastStorageDoctorPayload,null,2)); } };
+$('storageDeepScanBtn').onclick=async()=>{ try{ await deepScanStorage(false); }catch(err){ if($('storageDoctorReport')) $('storageDoctorReport').textContent='Deep scan failed: '+(err.message||err); } };
+$('storageRawExportBtn').onclick=async()=>{ try{ await deepScanStorage(true); }catch(err){ if(lastStorageDoctorPayload) downloadTextFile('mealquest_RAW_STORAGE_ERROR_'+new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')+'.json', JSON.stringify(lastStorageDoctorPayload,null,2)); } };
+$('storageMirrorRestoreBtn').onclick=async()=>{ try{ await restoreMirrorToDB(); }catch(err){ if($('storageDoctorReport')) $('storageDoctorReport').textContent='Mirror restore failed: '+(err.message||err); } };
 
 $('useEnglishBtn').onclick=()=>useBuiltInLanguage('en');
 $('useHungarianBtn').onclick=()=>useBuiltInLanguage('hu');
@@ -1863,7 +2029,7 @@ $('installDismiss').onclick=()=>{ hideInstallNudge(); localStorage.setItem('mqIn
     console.error('MealQuest database open failed', err);
     const msg='Local log storage did not open. Close other MealQuest tabs/apps and use APP REFRESH. Your existing log should remain on this device.';
     const el=$('bubbleText'); if(el) el.textContent=msg;
-    try{ show('storageDoctorOverlay'); await scanMealQuestStorage(false); }catch(_){}
+    try{ show('storageDoctorOverlay'); await deepScanStorage(false); }catch(_){}
     return;
   }
   const kt=await getSetting('kcalTarget'); if(kt!==undefined) state.settings.kcalTarget=kt;
@@ -1875,10 +2041,11 @@ $('installDismiss').onclick=()=>{ hideInstallNudge(); localStorage.setItem('mqIn
   const tc=await getSetting('trainerCharacter'); if(tc!==undefined) state.settings.trainerCharacter=String(tc)==='female'?'female':'male';
   state.date=isoToday();
   applyLanguage(); refreshAIState(); await safeRender();
+  syncMirrorFromIndexedDB();
   if(localStorage.getItem('mqInstallWanted') && !deferredInstallPrompt) showInstallNudge('Installation prepared. Press INSTALL.');
   if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{}); }
   if(!localStorage.getItem('mqInstallDismissed') && deferredInstallPrompt) showInstallNudge();
-  if(new URLSearchParams(location.search).get('doctor')==='1'){ show('storageDoctorOverlay'); try{ await scanMealQuestStorage(false); }catch(_){} }
+  if(new URLSearchParams(location.search).get('doctor')==='1'){ show('storageDoctorOverlay'); try{ await deepScanStorage(false); }catch(_){} }
 })();
 </script>
 </body>
