@@ -301,6 +301,44 @@
   .nutriStatRow .num{ font-size:16px; text-align:right; line-height:1.05; }
   .nutriStatRow .note{ grid-column:1/-1; font-size:15px; line-height:1.16; color:var(--c1); margin-top:2px; padding-top:1px; }
 
+
+  /* v0.4.6 edit + period reports */
+  .detailMeal,.detailWorkout{ cursor:pointer; }
+  .detailMeal:active,.detailWorkout:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 var(--c0); }
+  .editHint{ margin-top:7px; font-family:'Press Start 2P',monospace; font-size:7px; color:var(--c2); letter-spacing:.3px; }
+  .calActions{ display:flex; gap:7px; flex-wrap:nowrap; }
+  .calActions .pix{ flex:1; min-width:0; }
+  .reportSwitcher{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+  .reportSwitcher button{ font-family:'Press Start 2P',monospace; font-size:8px; border:2px solid var(--c0); background:var(--lcd); color:var(--c0); padding:9px 8px; box-shadow:2px 2px 0 var(--c0); }
+  .reportSwitcher button.active{ background:var(--c1); color:var(--lcd); }
+  .periodStats{ border:3px solid var(--c0); background:var(--c4); box-shadow:3px 3px 0 var(--c0); padding:10px; margin:8px 0 12px; }
+  .periodStats .title{ font-family:'Press Start 2P',monospace; font-size:8px; color:var(--c2); margin-bottom:8px; line-height:1.35; }
+  .periodGrid{ display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+  .periodStat{ border:2px solid var(--c0); background:var(--lcd); padding:7px 7px 6px; min-height:48px; }
+  .periodStat b{ display:block; font-size:23px; line-height:.95; }
+  .periodStat span{ display:block; font-family:'Press Start 2P',monospace; font-size:6px; color:var(--c2); margin-top:4px; line-height:1.25; }
+  .periodReportCard{ border:3px solid var(--c0); background:var(--c4); box-shadow:3px 3px 0 var(--c0); padding:11px; margin-top:10px; }
+  .periodReportCard .headline{ font-size:25px; line-height:1.02; margin-bottom:8px; }
+  .periodReportCard .status{ font-family:'Press Start 2P',monospace; font-size:8px; color:var(--lcd); background:var(--c1); border:2px solid var(--c0); display:inline-block; padding:6px 7px; margin-bottom:9px; }
+  .periodReportCard p{ font-size:19px; line-height:1.15; color:var(--c1); margin:7px 0; }
+  .periodReportCard .cols{ display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:9px; }
+  .periodReportCard .miniBlock{ border:2px solid var(--c2); background:var(--lcd); padding:8px; }
+  .periodReportCard .miniBlock h3{ font-family:'Press Start 2P',monospace; font-size:7px; color:var(--c2); margin-bottom:6px; line-height:1.35; }
+  .periodReportCard ul{ list-style:none; display:flex; flex-direction:column; gap:5px; }
+  .periodReportCard li{ font-size:17px; line-height:1.1; }
+  .periodReportCard li::before{ content:'□ '; color:var(--c2); }
+  .periodAdvice{ margin-top:10px; border:2px dashed var(--c2); background:var(--lcd); padding:9px; font-size:19px; line-height:1.12; }
+  @media (max-width:460px), (max-height:900px){
+    .periodGrid{ gap:5px; }
+    .periodStat{ padding:5px 6px; min-height:40px; }
+    .periodStat b{ font-size:19px; }
+    .periodStat span{ font-size:5px; }
+    .periodReportCard .headline{ font-size:21px; }
+    .periodReportCard p{ font-size:17px; }
+    .periodReportCard .cols{ gap:6px; }
+    .periodReportCard li{ font-size:15px; }
+  }
+
   /* Install prompt */
   .installNudge{
     position:fixed; left:50%; bottom:calc(10px + env(safe-area-inset-bottom)); transform:translateX(-50%);
@@ -602,7 +640,7 @@
       <div class="calWeek chrome" id="calWeek"><span>M</span><span>T</span><span>W</span><span>TH</span><span>F</span><span>SA</span><span>S</span></div>
       <div class="calendarGrid" id="calendarGrid"></div>
       <div class="calLegend"><span><i class="lm"></i><span data-title="calendar.meal">meal</span></span><span><i class="lw"></i><span data-title="calendar.weight">weight</span></span><span><i class="le"></i><span data-title="calendar.exercise">training</span></span><span data-title="calendar.todayMark">TODAY = current day</span></div>
-      <div class="calActions"><button class="pix solid" id="calTodayBtn">MAI NAP</button></div>
+      <div class="calActions"><button class="pix solid" id="calTodayBtn">MAI NAP</button><button class="pix ghost" id="calWeekReportBtn" type="button" data-title="btn.weekReport">WEEK</button><button class="pix ghost" id="calMonthReportBtn" type="button" data-title="btn.monthReport">MONTH</button></div>
       <div class="hint" data-title="calendar.hint">Tap the date to open. Left/right swipe still changes days.</div>
     </div>
   </div>
@@ -672,7 +710,26 @@
       <button class="pix ghost" id="wipeBtn">MAI NAP TÖRLÉSE</button>
       <div class="hint" id="backupHint">Export/import saves meals and weights to a JSON file. The App secret is not exported for safety.</div>
       <div class="hint" data-title="settings.refreshHint">REFRESH APP only refreshes the offline app cache and service worker. Log, Backend URL and App secret remain.</div>
-      <div class="hint" data-title="settings.version">MealQuest v0.4.5 · data on your device (IndexedDB + emergency mirror) · offline PWA</div>
+      <div class="hint" data-title="settings.version">MealQuest v0.4.6 · data on your device (IndexedDB + emergency mirror) · offline PWA</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- PERIOD REPORT -->
+<div class="overlay" id="periodReportOverlay">
+  <div class="sheet">
+    <header class="chrome"><h2 id="periodReportTitle">WEEK REPORT</h2><button class="closebtn" data-close="periodReportOverlay">X</button></header>
+    <div class="body">
+      <div class="reportSwitcher"><button id="periodWeekBtn" type="button">WEEK</button><button id="periodMonthBtn" type="button">MONTH</button></div>
+      <div class="hint" id="periodReportHint">A saved weekly/monthly report is shown here. Refresh only when you want to spend one API call.</div>
+      <div id="periodStatsBox"></div>
+      <div class="btnrow"><button class="pix solid" id="refreshPeriodReportBtn" type="button">REFRESH REPORT</button><button class="pix ghost" id="copyPeriodReportBtn" type="button">COPY REPORT</button></div>
+      <div class="nutriMeta empty" id="periodReportMeta">No report yet.</div>
+      <div class="copyHint" id="copyPeriodHint"></div>
+      <div class="spinner chrome" id="periodSpinner">REPORT ANALYSIS…</div>
+      <div class="errline" id="periodErr"></div>
+      <div id="periodReportContent"></div>
     </div>
   </div>
 </div>
@@ -703,6 +760,10 @@ let db, deferredInstallPrompt=null, state={
   date:isoToday(),
   settings:{ kcalTarget:2200, backendUrl:'', appSecret:'', language:'en', languageLabel:'English', uiPack:null, trainerCharacter:'male' },
   pendingAI:null,
+  editingMeal:null,
+  pendingExerciseAI:null,
+  editingWorkout:null,
+  currentPeriodReport:null,
   coachHistory:[],
   coachIndex:-1,
   coachCycleMode:false
@@ -711,25 +772,25 @@ let db, deferredInstallPrompt=null, state={
 
 const UI_EN={
   'coach.label':'COACH','app.settings':'SETTINGS','app.today':'TODAY','app.nutrients':'NUTRIENTS','app.detail':'DETAIL','app.mealLog':'MEAL LOG','app.emptyDay':'No meals logged yet. The trainer is waiting for data.','app.weight':'Weight','app.roomLv':'ROOM LV. {level}','app.routine':'ROUTINE {good}/7','room.fat':'STARTING ROOM','room.medium':'CONTROL BUILDING','room.lean':'GOOD ROUTINE',
-  'btn.addMeal':'+ MEAL','btn.addWeight':'+ WEIGHT','btn.addExercise':'+ TRAIN','btn.storageDoctor':'STORAGE DOCTOR','btn.estimate':'ESTIMATE','btn.saveLog':'SAVE TO LOG','btn.save':'SAVE','btn.install':'INSTALL','btn.refreshApp':'REFRESH APP','btn.export':'EXPORT JSON','btn.import':'IMPORT JSON','btn.wipeDay':'DELETE TODAY','btn.refreshNutrients':'REFRESH / ANALYZE','btn.estimateExercise':'QUICK ESTIMATE','btn.english':'ENGLISH','btn.hungarian':'MAGYAR','btn.adaptLanguage':'ADAPT LANGUAGE',
-  'meal.title':'+ MEAL','meal.what':'What did you eat? (free text)','meal.placeholder':'2 chicken legs, about 200g cooked rice, tomato, 1 ayran','meal.time':'Time (optional)','meal.aiOff':'Automatic estimate is off — add the backend URL in settings, or enter values manually below.','meal.spinner':'ANALYZING…','meal.name':'Name','meal.namePlaceholder':'e.g. Lunch — chicken with rice','meal.kcal':'Kcal','meal.proteinShort':'Prot. g','meal.fatShort':'Fat g','meal.carbs':'Carbs g',
+  'btn.addMeal':'+ MEAL','btn.addWeight':'+ WEIGHT','btn.addExercise':'+ TRAIN','btn.storageDoctor':'STORAGE DOCTOR','btn.estimate':'ESTIMATE','btn.saveLog':'SAVE TO LOG','btn.save':'SAVE','btn.install':'INSTALL','btn.refreshApp':'REFRESH APP','btn.export':'EXPORT JSON','btn.import':'IMPORT JSON','btn.wipeDay':'DELETE TODAY','btn.refreshNutrients':'REFRESH / ANALYZE','btn.estimateExercise':'QUICK ESTIMATE','btn.english':'ENGLISH','btn.hungarian':'MAGYAR','btn.adaptLanguage':'ADAPT LANGUAGE','btn.weekReport':'WEEK','btn.monthReport':'MONTH','btn.refreshReport':'REFRESH REPORT','btn.copyReport':'COPY REPORT',
+  'meal.title':'+ MEAL','meal.editTitle':'EDIT MEAL','meal.updated':'Meal updated. Daily log recalculated.','meal.what':'What did you eat? (free text)','meal.placeholder':'2 chicken legs, about 200g cooked rice, tomato, 1 ayran','meal.time':'Time (optional)','meal.aiOff':'Automatic estimate is off — add the backend URL in settings, or enter values manually below.','meal.spinner':'ANALYZING…','meal.name':'Name','meal.namePlaceholder':'e.g. Lunch — chicken with rice','meal.kcal':'Kcal','meal.proteinShort':'Prot. g','meal.fatShort':'Fat g','meal.carbs':'Carbs g',
   'weight.title':'+ WEIGHT','weight.kg':'Body weight (kg)','weight.note':'Note (optional)','weight.placeholder':'morning, before breakfast','weight.hint':'Daily fluctuation is normal. The trend matters, not one number.','weight.save':'SAVE WEIGHT',
-  'exercise.title':'+ TRAINING','exercise.activity':'Activity','exercise.time':'Time (optional)','exercise.minutes':'Minutes','exercise.kcal':'Burned kcal','exercise.intensity':'Intensity','exercise.note':'Note (optional)','exercise.hint':'Training lowers the daily net kcal. It is still only an estimate, but useful for daily control.','exercise.save':'SAVE TRAINING','exercise.empty':'No training logged yet.','exercise.saved':'Training logged: -{kcal} kcal. Net day updated.','exercise.auto':'Quick estimate added. Adjust it if needed.',
-  'calendar.title':'CALENDAR','calendar.today':'TODAY','calendar.meal':'meal','calendar.weight':'weight','calendar.exercise':'training','calendar.todayMark':'TODAY = current day','calendar.hint':'Tap the date to open. Left/right swipe still changes days.','calendar.days':'M,T,W,TH,F,SA,S',
+  'exercise.title':'+ TRAINING','exercise.editTitle':'EDIT TRAINING','exercise.updated':'Training updated. Daily net kcal recalculated.','exercise.activity':'Activity','exercise.time':'Time (optional)','exercise.minutes':'Minutes','exercise.kcal':'Burned kcal','exercise.intensity':'Intensity','exercise.note':'Note (optional)','exercise.hint':'Training lowers the daily net kcal. It is still only an estimate, but useful for daily control.','exercise.save':'SAVE TRAINING','exercise.empty':'No training logged yet.','exercise.saved':'Training logged: -{kcal} kcal. Net day updated.','exercise.auto':'Quick estimate added. Adjust it if needed.',
+  'period.titleWeek':'WEEK REPORT','period.titleMonth':'MONTH REPORT','period.hint':'Saved reports are shown first. Refresh only when you want to spend one API call.','period.noData':'No logged data in this period yet.','period.noReport':'No saved report yet. Press REFRESH REPORT to create one. This uses one API call.','period.stale':'The log changed since this report. Press refresh if you want a new analysis.','period.fresh':'Saved report: {time}.','period.running':'Report analysis running… this uses one API call.','period.needBackend':'Reports need Backend URL and App secret in Settings.','period.saved':'Report saved: {time}.','period.failed':'Report failed: {error}','period.week':'WEEK','period.month':'MONTH','period.logged':'LOGGED','period.avgNet':'AVG NET','period.training':'TRAINING','period.proteinDays':'PROTEIN','period.weightTrend':'WEIGHT','period.heavyDays':'HEAVY','period.beerDays':'BEER','period.highlights':'HIGHLIGHTS','period.watch':'WATCH','period.next':'NEXT FOCUS','period.trainer':'TRAINER NOTE','period.copyEmpty':'No report to copy yet.','calendar.title':'CALENDAR','calendar.today':'TODAY','calendar.meal':'meal','calendar.weight':'weight','calendar.exercise':'training','calendar.todayMark':'TODAY = current day','calendar.hint':'Tap the date to open. Left/right swipe still changes days.','calendar.days':'M,T,W,TH,F,SA,S',
   'day.title':'FULL DAY','day.hint':'The main screen is intentionally compact. Full text is here, touch-scrollable without visible scrollbars.','nutri.title':'DAILY NUTRIENTS','nutri.hint':'Opened from the TODAY panel. Estimated macros, vitamins, minerals, fiber, salt and cholesterol. Not a lab result, just daily orientation.','nutri.meta.empty':'Detailed nutrients only use an API call when you ask for refresh here.','nutri.spinner':'DETAILED ANALYSIS…','nutri.noMeals':'Nothing to analyze yet. Log a meal first.','nutri.noMeals2':'Log a meal first, then there is something to analyze.','nutri.needBackend':'Detailed analysis needs the Backend URL in Settings.','nutri.needBackend2':'Extra nutrient estimation needs the backend URL in settings.','nutri.running':'Detailed analysis running… this uses one API call.','nutri.saved':'Fresh detailed analysis saved: {time}.','nutri.failed':'Detailed nutrient estimate failed: {error}','nutri.cachedFresh':'Last detailed analysis: {time}. Meals have not changed since.','nutri.cachedStale':'A previous analysis exists, but the log changed. Press REFRESH / ANALYZE if you want a new estimate.','nutri.noneCached':'No detailed nutrient estimate yet. Press REFRESH / ANALYZE if you want one. This uses one API call.','nutri.noneCached2':'No detailed daily nutrient estimate yet. The button starts analysis only on request, so it does not waste API calls.','nutri.noData':'not enough data','nutri.chartTitle':'DAILY VALUE % · QUICK VIEW','nutri.mainStats':'MAIN STATS','nutri.minerals':'MINERALS','nutri.vitamins':'VITAMINS','nutri.strengths':'STRENGTHS','nutri.watch':'WATCH','nutri.restOfDay':'REST OF DAY','nutri.trainerNote':'TRAINER NOTE','nutri.caveat':'Estimate · depends on portions · not medical advice.',
-  'settings.title':'SETTINGS','settings.kcal':'Daily kcal target','settings.backend':'Backend URL (for estimates)','settings.backendHint':'Cloudflare Worker URL. Empty = manual mode. The API key lives only in the Worker, never here.','settings.secret':'App secret (x-app-secret)','settings.secretPlaceholder':'Worker APP_API_SECRET','settings.language':'App language','settings.languageHint':'Default language is English. AI language packs are saved on this device and survive app refreshes.','settings.trainerCharacter':'Trainer character','settings.trainerMale':'Male','settings.trainerFemale':'Female','settings.trainerHint':'Only changes the room character artwork. Your log and targets stay the same.','settings.langSaved':'Language saved.','settings.langNeedBackend':'Language adaptation needs Backend URL and App secret first.','settings.langRunning':'Adapting the app language… this uses one API call.','settings.langDone':'Language pack saved: {language}. App updates will not overwrite it.','settings.langFail':'Language adaptation failed: {error}','settings.backup':'Export/import saves meals and weights to a JSON file. The App secret is not exported for safety.','settings.refreshHint':'REFRESH APP only refreshes the offline app cache and service worker. Log, Backend URL and App secret remain.','settings.version':'MealQuest v0.4.5 · data on your device (IndexedDB + emergency mirror) · offline PWA',
+  'settings.title':'SETTINGS','settings.kcal':'Daily kcal target','settings.backend':'Backend URL (for estimates)','settings.backendHint':'Cloudflare Worker URL. Empty = manual mode. The API key lives only in the Worker, never here.','settings.secret':'App secret (x-app-secret)','settings.secretPlaceholder':'Worker APP_API_SECRET','settings.language':'App language','settings.languageHint':'Default language is English. AI language packs are saved on this device and survive app refreshes.','settings.trainerCharacter':'Trainer character','settings.trainerMale':'Male','settings.trainerFemale':'Female','settings.trainerHint':'Only changes the room character artwork. Your log and targets stay the same.','settings.langSaved':'Language saved.','settings.langNeedBackend':'Language adaptation needs Backend URL and App secret first.','settings.langRunning':'Adapting the app language… this uses one API call.','settings.langDone':'Language pack saved: {language}. App updates will not overwrite it.','settings.langFail':'Language adaptation failed: {error}','settings.backup':'Export/import saves meals and weights to a JSON file. The App secret is not exported for safety.','settings.refreshHint':'REFRESH APP only refreshes the offline app cache and service worker. Log, Backend URL and App secret remain.','settings.version':'MealQuest v0.4.6 · data on your device (IndexedDB + emergency mirror) · offline PWA',
   'coach.lowData':'Low data. The trainer does not predict through fog.','coach.good':'Control looks good. Mission continues.','coach.under':'Under target. Fine, but protein could be higher tomorrow.','coach.over':'Over target by about {diff} kcal. Logged. Tomorrow a lighter side dish balances it.','coach.noMealsReport':'No meals logged today. Log first, then the trainer can report.','coach.goodReport':'Control good: {kcal} kcal within the {target} target, protein {protein} g. The logging is the win today.','coach.underReport':'{kcal} kcal, under target. Fine, but protein ({protein} g) could be higher tomorrow.','coach.overReport':'{kcal} kcal, {diff} over target. Logged. Tomorrow a lighter side dish balances it.','coach.installReady':'Already running as an app. No reinstall needed.','coach.refreshing':'Refreshing the app. Log and App secret remain.','coach.refreshedFail':'Refresh failed. The log is safe; try refreshing from the browser.','coach.nutrientsSaved':'Detailed daily nutrient estimate updated. It is saved for this day.','coach.exerciseSaved':'Training logged. Daily net kcal lowered by {kcal}.',
   'remaining.lotProtein':'About {left} kcal left. Protein could still use about {proteinLeft} g, so choose simple protein + vegetables, with a smaller side dish.','remaining.lot':'About {left} kcal left. Protein is roughly fine, so a normal but not heavy meal works: vegetables + smaller side + simple protein.','remaining.someProtein':'About {left} kcal fits. For the rest of the day, prioritize protein with little side dish.','remaining.some':'About {left} kcal fits. A light dinner / small snack still fits, but I would not force a big side dish.','remaining.closeProtein':'You are close to target. If you still eat, choose a small protein option with little fat and little side dish.','remaining.close':'You are close to the daily target. From here, a light controlled finish is best.','remaining.over':'You are about {over} kcal over target. Not tragic, but today I would keep it to water, vegetables, light protein; no new big meal.','remaining.proteinGap':'Protein may still be about {proteinLeft} g short for a good day.','remaining.carbHigh':'Carbs are already on the higher side, so further side dishes should be reduced.','remaining.fatHigh':'Fat is already on the higher side, so I would avoid oily/cheesy/sausage-heavy finishes.'
 };
 const UI_HU={
   'coach.label':'EDZŐ','app.settings':'BEÁLLÍTÁS','app.today':'MAI NAP','app.nutrients':'TÁPANYAG','app.detail':'RÉSZLET','app.mealLog':'MEAL LOG','app.emptyDay':'Ma még üres a napló. Az edző vár egy adatra.','app.weight':'Súly','app.roomLv':'ROOM LV. {level}','app.routine':'RUTIN {good}/7','room.fat':'KEZDŐ TEREM','room.medium':'KONTROLL ALAKUL','room.lean':'JÓ RUTIN',
-  'btn.addMeal':'+ ÉTEL','btn.addWeight':'+ SÚLY','btn.addExercise':'+ EDZÉS','btn.estimate':'BECSLÉS','btn.saveLog':'MENTÉS A NAPLÓBA','btn.save':'MENTÉS','btn.install':'TELEPÍTÉS','btn.refreshApp':'APP FRISSÍTÉSE','btn.export':'EXPORT JSON','btn.import':'IMPORT JSON','btn.wipeDay':'MAI NAP TÖRLÉSE','btn.refreshNutrients':'FRISSÍTÉS / ELEMZÉS','btn.estimateExercise':'GYORS BECSLÉS','btn.english':'ENGLISH','btn.hungarian':'MAGYAR','btn.adaptLanguage':'NYELV ÁTALAKÍTÁSA',
-  'meal.title':'+ ÉTEL','meal.what':'Mit ettél? (szabad szöveg)','meal.placeholder':'2 csirkecomb, kb 200g főtt rizs, paradicsom, 1 ayran','meal.time':'Idő (opcionális)','meal.aiOff':'Automatikus becslés kikapcsolva — add meg a backend URL-t a beállításokban, vagy vidd fel kézzel lentebb.','meal.spinner':'ELEMZÉS…','meal.name':'Megnevezés','meal.namePlaceholder':'pl. Ebéd — csirke rizzsel','meal.kcal':'Kcal','meal.proteinShort':'Feh. g','meal.fatShort':'Zsír g','meal.carbs':'Szénhidrát g',
+  'btn.addMeal':'+ ÉTEL','btn.addWeight':'+ SÚLY','btn.addExercise':'+ EDZÉS','btn.estimate':'BECSLÉS','btn.saveLog':'MENTÉS A NAPLÓBA','btn.save':'MENTÉS','btn.install':'TELEPÍTÉS','btn.refreshApp':'APP FRISSÍTÉSE','btn.export':'EXPORT JSON','btn.import':'IMPORT JSON','btn.wipeDay':'MAI NAP TÖRLÉSE','btn.refreshNutrients':'FRISSÍTÉS / ELEMZÉS','btn.estimateExercise':'GYORS BECSLÉS','btn.english':'ENGLISH','btn.hungarian':'MAGYAR','btn.adaptLanguage':'NYELV ÁTALAKÍTÁSA','btn.weekReport':'HÉT','btn.monthReport':'HÓNAP','btn.refreshReport':'JELENTÉS FRISSÍTÉSE','btn.copyReport':'JELENTÉS MÁSOLÁSA',
+  'meal.title':'+ ÉTEL','meal.editTitle':'ÉTEL SZERKESZTÉSE','meal.updated':'Étel frissítve. A napi log újraszámolva.','meal.what':'Mit ettél? (szabad szöveg)','meal.placeholder':'2 csirkecomb, kb 200g főtt rizs, paradicsom, 1 ayran','meal.time':'Idő (opcionális)','meal.aiOff':'Automatikus becslés kikapcsolva — add meg a backend URL-t a beállításokban, vagy vidd fel kézzel lentebb.','meal.spinner':'ELEMZÉS…','meal.name':'Megnevezés','meal.namePlaceholder':'pl. Ebéd — csirke rizzsel','meal.kcal':'Kcal','meal.proteinShort':'Feh. g','meal.fatShort':'Zsír g','meal.carbs':'Szénhidrát g',
   'weight.title':'+ SÚLY','weight.kg':'Testsúly (kg)','weight.note':'Megjegyzés (opcionális)','weight.placeholder':'reggel, éhgyomorra','weight.hint':'A napi ingadozás normális. A trend számít, nem egyetlen szám.','weight.save':'SÚLY RÖGZÍTÉSE',
-  'exercise.title':'+ EDZÉS','exercise.activity':'Edzés / mozgás','exercise.time':'Idő (opcionális)','exercise.minutes':'Perc','exercise.kcal':'Elégetett kcal','exercise.intensity':'Intenzitás','exercise.note':'Megjegyzés (opcionális)','exercise.hint':'Az edzés a napi nettó kcal-t csökkenti. Ez is csak becslés, de napi kontrollhoz hasznos.','exercise.save':'EDZÉS RÖGZÍTÉSE','exercise.empty':'Ma még nincs edzés rögzítve.','exercise.saved':'Edzés rögzítve: -{kcal} kcal. A napi nettó frissült.','exercise.auto':'Gyors becslés kitöltve. Ha kell, írd át.',
-  'calendar.title':'NAPTÁR','calendar.today':'MAI NAP','calendar.meal':'étkezés','calendar.weight':'súly','calendar.exercise':'edzés','calendar.todayMark':'MA = mai nap','calendar.hint':'A dátumra koppintva nyílik. Balra/jobbra swipe továbbra is napot vált.','calendar.days':'H,K,SZE,CS,P,SZO,V',
+  'exercise.title':'+ EDZÉS','exercise.editTitle':'EDZÉS SZERKESZTÉSE','exercise.updated':'Edzés frissítve. A napi nettó kcal újraszámolva.','exercise.activity':'Edzés / mozgás','exercise.time':'Idő (opcionális)','exercise.minutes':'Perc','exercise.kcal':'Elégetett kcal','exercise.intensity':'Intenzitás','exercise.note':'Megjegyzés (opcionális)','exercise.hint':'Az edzés a napi nettó kcal-t csökkenti. Ez is csak becslés, de napi kontrollhoz hasznos.','exercise.save':'EDZÉS RÖGZÍTÉSE','exercise.empty':'Ma még nincs edzés rögzítve.','exercise.saved':'Edzés rögzítve: -{kcal} kcal. A napi nettó frissült.','exercise.auto':'Gyors becslés kitöltve. Ha kell, írd át.',
+  'period.titleWeek':'HETI JELENTÉS','period.titleMonth':'HAVI JELENTÉS','period.hint':'Először a mentett jelentést mutatja. Csak akkor frissíts, ha el akarsz költeni egy API-hívást.','period.noData':'Ebben az időszakban még nincs naplózott adat.','period.noReport':'Még nincs mentett jelentés. A JELENTÉS FRISSÍTÉSE gomb egy API-hívást használ.','period.stale':'A napló változott a jelentés óta. Frissíts, ha új elemzést szeretnél.','period.fresh':'Mentett jelentés: {time}.','period.running':'Jelentés elemzése… ez egy API-hívás.','period.needBackend':'A jelentésekhez Backend URL és App titok kell a Beállításokban.','period.saved':'Jelentés mentve: {time}.','period.failed':'A jelentés nem sikerült: {error}','period.week':'HÉT','period.month':'HÓNAP','period.logged':'LOGOLT','period.avgNet':'ÁTL. NETTÓ','period.training':'EDZÉS','period.proteinDays':'FEHÉRJE','period.weightTrend':'SÚLY','period.heavyDays':'NEHÉZ','period.beerDays':'SÖR','period.highlights':'ERŐSSÉGEK','period.watch':'FIGYELENDŐ','period.next':'KÖV. FÓKUSZ','period.trainer':'EDZŐI MEGJEGYZÉS','period.copyEmpty':'Még nincs másolható jelentés.','calendar.title':'NAPTÁR','calendar.today':'MAI NAP','calendar.meal':'étkezés','calendar.weight':'súly','calendar.exercise':'edzés','calendar.todayMark':'MA = mai nap','calendar.hint':'A dátumra koppintva nyílik. Balra/jobbra swipe továbbra is napot vált.','calendar.days':'H,K,SZE,CS,P,SZO,V',
   'day.title':'TELJES NAP','day.hint':'A főképernyő szándékosan tömör. Itt látszik a teljes szöveg, scrollbar nélkül, érintéssel görgetve.','nutri.title':'NAPI TÁPANYAGOK','nutri.hint':'A MAI NAP panelről nyílik. Makrók, vitaminok, ásványi anyagok, rost, só és koleszterin becslése. Nem laboreredmény, hanem napi tájékozódás.','nutri.meta.empty':'A részletes tápanyagbecslés csak akkor hív API-t, ha itt frissítést kérsz.','nutri.spinner':'RÉSZLETES ELEMZÉS…','nutri.noMeals':'Nincs még mit elemezni. Előbb rögzíts étkezést ezen a napon.','nutri.noMeals2':'Előbb rögzíts étkezést, utána van mit elemezni.','nutri.needBackend':'A részletes elemzéshez kell Backend URL a Beállításokban.','nutri.needBackend2':'Az extra tápanyagbecsléshez kell a backend URL a beállításokban.','nutri.running':'Részletes elemzés fut… ez most egy API-hívás.','nutri.saved':'Friss részletes elemzés mentve: {time}.','nutri.failed':'A részletes tápanyagbecslés nem sikerült: {error}','nutri.cachedFresh':'Utolsó részletes elemzés: {time}. Azóta nem változott a napi étkezéslista.','nutri.cachedStale':'Van korábbi elemzés, de azóta változott a napló. Nyomj FRISSÍTÉS / ELEMZÉS-t, ha új becslést kérsz.','nutri.noneCached':'Ehhez a naphoz még nincs részletes tápanyagbecslés. Nyomj FRISSÍTÉS / ELEMZÉS-t, ha kéred. Ez egy API-hívást használ.','nutri.noneCached2':'Még nincs részletes napi tápanyagbecslés. A gomb csak kérésre indít elemzést, így nem költ feleslegesen API-hívást.','nutri.noData':'nincs elég adat','nutri.chartTitle':'NAPI ÉRTÉK % · GYORS NÉZET','nutri.mainStats':'FŐ STATOK','nutri.minerals':'ÁSVÁNYI ANYAGOK','nutri.vitamins':'VITAMINOK','nutri.strengths':'ERŐSSÉGEK','nutri.watch':'FIGYELENDŐ','nutri.restOfDay':'NAP MARADÉKA','nutri.trainerNote':'EDZŐI MEGJEGYZÉS','nutri.caveat':'Becslés · adagpontosságtól függ · nem orvosi tanács.',
-  'settings.title':'BEÁLLÍTÁS','settings.kcal':'Napi kcal cél','settings.backend':'Backend URL (becsléshez)','settings.backendHint':'Cloudflare Worker URL. Üresen = kézi mód. Az API-kulcs csak a Workerben él, sosem itt.','settings.secret':'App titok (x-app-secret)','settings.secretPlaceholder':'a Worker APP_API_SECRET titka','settings.language':'App nyelve','settings.languageHint':'Az alapnyelv angol. Az AI nyelvi csomag ezen az eszközön mentődik, és appfrissítés nem írja felül.','settings.trainerCharacter':'Edző karakter','settings.trainerMale':'Férfi','settings.trainerFemale':'Női','settings.trainerHint':'Csak a terem karakterképét cseréli. A napló és a célok változatlanok maradnak.','settings.langSaved':'Nyelv mentve.','settings.langNeedBackend':'A nyelvi átalakításhoz előbb kell Backend URL és App titok.','settings.langRunning':'Az app nyelvi csomagja készül… ez egy API-hívás.','settings.langDone':'Nyelvi csomag mentve: {language}. Appfrissítés nem írja felül.','settings.langFail':'A nyelvi átalakítás nem sikerült: {error}','settings.backup':'Export/import: a naplózott étkezések és súlyadatok mentése JSON fájlba. Az App titok biztonság miatt nem kerül exportba.','settings.refreshHint':'APP FRISSÍTÉSE: csak az offline app-cache-t és service workert cseréli. A napló, a Backend URL és az App titok megmarad.','settings.version':'MealQuest v0.4.5 · adatok az eszközödön (IndexedDB + vészmentés) · offline PWA',
+  'settings.title':'BEÁLLÍTÁS','settings.kcal':'Napi kcal cél','settings.backend':'Backend URL (becsléshez)','settings.backendHint':'Cloudflare Worker URL. Üresen = kézi mód. Az API-kulcs csak a Workerben él, sosem itt.','settings.secret':'App titok (x-app-secret)','settings.secretPlaceholder':'a Worker APP_API_SECRET titka','settings.language':'App nyelve','settings.languageHint':'Az alapnyelv angol. Az AI nyelvi csomag ezen az eszközön mentődik, és appfrissítés nem írja felül.','settings.trainerCharacter':'Edző karakter','settings.trainerMale':'Férfi','settings.trainerFemale':'Női','settings.trainerHint':'Csak a terem karakterképét cseréli. A napló és a célok változatlanok maradnak.','settings.langSaved':'Nyelv mentve.','settings.langNeedBackend':'A nyelvi átalakításhoz előbb kell Backend URL és App titok.','settings.langRunning':'Az app nyelvi csomagja készül… ez egy API-hívás.','settings.langDone':'Nyelvi csomag mentve: {language}. Appfrissítés nem írja felül.','settings.langFail':'A nyelvi átalakítás nem sikerült: {error}','settings.backup':'Export/import: a naplózott étkezések és súlyadatok mentése JSON fájlba. Az App titok biztonság miatt nem kerül exportba.','settings.refreshHint':'APP FRISSÍTÉSE: csak az offline app-cache-t és service workert cseréli. A napló, a Backend URL és az App titok megmarad.','settings.version':'MealQuest v0.4.6 · adatok az eszközödön (IndexedDB + vészmentés) · offline PWA',
   'coach.lowData':'Kevés adat. Az edző ködből nem jósol.','coach.good':'Kontroll rendben. Küldetés folytatható.','coach.under':'Keret alatt. Rendben, de a fehérje lehetne feljebb holnap.','coach.over':'Kb. {diff} kcal a keret fölött. Bejegyezve. Holnap egy könnyebb köret kiegyenlíti.','coach.noMealsReport':'Nincs rögzített étkezés ma. A jelentéshez előbb naplózz.','coach.goodReport':'Kontroll rendben: {kcal} kcal a {target}-es keretben, fehérje {protein} g. A rögzítés a lényeg — ma megvan.','coach.underReport':'{kcal} kcal, keret alatt. Rendben, de a fehérje ({protein} g) lehetne feljebb holnap.','coach.overReport':'{kcal} kcal, {diff} a keret fölött. Bejegyezve. Holnap egy könnyebb köret kiegyenlíti.','coach.installReady':'Már appként fut. Nem kell újratelepíteni.','coach.refreshing':'Frissítem az appot. A napló és az App titok megmarad.','coach.refreshedFail':'Frissítés nem sikerült. A napló nem sérült; próbálj böngészőből frissíteni.','coach.nutrientsSaved':'Részletes napi tápanyagbecslés frissítve. Ez már el van mentve ehhez a naphoz.','coach.exerciseSaved':'Edzés rögzítve. A napi nettó kcal {kcal}-lal csökkent.',
   'remaining.lotProtein':'Még kb. {left} kcal maradt. Fehérjéből még kb. {proteinLeft} g kellene, ezért egyszerű fehérje + zöldség + kisebb köret jó irány.','remaining.lot':'Még kb. {left} kcal maradt. Fehérje nagyjából rendben, ezért jöhet egy normális, de nem nehéz étkezés: zöldség + kisebb köret + egyszerű fehérje.','remaining.someProtein':'Még kb. {left} kcal fér bele. A nap maradékában inkább fehérjét érdemes pótolni kevés körettel.','remaining.some':'Még kb. {left} kcal fér bele. Könnyű vacsora / kis snack még belefér, de nagy köretet már nem erőltetnék.','remaining.closeProtein':'Már közel vagy a napi célhoz. Ha még ennél, inkább kis fehérjés opciót válassz, kevés zsírral és kevés körettel.','remaining.close':'A napi cél közelében vagy. Innen már inkább csak könnyű, kontrollált lezárás ajánlott.','remaining.over':'A napi cél fölött vagy kb. {over} kcal-lal. Nem tragédia, de ma már inkább víz, zöldség, könnyű fehérje; új nagy étkezést nem érdemes nyitni.','remaining.proteinGap':'Fehérjéből még kb. {proteinLeft} g hiányozhat a jó naphoz.','remaining.carbHigh':'A szénhidrát már magasabb oldalon van, ezért a további köretet érdemes visszafogni.','remaining.fatHigh':'A zsír már magasabb oldalon van, ezért olajos/sajtos/kolbászos zárást nem választanék.'
 };
@@ -760,6 +821,7 @@ function applyLanguage(){
   setText('analyzeBtn','btn.estimate'); setText('saveMealBtn','btn.saveLog'); setText('saveWeightBtn','weight.save'); setText('saveExerciseBtn','exercise.save'); setText('estimateExerciseBtn','btn.estimateExercise');
   setText('settingsInstallBtn','btn.install'); setText('installBtn','btn.install'); setText('refreshAppBtn','btn.refreshApp'); setText('exportBtn','btn.export'); setText('importBtn','btn.import'); setText('wipeBtn','btn.wipeDay'); setText('saveSettingsBtn','btn.save');
   setText('useEnglishBtn','btn.english'); setText('useHungarianBtn','btn.hungarian'); setText('localizeBtn','btn.adaptLanguage'); setText('parseExerciseBtn','btn.fillOffline'); setText('aiExerciseBtn','btn.aiFill');
+  setText('calWeekReportBtn','btn.weekReport'); setText('calMonthReportBtn','btn.monthReport'); setText('refreshPeriodReportBtn','btn.refreshReport'); setText('copyPeriodReportBtn','btn.copyReport'); setText('periodWeekBtn','period.week'); setText('periodMonthBtn','period.month');
   const tc=$('setTrainerCharacter'); if(tc){ const m=tc.querySelector('option[value="male"]'); const f=tc.querySelector('option[value="female"]'); if(m) m.textContent=t('settings.trainerMale','Male'); if(f) f.textContent=t('settings.trainerFemale','Female'); }
   setText('calTodayBtn','calendar.today'); if($('installText')) $('installText').textContent='Install as a standalone app.';
   setText('aiHint','meal.aiOff'); setText('nutriMeta','nutri.meta.empty'); setText('backupHint','settings.backup'); setText('languageHint','settings.languageHint');
@@ -1122,7 +1184,7 @@ async function handleCoachBubbleTap(){
 async function exportBackup(){
   const [meals,weights,workouts]=await Promise.all([getAll('meals'),getAll('weights'),getAll('workouts')]);
   const backup={
-    app:'MealQuest', version:'0.4.5', schemaVersion:3, exportedAt:new Date().toISOString(),
+    app:'MealQuest', version:'0.4.6', schemaVersion:3, exportedAt:new Date().toISOString(),
     data:{
       meals:meals.sort((a,b)=>(a.date||'').localeCompare(b.date||'') || (a.time||'99').localeCompare(b.time||'99') || n(a.createdAt)-n(b.createdAt)),
       weights:weights.sort((a,b)=>(a.date||'').localeCompare(b.date||'')),
@@ -1130,7 +1192,7 @@ async function exportBackup(){
       settings:{ kcalTarget:state.settings.kcalTarget, backendUrl:state.settings.backendUrl, language:state.settings.language, languageLabel:state.settings.languageLabel, uiPack:state.settings.uiPack, trainerCharacter:state.settings.trainerCharacter },
       emergencyMirrorCounts:(()=>{ const m=readEmergencyMirror(); return {meals:m.meals.length, weights:m.weights.length, workouts:m.workouts.length}; })()
     },
-    note:'The appSecret / access code is not included in the backup for safety. v0.4.5 also keeps a local emergency mirror for future recovery.'
+    note:'The appSecret / access code is not included in the backup for safety. v0.4.6 also keeps a local emergency mirror for future recovery.'
   };
   const stamp=new Date().toISOString().slice(0,19).replace(/[-:T]/g,'');
   downloadTextFile(`mealquest_backup_${stamp}.json`, JSON.stringify(backup,null,2));
@@ -1398,6 +1460,27 @@ function updateBubble(kcal, mealCount, hasWeight){
 
 
 
+
+function setMealOverlayMode(editing){
+  const h=document.querySelector('#mealOverlay h2'); if(h) h.textContent=editing?t('meal.editTitle','EDIT MEAL'):t('meal.title','+ MEAL');
+  setText('saveMealBtn','btn.saveLog');
+}
+function resetMealForm(){ ['mealText','mealTime','mTitle','mKcal','mProt','mFat','mCarb'].forEach(i=>$(i).value=''); $('mealPreview').classList.remove('show'); $('mealErr').classList.remove('show'); state.pendingAI=null; state.editingMeal=null; setMealOverlayMode(false); refreshAIState(); }
+function openMealEditor(meal){
+  state.editingMeal=meal||null; state.pendingAI=null; setMealOverlayMode(!!meal);
+  $('mealPreview').classList.remove('show'); $('mealErr').classList.remove('show'); refreshAIState();
+  $('mealText').value=meal.rawText||''; $('mealTime').value=meal.time||''; $('mTitle').value=meal.title||''; $('mKcal').value=n(meal.kcal)||''; $('mProt').value=n(meal.protein)||''; $('mCarb').value=n(meal.carbs)||''; $('mFat').value=n(meal.fat)||'';
+  hide('dayOverlay'); show('mealOverlay');
+}
+function setExerciseOverlayMode(editing){ const h=document.querySelector('#exerciseOverlay h2'); if(h) h.textContent=editing?t('exercise.editTitle','EDIT TRAINING'):t('exercise.title','+ TRAINING'); setText('saveExerciseBtn','exercise.save'); }
+function resetExerciseForm(){ ['exFreeText','exActivity','exTime','exMinutes','exKcal','exIntensity','exNote'].forEach(i=>$(i).value=''); $('exerciseErr').classList.remove('show'); $('exerciseSpinner').classList.remove('show'); state.pendingExerciseAI=null; state.editingWorkout=null; setExerciseOverlayMode(false); }
+function openWorkoutEditor(w){
+  state.editingWorkout=w||null; state.pendingExerciseAI=null; setExerciseOverlayMode(!!w);
+  $('exerciseErr').classList.remove('show'); $('exerciseSpinner').classList.remove('show');
+  $('exFreeText').value=w.rawText||''; $('exActivity').value=w.activity||''; $('exTime').value=w.time||''; $('exMinutes').value=n(w.minutes)||''; $('exKcal').value=n(w.burnedKcal)||''; $('exIntensity').value=w.intensity||''; $('exNote').value=w.note||'';
+  hide('dayOverlay'); show('exerciseOverlay');
+}
+
 async function getDayMealsSorted(){
   const meals=await getAllByDate('meals',state.date);
   meals.sort((a,b)=> (a.time||'99')<(b.time||'99')?-1:(a.time||'99')>(b.time||'99')?1:a.createdAt-b.createdAt);
@@ -1414,19 +1497,23 @@ async function openDayDetail(){
   const box=$('dayMealFullList'); box.innerHTML='';
   if(!meals.length && !workouts.length){ box.innerHTML='<div class="empty">'+esc(t('nutri.noMeals2','Log a meal first.'))+'</div>';  }
   meals.forEach(mm=>{
-    const el=document.createElement('div'); el.className='detailMeal';
+    const el=document.createElement('div'); el.className='detailMeal'; el.setAttribute('role','button'); el.tabIndex=0;
     const macros=`P ${n(mm.protein)}g · C ${n(mm.carbs)}g · F ${n(mm.fat)}g`;
     const range=(mm.kcalMin&&mm.kcalMax)?` · range ${mm.kcalMin}–${mm.kcalMax} kcal`:'';
     el.innerHTML=`<div class="top"><div class="name">${esc(mm.title||'Meal')}</div><div class="kcal">${n(mm.kcal)} kcal</div></div>
       <div class="raw">${esc(mm.rawText||'')}</div>
-      <div class="meta">${mm.time?esc(mm.time)+' · ':''}${macros}${range}</div>`;
+      <div class="meta">${mm.time?esc(mm.time)+' · ':''}${macros}${range}</div><div class="editHint">TAP TO EDIT</div>`;
+    el.onclick=()=>openMealEditor(mm);
+    el.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openMealEditor(mm); } };
     box.appendChild(el);
   });
   workouts.forEach(w=>{
-    const el=document.createElement('div'); el.className='detailWorkout';
+    const el=document.createElement('div'); el.className='detailWorkout'; el.setAttribute('role','button'); el.tabIndex=0;
     el.innerHTML=`<div class="top"><div class="name">${esc(w.activity||'Training')}</div><div class="kcal">-${n(w.burnedKcal)} kcal</div></div>
-      <div class="raw">${esc(w.note||'')}</div>
-      <div class="meta">${w.time?esc(w.time)+' · ':''}${n(w.minutes)} min · ${esc(w.intensity||'')}</div>`;
+      <div class="raw">${esc(w.note||w.rawText||'')}</div>
+      <div class="meta">${w.time?esc(w.time)+' · ':''}${n(w.minutes)} min · ${esc(w.intensity||'')}</div><div class="editHint">TAP TO EDIT</div>`;
+    el.onclick=()=>openWorkoutEditor(w);
+    el.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openWorkoutEditor(w); } };
     box.appendChild(el);
   });
   show('dayOverlay');
@@ -1671,6 +1758,94 @@ async function copyDailySummary(){
   setCoachMessage(ok?t('exercise.copyReady'):t('exercise.copyFailed'), {source:'copy'});
 }
 
+
+function startOfWeek(iso){ const [y,m,d]=iso.split('-').map(Number); const dt=new Date(y,m-1,d); const off=(dt.getDay()+6)%7; dt.setDate(dt.getDate()-off); return isoOf(dt); }
+function endOfWeek(iso){ return shiftDate(startOfWeek(iso),6); }
+function periodRange(type, anchor){
+  if(type==='month'){
+    const [y,m]=anchor.split('-').map(Number); const s=`${y}-${String(m).padStart(2,'0')}-01`; const e=isoOf(new Date(y,m,0)); return {type,start:s,end:e,label:monthLabelHu(anchor.slice(0,7))};
+  }
+  const s=startOfWeek(anchor), e=endOfWeek(anchor); return {type:'week',start:s,end:e,label:`${s.slice(5)}–${e.slice(5)}`};
+}
+function inRange(date,start,end){ return date>=start && date<=end; }
+function daysInRange(start,end){ const out=[]; let d=start; while(d<=end){ out.push(d); d=shiftDate(d,1); } return out; }
+function hashString(raw){ raw=String(raw||''); let h=0; for(let i=0;i<raw.length;i++){ h=((h<<5)-h + raw.charCodeAt(i))|0; } return String(h)+'/'+raw.length; }
+async function collectPeriodData(type){
+  const range=periodRange(type,state.date); const days=daysInRange(range.start,range.end);
+  const [mealsAll,workoutsAll,weightsAll]=await Promise.all([getAll('meals'),getAll('workouts'),getAll('weights')]);
+  const meals=mealsAll.filter(m=>inRange(m.date,range.start,range.end));
+  const workouts=workoutsAll.filter(w=>inRange(w.date,range.start,range.end));
+  const weights=weightsAll.filter(w=>inRange(w.date,range.start,range.end)).sort((a,b)=>a.date.localeCompare(b.date));
+  const proteinTarget=macroTargets().protein;
+  const rows=days.map(day=>{
+    const dm=meals.filter(m=>m.date===day); const dw=workouts.filter(w=>w.date===day); const totals=mealTotals(dm); const burn=totalKcalForWorkouts(dw); const net=Math.max(0, totals.kcal-burn);
+    const beer=dm.some(m=>/\bbeer\b|sör|sor|alkohol|bor|wine/i.test((m.rawText||'')+' '+(m.title||'')));
+    return {date:day, logged:dm.length||dw.length, meals:dm.length, trainings:dw.length, foodKcal:totals.kcal, trainingKcal:burn, netKcal:net, protein:totals.protein, carbs:totals.carbs, fat:totals.fat, proteinOk:totals.protein>=proteinTarget*.8, heavy:net>state.settings.kcalTarget*1.1, beer};
+  });
+  const loggedDays=rows.filter(r=>r.logged).length; const divisor=Math.max(1,loggedDays);
+  const totalFood=rows.reduce((s,r)=>s+r.foodKcal,0), totalBurn=rows.reduce((s,r)=>s+r.trainingKcal,0), totalNet=rows.reduce((s,r)=>s+r.netKcal,0);
+  const wStart=weights[0], wEnd=weights[weights.length-1]; const trend=(wStart&&wEnd)?Number((wEnd.weightKg-wStart.weightKg).toFixed(1)):null;
+  const stats={ type:range.type, start:range.start, end:range.end, label:range.label, days:days.length, loggedDays, totalFood, totalBurn, totalNet,
+    avgNet:Math.round(totalNet/divisor), avgFood:Math.round(totalFood/divisor), trainingSessions:workouts.length, trainingDays:rows.filter(r=>r.trainings).length,
+    proteinOkDays:rows.filter(r=>r.proteinOk).length, heavyDays:rows.filter(r=>r.heavy).length, beerDays:rows.filter(r=>r.beer).length,
+    weightStart:wStart?Number(wStart.weightKg):null, weightEnd:wEnd?Number(wEnd.weightKg):null, weightTrend:trend };
+  const sig=hashString(JSON.stringify({meals:meals.map(m=>[m.id,m.updatedAt,m.kcal,m.protein,m.carbs,m.fat,m.rawText]),workouts:workouts.map(w=>[w.id,w.updatedAt,w.burnedKcal,w.minutes,w.activity,w.note]),weights:weights.map(w=>[w.id,w.updatedAt,w.weightKg]),stats}));
+  return {range,days:rows,meals,workouts,weights,stats,signature:sig};
+}
+function periodCacheKey(p){ return `periodReport:${p.type}:${p.range.start}:${p.range.end}`; }
+async function getCachedPeriodReport(p){ return await getSetting(periodCacheKey(p)); }
+async function saveCachedPeriodReport(p,payload){ await setSetting(periodCacheKey(p),payload); }
+function renderPeriodStats(p){
+  const s=p.stats; const wt=s.weightTrend==null?'—':((s.weightTrend>0?'+':'')+s.weightTrend+' kg');
+  $('periodStatsBox').innerHTML=`<div class="periodStats"><div class="title">${esc(s.label)} · ${esc(String(s.start))} → ${esc(String(s.end))}</div><div class="periodGrid">
+    <div class="periodStat"><b>${s.loggedDays}/${s.days}</b><span>${esc(t('period.logged','LOGGED'))}</span></div>
+    <div class="periodStat"><b>${s.avgNet}</b><span>${esc(t('period.avgNet','AVG NET'))}</span></div>
+    <div class="periodStat"><b>${s.trainingSessions}</b><span>${esc(t('period.training','TRAINING'))}</span></div>
+    <div class="periodStat"><b>${s.proteinOkDays}/${s.days}</b><span>${esc(t('period.proteinDays','PROTEIN'))}</span></div>
+    <div class="periodStat"><b>${esc(wt)}</b><span>${esc(t('period.weightTrend','WEIGHT'))}</span></div>
+    <div class="periodStat"><b>${s.heavyDays} / ${s.beerDays}</b><span>${esc(t('period.heavyDays','HEAVY'))} / ${esc(t('period.beerDays','BEER'))}</span></div>
+  </div></div>`;
+}
+function renderPeriodReport(report, stats){
+  if(!report){ $('periodReportContent').innerHTML=''; return; }
+  const hi=(report.highlights||[]).slice(0,4), wa=(report.watchouts||[]).slice(0,4);
+  $('periodReportContent').innerHTML=`<div class="periodReportCard"><div class="status">${esc(report.status||'REPORT')}</div><div class="headline">${esc(report.headline||'Period report')}</div><p>${esc(report.summary||'')}</p><div class="cols"><div class="miniBlock"><h3>${esc(t('period.highlights','HIGHLIGHTS'))}</h3><ul>${hi.map(x=>`<li>${esc(x)}</li>`).join('')||'<li>—</li>'}</ul></div><div class="miniBlock"><h3>${esc(t('period.watch','WATCH'))}</h3><ul>${wa.map(x=>`<li>${esc(x)}</li>`).join('')||'<li>—</li>'}</ul></div></div>${report.nextFocus?`<div class="periodAdvice"><b>${esc(t('period.next','NEXT FOCUS'))}</b><br>${esc(report.nextFocus)}</div>`:''}${report.trainerNote?`<div class="periodAdvice"><b>${esc(t('period.trainer','TRAINER NOTE'))}</b><br>${esc(report.trainerNote)}</div>`:''}</div>`;
+}
+async function openPeriodReport(type){
+  hide('calendarOverlay'); $('periodErr').classList.remove('show'); $('periodSpinner').classList.remove('show'); $('copyPeriodHint').textContent='';
+  const p=await collectPeriodData(type||'week'); state.currentPeriodReport=p; show('periodReportOverlay');
+  $('periodReportTitle').textContent= type==='month'?t('period.titleMonth','MONTH REPORT'):t('period.titleWeek','WEEK REPORT');
+  $('periodWeekBtn').classList.toggle('active',p.range.type==='week'); $('periodMonthBtn').classList.toggle('active',p.range.type==='month');
+  $('periodReportHint').textContent=t('period.hint'); renderPeriodStats(p); renderPeriodReport(null,p.stats);
+  if(!p.stats.loggedDays){ $('periodReportMeta').className='nutriMeta empty'; $('periodReportMeta').textContent=t('period.noData'); $('periodReportContent').innerHTML=''; return; }
+  const cached=await getCachedPeriodReport(p);
+  if(cached && cached.report){ renderPeriodReport(cached.report,p.stats); $('periodReportMeta').className='nutriMeta '+(cached.signature===p.signature?'fresh':'stale'); $('periodReportMeta').textContent=cached.signature===p.signature?fmt('period.fresh',{time:formatTimeStamp(cached.updatedAt)}):t('period.stale'); }
+  else { $('periodReportMeta').className='nutriMeta empty'; $('periodReportMeta').textContent=t('period.noReport'); }
+}
+async function refreshPeriodReport(){
+  const p=state.currentPeriodReport || await collectPeriodData('week'); if(!p.stats.loggedDays){ $('periodReportMeta').textContent=t('period.noData'); return; }
+  if(!state.settings.backendUrl || !state.settings.appSecret){ $('periodReportMeta').className='nutriMeta empty'; $('periodReportMeta').textContent=t('period.needBackend'); return; }
+  const btn=$('refreshPeriodReportBtn'); btn.disabled=true; $('periodErr').classList.remove('show'); $('periodSpinner').classList.add('show'); $('periodReportMeta').className='nutriMeta stale'; $('periodReportMeta').textContent=t('period.running');
+  try{
+    const body={ periodType:p.range.type, startDate:p.range.start, endDate:p.range.end, stats:p.stats, days:p.days,
+      meals:p.meals.slice(0,80).map(m=>({date:m.date,time:m.time,title:m.title,rawText:m.rawText,kcal:n(m.kcal),protein:n(m.protein),carbs:n(m.carbs),fat:n(m.fat)})),
+      workouts:p.workouts.slice(0,80).map(w=>({date:w.date,time:w.time,activity:w.activity,minutes:n(w.minutes),burnedKcal:n(w.burnedKcal),note:w.note})),
+      userContext:{language:currentLanguageName(), dailyKcalTarget:state.settings.kcalTarget} };
+    const res=await fetch(state.settings.backendUrl.replace(/\/$/,'')+'/api/analyze-period',{method:'POST',headers:{'Content-Type':'application/json','x-app-secret':state.settings.appSecret},body:JSON.stringify(body)});
+    if(!res.ok){ let detail=''; try{ detail=await res.text(); }catch(_e){} throw new Error('HTTP '+res.status+(detail?' · '+detail.slice(0,160):'')); }
+    const report=await res.json(); const payload={signature:p.signature,report,stats:p.stats,updatedAt:Date.now(),schemaVersion:1}; await saveCachedPeriodReport(p,payload); renderPeriodReport(report,p.stats); $('periodReportMeta').className='nutriMeta fresh'; $('periodReportMeta').textContent=fmt('period.saved',{time:formatTimeStamp(payload.updatedAt)}); setCoachMessage(report.trainerNote||report.nextFocus||report.headline,{source:'daily'});
+  }catch(err){ $('periodErr').textContent=fmt('period.failed',{error:err.message}); $('periodErr').classList.add('show'); $('periodReportMeta').className='nutriMeta empty'; $('periodReportMeta').textContent=fmt('period.failed',{error:err.message}); }
+  finally{ $('periodSpinner').classList.remove('show'); btn.disabled=false; }
+}
+async function buildPeriodReportText(){
+  const p=state.currentPeriodReport; if(!p) return '';
+  const cached=await getCachedPeriodReport(p); if(!cached||!cached.report) return '';
+  const r=cached.report, s=p.stats; const lines=[`MealQuest ${p.range.type} report — ${p.range.start} to ${p.range.end}`,`Logged: ${s.loggedDays}/${s.days} · Avg net: ${s.avgNet}/${state.settings.kcalTarget} kcal · Training: ${s.trainingSessions} sessions`, `Protein days: ${s.proteinOkDays}/${s.days} · Heavy days: ${s.heavyDays} · Beer days: ${s.beerDays}`];
+  if(s.weightTrend!=null) lines.push(`Weight trend: ${s.weightTrend>0?'+':''}${s.weightTrend} kg`);
+  lines.push('', r.headline||'', r.summary||''); if(r.highlights&&r.highlights.length) lines.push('Highlights: '+r.highlights.join('; ')); if(r.watchouts&&r.watchouts.length) lines.push('Watch: '+r.watchouts.join('; ')); if(r.nextFocus) lines.push('Next focus: '+r.nextFocus); if(r.trainerNote) lines.push('Trainer note: '+r.trainerNote); return lines.join('\n');
+}
+async function copyPeriodReport(){ const txt=await buildPeriodReportText(); const hint=$('copyPeriodHint'); if(!txt){ if(hint) hint.textContent=t('period.copyEmpty'); return; } const ok=await copyToClipboard(txt); if(hint) hint.textContent=ok?t('exercise.copyReady'):t('exercise.copyFailed'); }
+
 function refreshAIState(){ const on=!!state.settings.backendUrl;
   $('analyzeBtn').style.display=on?'block':'none'; $('aiHint').style.display=on?'none':'block'; }
 
@@ -1778,8 +1953,7 @@ function show(id){ $(id).classList.add('show'); }
 function hide(id){ $(id).classList.remove('show'); }
 document.querySelectorAll('[data-close]').forEach(b=> b.onclick=()=>hide(b.dataset.close));
 
-$('addMealBtn').onclick=()=>{ ['mealText','mealTime','mTitle','mKcal','mProt','mFat','mCarb'].forEach(i=>$(i).value='');
-  $('mealPreview').classList.remove('show'); $('mealErr').classList.remove('show'); state.pendingAI=null; refreshAIState(); show('mealOverlay'); };
+$('addMealBtn').onclick=()=>{ resetMealForm(); show('mealOverlay'); };
 
 $('analyzeBtn').onclick=async()=>{
   const raw=$('mealText').value.trim(); if(raw.length<2) return;
@@ -1810,14 +1984,16 @@ $('saveMealBtn').onclick=async()=>{
   const btn=$('saveMealBtn'); const oldTxt=btn.textContent; btn.disabled=true; btn.textContent=t('state.saving','SAVING…');
   $('mealErr').classList.remove('show');
   try{
-    const a=state.pendingAI;
-    const meal={ id:uid(), date:state.date, time:$('mealTime').value||null, rawText:raw,
-      title:title||raw||'Meal', kcal:n($('mKcal').value), kcalMin:a?a.kcalMin:null, kcalMax:a?a.kcalMax:null,
+    const a=state.pendingAI; const existing=state.editingMeal;
+    const meal={ id:existing?existing.id:uid(), date:state.date, time:$('mealTime').value||null, rawText:raw,
+      title:title||raw||'Meal', kcal:n($('mKcal').value), kcalMin:a?a.kcalMin:(existing?existing.kcalMin:null), kcalMax:a?a.kcalMax:(existing?existing.kcalMax:null),
       protein:n($('mProt').value), carbs:n($('mCarb').value), fat:n($('mFat').value),
-      confidence:a?a.confidence:null, trainerNote:a?a.trainerNote:null, source:a?'ai':'manual', createdAt:Date.now(), updatedAt:Date.now() };
+      confidence:a?a.confidence:(existing?existing.confidence:null), trainerNote:a?a.trainerNote:(existing?existing.trainerNote:null),
+      source:a?'ai':(existing?existing.source||'manual':'manual'), createdAt:existing?existing.createdAt:Date.now(), updatedAt:Date.now() };
     await put('meals',meal);
+    state.editingMeal=null; state.pendingAI=null;
     hide('mealOverlay');
-    rememberCoachMessage('Meal saved. The daily log has been updated.', 'meal');
+    rememberCoachMessage(existing?t('meal.updated','Meal updated. Daily log recalculated.'):'Meal saved. The daily log has been updated.', 'meal');
     await safeRender({retry:true});
   }catch(err){
     $('mealErr').textContent='Save failed: '+(err.message||err);
@@ -1835,7 +2011,7 @@ $('saveWeightBtn').onclick=async()=>{ const kg=parseFloat($('wKg').value); if(is
   await put('weights',w); hide('weightOverlay'); safeRender(); };
 
 
-$('addExerciseBtn').onclick=()=>{ ['exFreeText','exActivity','exTime','exMinutes','exKcal','exIntensity','exNote'].forEach(i=>$(i).value=''); $('exerciseErr').classList.remove('show'); $('exerciseSpinner').classList.remove('show'); state.pendingExerciseAI=null; show('exerciseOverlay'); };
+$('addExerciseBtn').onclick=()=>{ resetExerciseForm(); show('exerciseOverlay'); };
 const EX_PRESETS={
   walk:{activity:'Walk',minutes:30,intensity:'medium'}, run:{activity:'Run',minutes:20,intensity:'medium'}, bike:{activity:'Bike',minutes:30,intensity:'medium'}, gym:{activity:'Gym',minutes:45,intensity:'medium'},
   pushups:{activity:'Push-ups',minutes:3,intensity:'medium',note:'3x10 push-ups'}, squats:{activity:'Squats',minutes:3,intensity:'medium',note:'3x15 squats'}, plank:{activity:'Plank',minutes:2,intensity:'medium',note:'2 min plank'}, pullups:{activity:'Pull-ups',minutes:3,intensity:'medium',note:'3x5 pull-ups'}, custom:{activity:'Training',minutes:'',intensity:'medium'}
@@ -1867,11 +2043,11 @@ $('saveExerciseBtn').onclick=async()=>{
   let kcal=n($('exKcal').value);
   if(!kcal && minutes) kcal=workoutEstimate(activity, minutes, $('exIntensity').value);
   if(!activity && !minutes && !kcal && !$('exFreeText').value.trim()) return;
-  const ai=state.pendingExerciseAI;
-  const w={ id:uid(), date:state.date, time:$('exTime').value||null, activity:activity||'Training', minutes, burnedKcal:kcal,
-    intensity:$('exIntensity').value.trim()||null, note:$('exNote').value.trim()||$('exFreeText').value.trim()||null, rawText:$('exFreeText').value.trim()||null, reps:ai?n(ai.reps):0,
-    confidence:ai?ai.confidence:null, source:ai?'ai':'manual', createdAt:Date.now(), updatedAt:Date.now() };
-  await put('workouts',w); hide('exerciseOverlay'); setCoachMessage(fmt('coach.exerciseSaved',{kcal}), {source:'training'}); safeRender();
+  const ai=state.pendingExerciseAI; const existing=state.editingWorkout;
+  const w={ id:existing?existing.id:uid(), date:state.date, time:$('exTime').value||null, activity:activity||'Training', minutes, burnedKcal:kcal,
+    intensity:$('exIntensity').value.trim()||null, note:$('exNote').value.trim()||$('exFreeText').value.trim()||null, rawText:$('exFreeText').value.trim()||null, reps:ai?n(ai.reps):(existing?n(existing.reps):0),
+    confidence:ai?ai.confidence:(existing?existing.confidence:null), source:ai?'ai':(existing?existing.source||'manual':'manual'), createdAt:existing?existing.createdAt:Date.now(), updatedAt:Date.now() };
+  await put('workouts',w); state.editingWorkout=null; state.pendingExerciseAI=null; hide('exerciseOverlay'); setCoachMessage(existing?t('exercise.updated','Training updated. Daily net kcal recalculated.'):fmt('coach.exerciseSaved',{kcal}), {source:'training'}); safeRender();
 };
 
 async function showDailyReport(fromBubble){
@@ -1904,6 +2080,12 @@ $('dateLabel').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault
 $('calPrevMonth').onclick=async()=>{ state.calendarMonth=addMonths(state.calendarMonth || state.date.slice(0,7),-1); await renderCalendar(); };
 $('calNextMonth').onclick=async()=>{ state.calendarMonth=addMonths(state.calendarMonth || state.date.slice(0,7), 1); await renderCalendar(); };
 $('calTodayBtn').onclick=async()=>{ state.date=isoToday(); state.calendarMonth=state.date.slice(0,7); hide('calendarOverlay'); await safeRender(); };
+$('calWeekReportBtn').onclick=()=>openPeriodReport('week');
+$('calMonthReportBtn').onclick=()=>openPeriodReport('month');
+$('periodWeekBtn').onclick=()=>openPeriodReport('week');
+$('periodMonthBtn').onclick=()=>openPeriodReport('month');
+$('refreshPeriodReportBtn').onclick=refreshPeriodReport;
+$('copyPeriodReportBtn').onclick=copyPeriodReport;
 $('mealsPanel').onclick=e=>{ e.stopPropagation(); if(e.target.closest('.del')) return; openDayDetail(); };
 $('mealsPanel').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openDayDetail(); } };
 
